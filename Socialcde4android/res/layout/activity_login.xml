@@ -1,0 +1,108 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollviewlogin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/AliceBlue"
+    android:clickable="true" >
+
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context=".LoginActivity" >
+
+        <ImageView
+            android:id="@+id/imageViewdrawerAVATAR"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="30dp"
+            android:contentDescription="@string/socialtfs"
+            android:src="@drawable/socialfortfs_med" />
+
+        <EditText
+            android:id="@+id/editTextRegProxy"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/rounded_edittext"
+            android:ems="10"
+            android:hint="@string/proxystring" >
+            
+        </EditText>
+
+        <EditText
+            android:id="@+id/editTextRegName"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="7dp"
+            android:background="@drawable/rounded_edittext"
+            android:ems="10"
+            android:hint="@string/username" />
+
+        <EditText
+            android:id="@+id/editTextloginpassw"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="7dp"
+            android:background="@drawable/rounded_edittext"
+            android:ems="10"
+            android:hint="@string/password"
+            android:inputType="textPassword" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="5dp" >
+
+            <CheckBox
+                android:id="@+id/checkBoxSavePassw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="7dp"
+                android:text="@string/savapassword"
+                android:textColor="@color/Black"
+                android:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/checkBoxAutoLog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/autologin"
+                android:textColor="@color/Black"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonSendRegistration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/rounded_button"
+            android:text="@string/buttonlogin"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonSignup"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginTop="45dp"
+            android:background="@drawable/rounded_little_button"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/signup" />
+
+    </LinearLayout>
+
+</ScrollView>
