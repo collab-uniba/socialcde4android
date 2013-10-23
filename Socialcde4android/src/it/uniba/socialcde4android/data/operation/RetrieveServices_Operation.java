@@ -27,7 +27,7 @@ import com.google.gson.Gson;
 
 public class RetrieveServices_Operation implements Operation {
 
-	//private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
+	private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)
@@ -59,7 +59,6 @@ public class RetrieveServices_Operation implements Operation {
 			writer.close();
 			out.close();
 			status = conn.getResponseCode();
-			Log.i("operatioooooooooooooooooooon", String.valueOf(status));
 			if (status >= 200 && status <= 299) {
 				InputStreamReader in = new InputStreamReader(
 						conn.getInputStream());
@@ -75,20 +74,22 @@ public class RetrieveServices_Operation implements Operation {
 				wservice = new WService[countOccurrences(result, '{')];
 				Gson gson = new Gson();
 				wservice = gson.fromJson(result, WService[].class);
+			}else{
+				throw new ConnectionException	("Error retrieving services", status);		
+
 			}
 
 			conn.disconnect();
 		} catch(java.net.SocketTimeoutException e) {
 			
-			wservice = null;
-			
+			throw new ConnectionException	("Error retrieving services", status);		
 		} catch (Exception e) {
 			
-			wservice = null;
+			throw new ConnectionException	("Error retrieving services", status);		
 		}
 
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STAUS_WSERVICESREQUEST, status);
+		
 
 		if (wservice != null && wservice.length>0){
 			bundle.putParcelableArray(Consts.WSERVICES, wservice);

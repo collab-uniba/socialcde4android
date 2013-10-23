@@ -75,18 +75,18 @@ public class SubscribeUser_Operation implements Operation {
 				}
 				br.close();
 
+			}else{
+				throw new ConnectionException("Connection error",status);
 			}
-
 			conn.disconnect();
 		}catch(java.net.SocketTimeoutException e) {
 			
-			response = -1;			
+			throw new ConnectionException("Connection error",status);
 		}catch (Exception e) {
-			response = -1;
+			throw new ConnectionException("Connection error",status);
 		}
 		response = Integer.parseInt(result);
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
 		bundle.putInt(Consts.SUBSCRIPTION_RESPONSE, response);
 		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SUBSCRIBEUSER);
 

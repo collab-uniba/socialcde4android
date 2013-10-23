@@ -304,16 +304,15 @@ public class LoginActivity extends Activity implements RequestListener {
 
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
-		
+
 		if (resultData != null){
 			switch(resultData.getInt(Consts.REQUEST_TYPE)){
 
-			
+
 
 
 			case(Consts.REQUESTTYPE_GETUSER):
-				int status_get = resultData.getInt(Consts.STATUS_WEBSERVICE);
-			if (status_get >= 200 && status_get <= 299) { //OK
+
 				if (resultData.getBoolean(Consts.FOUND_WUSER)){//OK
 					savePreferences();
 					Intent i = new Intent(LoginActivity.this, HomeActivity.class);
@@ -330,35 +329,24 @@ public class LoginActivity extends Activity implements RequestListener {
 					this.passwEdit.startAnimation(shake);
 				}
 
-			}else{ //errore 
-				Toast.makeText(this, "Please check your entries."  , Toast.LENGTH_SHORT).show();
-				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-				this.proxyEdit.startAnimation(shake);
-				this.userNameEdit.startAnimation(shake);
-				this.passwEdit.startAnimation(shake);
-			}
+
 			StopProgressDialog();
 			break;
 
-			
-			
-			
+
+
+
 			case(Consts.REQUESTTYPE_WEBSERVICEVAILABLE):
-				int status = resultData.getInt(Consts.STATUS_WEBSERVICE);
-			if (status >= 200 && status <= 299) {
+
 				Boolean online = resultData.getBoolean(Consts.WEBSERVICE_AVAILABLE);
-				if (online){
-					login();
-				}else{
-					Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
-					Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-					this.proxyEdit.startAnimation(shake);
-				}
+			if (online){
+				login();
 			}else{
-				Toast.makeText(this, "Please check the proxy address entered."  , Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
 				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 				this.proxyEdit.startAnimation(shake);
 			}
+
 			StopProgressDialog();
 			break;
 
@@ -371,7 +359,7 @@ public class LoginActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		Toast.makeText(this, "Connection error", Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Connection error, status: "+statusCode, Toast.LENGTH_SHORT).show();
 	}
 
 

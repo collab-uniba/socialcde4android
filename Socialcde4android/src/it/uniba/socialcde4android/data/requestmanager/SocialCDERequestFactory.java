@@ -26,10 +26,8 @@ public final class SocialCDERequestFactory {
     public static final int SUBSCRIBE_USER = 3;
 	public static final int CHANGE_INVITATION_WITH_PASSWORD = 4;
 	public static final int GET_USER = 5;
-	public static final int GET_SUGGESTED_FRIEND = 6;
-	public static final int GET_FOLLOWINGS = 7;
-	public static final int GET_FOLLOWERS = 8;
-	public static final int GET_HIDDEN = 9;
+	public static final int GET_FRIENDS = 6;
+
 
 
 
@@ -82,23 +80,10 @@ public final class SocialCDERequestFactory {
 		return request;
 	}
 
-	public static Request GetSuggestedFriends() {
-		Request request = new Request(GET_SUGGESTED_FRIEND);		
-		return request;
-	}
 
-	public static Request GetFollowings() {
-		Request request = new Request(GET_FOLLOWINGS);		
-		return request;
-	}
 
-	public static Request GetFollowers() {
-		Request request = new Request(GET_FOLLOWERS);		
-		return request;
-	}
-
-	public static Request GetHidden() {
-		Request request = new Request(GET_HIDDEN);		
+	public static Request GetFriends() {
+		Request request = new Request(GET_FRIENDS);		
 		return request;
 	}
 

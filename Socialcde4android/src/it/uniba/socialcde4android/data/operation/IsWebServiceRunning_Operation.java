@@ -47,14 +47,15 @@ public class IsWebServiceRunning_Operation implements Operation {
 				BufferedReader br = new BufferedReader(in);
 				output = br.readLine();
 
+			}else{
+				throw new ConnectionException("Error connecting to the server",status);
 			}
 		}catch(java.net.SocketTimeoutException e) {
-			
-			online = false;
-			
+			throw new ConnectionException("Error connecting to the server",status);
+		
 		} catch (Exception e) {
+			throw new ConnectionException("Error connecting to the server",status);
 
-			online = false;
 		}
 
 		if (output.equals("true")) {
@@ -65,7 +66,6 @@ public class IsWebServiceRunning_Operation implements Operation {
 			online = false;
 		}
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
 		bundle.putBoolean(Consts.WEBSERVICE_AVAILABLE, online);
 		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_WEBSERVICEVAILABLE);
 

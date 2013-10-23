@@ -38,14 +38,14 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 
 
 
-	public UsersAdapter(Context context, int resource,ArrayList<WUser> allwusers,	int[] wuLgts_SuFngFrsHid ) {
+	public UsersAdapter(Context context, int resource,ArrayList<WUser> allwusers,	int[] wUsersNumType_SuggFingFersHidd ) {
 		super(context, resource, allwusers);
 
 	//	this.context = context;
-		length_suggested = wuLgts_SuFngFrsHid[0];
-		length_following = wuLgts_SuFngFrsHid[1];
-		length_followers = wuLgts_SuFngFrsHid[2];
-		length_hidden = wuLgts_SuFngFrsHid[3];
+		length_suggested = wUsersNumType_SuggFingFersHidd[0];
+		length_following = wUsersNumType_SuggFingFersHidd[1];
+		length_followers = wUsersNumType_SuggFingFersHidd[2];
+		length_hidden = wUsersNumType_SuggFingFersHidd[3];
 
 		//posso creare un array per memorizare i tipi
 		type_list = new ArrayList<Integer>();

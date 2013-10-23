@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 
 public class GetUser_Operation implements Operation {
 
-	//private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
+	private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)
@@ -74,16 +74,17 @@ public class GetUser_Operation implements Operation {
 				
 				Gson gson = new Gson();
 				wuser = gson.fromJson(result, WUser.class);
+			}else{
+				throw new ConnectionException("Error retrieving user",status);
 			}
 
 			conn.disconnect();
 		} catch (Exception e) {
-			wuser = null;
-
+			throw new ConnectionException("Error retrieving user",status);
 		}
 		
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
+	
 		
 		if (wuser != null){
 			bundle.putParcelable(Consts.WUSER, wuser);

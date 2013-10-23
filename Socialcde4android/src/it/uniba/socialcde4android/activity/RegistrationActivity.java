@@ -164,7 +164,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 				}else{
 					//la lunghezza minima della password e i caratteri ammessi(?)
 					//in caso di campi tutti compilati correttamente
-
+					//TODO
 
 					//invio la richiesta di registrazione
 					if (isOnline()){
@@ -191,7 +191,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 		mRequestManager.execute(r, this);		
 	}
 
-	
+
 	private void changeInvitationCodeWithPassword(){
 		r = SocialCDERequestFactory.changeInvWithPass();
 		r.put(Consts.MAIL, this.mail_string);
@@ -202,9 +202,9 @@ public class RegistrationActivity extends Activity implements RequestListener {
 		r.setMemoryCacheEnabled(true);
 		StartProgressDialog();
 		mRequestManager.execute(r, this);	
-		
+
 	}
-	
+
 	public   void StartProgressDialog(){
 		if (progressDialog == null || !progressDialog.isShowing()){
 			progressDialog = ProgressDialog.show(this, "Querying the server..", "Wait a moment please", true, false);
@@ -245,8 +245,6 @@ public class RegistrationActivity extends Activity implements RequestListener {
 
 
 			case(Consts.REQUESTTYPE_SUBSCRIBEUSER):
-				int status_serv = resultData.getInt(Consts.STATUS_WEBSERVICE);
-			if (status_serv >= 200 && status_serv <= 299) {
 				int response = resultData.getInt(Consts.SUBSCRIPTION_RESPONSE);
 				switch(response){
 				case -3:
@@ -261,7 +259,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 					Toast.makeText(this, "There's a problem. Check your connection and try again"  , Toast.LENGTH_SHORT).show();
 					break;
 				case 0:
-
+					//TODO
 					//chiama change password per l'iscrizione vera e propria..
 					changeInvitationCodeWithPassword();
 					break;
@@ -284,21 +282,11 @@ public class RegistrationActivity extends Activity implements RequestListener {
 					Toast.makeText(this, "Response not valid from the server"  , Toast.LENGTH_SHORT).show();
 				}
 
-			}else{
-				Toast.makeText(this, "Please check the proxy address entered."  , Toast.LENGTH_SHORT).show();
-				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-				proxyEdit.startAnimation(shake);
-			}
 			break;
-			
-			
-			
-			
+
+
 			case(Consts.REQUESTTYPE_CHANGE_INVIT_WITH_PASSW):
-				int status_ch = resultData.getInt(Consts.STATUS_WEBSERVICE);
-			if (status_ch >= 200 && status_ch <= 299) {
 				if(resultData.getBoolean(Consts.PASSWORD_SETTED)){
-					
 					//dialog
 					//TODO
 					Toast.makeText(this, "Registration complete."  , Toast.LENGTH_SHORT).show();
@@ -306,15 +294,10 @@ public class RegistrationActivity extends Activity implements RequestListener {
 				}else{
 					Toast.makeText(this, "Registration failed; please contact the administrator"  , Toast.LENGTH_SHORT).show();
 				}
-			}else{
-				Toast.makeText(this, "Please check the proxy address entered."  , Toast.LENGTH_SHORT).show();
-				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-				proxyEdit.startAnimation(shake);
-			}
+			break;
 			
 			
-			}
-
+			}		
 		}else{
 			Toast.makeText(this, "ERROR"  , Toast.LENGTH_SHORT).show();
 		}
@@ -325,7 +308,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		Toast.makeText(this, "Connection error", Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Connection error. Status: " + statusCode, Toast.LENGTH_SHORT).show();
 
 
 	}

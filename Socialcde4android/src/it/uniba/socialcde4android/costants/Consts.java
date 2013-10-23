@@ -44,6 +44,10 @@ public class Consts {
 
 	public static final String WUSERS_HIDDEN = "wuser_hidden";
 	
+	public static final String WUSERS_SUG = "wuser_sugg";
+
+	public static final String WUSERS_NUMBERS = "WUsers numebrs per type";
+
 	//type requests:
 	
 	public final static int REQUESTTYPE_WEBSERVICEVAILABLE = 0;
@@ -66,7 +70,9 @@ public class Consts {
 
 	public static final int REQUESTTYPE_HIDDENUSERS = 9;
 
-	public static final String WUSERS_SUG = "wuser_sugg";
+	public static final int REQUESTTYPE_LOADUSERS = 10;
+
+	public static final int REQUESTTYPE_ALL_USERS = 11;
 
 
 

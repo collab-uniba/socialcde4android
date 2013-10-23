@@ -47,14 +47,17 @@ public class IsUsernameAvailable_Operation implements Operation {
 				BufferedReader br = new BufferedReader(in);
 				output = br.readLine();
 
+			}else{
+				throw new ConnectionException("Connection error",status);
+
 			}
 		}catch(java.net.SocketTimeoutException e) {
 			
-			available = false;
+			throw new ConnectionException("Connection error",status);
 			
 		} catch (Exception e) {
 
-			available = false;
+			throw new ConnectionException("Connection error",status);
 		}
 
 		if (output.equals("true")) {
@@ -69,7 +72,6 @@ public class IsUsernameAvailable_Operation implements Operation {
 		}
 		
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
 		bundle.putBoolean(Consts.USERNAME_AVAILABLE, available);
 		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_USERNAMEVAILABLE);
 
