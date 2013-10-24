@@ -27,7 +27,8 @@ public final class SocialCDERequestFactory {
 	public static final int CHANGE_INVITATION_WITH_PASSWORD = 4;
 	public static final int GET_USER = 5;
 	public static final int GET_FRIENDS = 6;
-
+	public static final int GET_COLLEAGUE = 7;
+	public static final int SET_FOLLOWED = 8;
 
 
 
@@ -84,6 +85,16 @@ public final class SocialCDERequestFactory {
 
 	public static Request GetFriends() {
 		Request request = new Request(GET_FRIENDS);		
+		return request;
+	}
+
+	public static Request getColleagueProfileRequest() {
+		Request request = new Request(GET_COLLEAGUE);		
+		return request;
+	}
+
+	public static Request setFollowed() {
+		Request request = new Request(SET_FOLLOWED);		
 		return request;
 	}
 

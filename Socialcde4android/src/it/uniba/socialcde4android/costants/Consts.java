@@ -74,6 +74,16 @@ public class Consts {
 
 	public static final int REQUESTTYPE_ALL_USERS = 11;
 
+	public static final String COLLEAGUE_ID = "colleague ID";
+
+	public static final int REQUESTTYPE_GET_COLLEAGUE_PROFILE = 12;
+
+	public static final String BOOLEAN_FOLLOW = "boolean follow";
+
+	public static final int REQUESTTYPE_SET_FOLLOWED = 13;
+
+	public static final String FOLLOW_SETTED = "Follow setted";
+
 
 
 

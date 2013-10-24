@@ -9,6 +9,8 @@ import it.uniba.socialcde4android.adapters.ServicesAdapter;
 import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
+import it.uniba.socialcde4android.fragments.WUserProfileFragment;
+import it.uniba.socialcde4android.fragments.WUserProfileFragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
@@ -21,11 +23,14 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class HomeActivity extends Activity   implements RequestListener {
+public class HomeActivity extends Activity   implements RequestListener, OnProfileFragmentInteractionListener {
 
 
 
@@ -130,7 +135,7 @@ public class HomeActivity extends Activity   implements RequestListener {
 	public   void StartProgressDialog(){
 		if (progressDialog == null || !progressDialog.isShowing()){
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-			progressDialog = ProgressDialog.show(this, "Logging..", "Wait a moment please", true, false);
+			progressDialog = ProgressDialog.show(this, "Loading..", "Wait a moment please", true, false);
 		}
 	}
 
@@ -158,10 +163,10 @@ public class HomeActivity extends Activity   implements RequestListener {
 		for (int i=0; i<wservice.length; i++){
 			nomi_servizi[i] = wservice[i].getName();
 		}
-		
+
 		mDrawerToggle_left = new ActionBarDrawerToggle(this, mDrawerLayout, 
 				R.drawable.ic_action_storage, R.string.null_string, R.string.null_string ) {
-			
+
 			public void onDrawerClosed(View view) {
 				getActionBar().setTitle("");
 			}
@@ -182,7 +187,7 @@ public class HomeActivity extends Activity   implements RequestListener {
 	private class DrawerLeftItemClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id) {
-			selectItem(position);
+			selectItemLeft(position);
 		}
 	}
 
@@ -214,11 +219,19 @@ public class HomeActivity extends Activity   implements RequestListener {
 	}
 
 
-	
+
 	private class DrawerRightItemClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id) {
-			selectItem(position);
+			int array_position=0;
+			if (mDrawerList_right.getAdapter().getItemViewType(position) == ((UsersAdapter) mDrawerList_right.getAdapter()).getUserTypeID()){
+				for(int i=0; i<position;i++){
+					if (mDrawerList_right.getAdapter().getItemViewType(i) == ((UsersAdapter) mDrawerList_right.getAdapter()).getUserTypeID())
+						array_position++;
+				}
+				loadColleagueProfile(array_position);
+			}else 		mDrawerLayout.closeDrawer(mDrawerList_right);
+
 		}
 	}
 
@@ -250,37 +263,26 @@ public class HomeActivity extends Activity   implements RequestListener {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Pass the event to ActionBarDrawerToggle, if it returns
-		// true, then it has handled the app icon touch event
-//		if (mDrawerToggle_left.onOptionsItemSelected(item)) {
-//			return true;
-//		}
-//		if (mDrawerToggle_right.onOptionsItemSelected(item)) {
-//			return true;
-//		}
-		// Handle your other action bar items...
+
 		switch (item.getItemId()) {
+
 		case android.R.id.home:
-			if (mDrawerLayout.isDrawerOpen(mDrawerList_left)){
-				mDrawerLayout.closeDrawer(mDrawerList_left);
-			}else{
-				if (mDrawerLayout.isDrawerOpen(mDrawerList_right)){
-					mDrawerLayout.closeDrawer(mDrawerList_right);
-				}
+			if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
+			else{
+				if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
 				mDrawerLayout.openDrawer(mDrawerList_left);
 			}
 			break;
+
 		case R.id.action_drawer:
-			if (mDrawerLayout.isDrawerOpen(mDrawerList_right)){
-				mDrawerLayout.closeDrawer(mDrawerList_right);
-			}else {
-				if (mDrawerLayout.isDrawerOpen(mDrawerList_left)){
-					mDrawerLayout.closeDrawer(mDrawerList_left);
-				}
+			if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
+			else {
+				if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
 				mDrawerLayout.openDrawer(mDrawerList_right);
 			}
-		default:
 			break;
+		default:
+
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -289,25 +291,35 @@ public class HomeActivity extends Activity   implements RequestListener {
 
 	/** Swaps fragments in the main content view */
 
-	private void selectItem(int position) {
+	private void selectItemRight(WUser wuser_colleague) {
 		// create a new fragment and specify the planet to show based on position
-		//		Fragment fragment = new OpertingSystemFragment();
-		//		Bundle args = new Bundle();
-		//		args.putInt(OpertingSystemFragment.ARG_OS, position);
-		//		fragment.setArguments(args);
-		//
-		//		// Insert the fragment by replacing any existing fragment
-		//		FragmentManager fragmentManager = getFragmentManager();
-		//		fragmentManager.beginTransaction()
-		//		.replace(R.id.content_frame, fragment)
-		//		.commit();
-		//
-		//		// Highlight the selected item, update the title, and close the drawer
-		//	mDrawerList_left.setItemChecked(position, true);
-		//		getActionBar().setTitle((services[position]));
+		Fragment fragment = WUserProfileFragment.newInstance(wuser_colleague);
+		// Insert the fragment by replacing any existing fragment
+		FragmentManager fragmentManager = getFragmentManager();
+		fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+		// Highlight the selected item, update the title, and close the drawer
+		getActionBar().setTitle("User Profile");
+		mDrawerLayout.closeDrawer(mDrawerList_right);
+	}
+
+
+	private void selectItemLeft(int position) {
+
 		mDrawerLayout.closeDrawer(mDrawerList_left);
 	}
 
+
+	private void loadColleagueProfile(int array_position){
+		r = SocialCDERequestFactory.getColleagueProfileRequest();
+		r.put(Preferences.PROXYSERVER, this.proxy_string);
+		r.put(Preferences.USERNAME, this.userName_string);
+		r.put(Preferences.PASSWORD, this.passw_string);
+		r.put(Consts.COLLEAGUE_ID, String.valueOf(this.wuser_all.get(array_position).getId()));
+		r.setMemoryCacheEnabled(true);
+		StartProgressDialog();
+		mRequestManager.execute(r, this);
+	}
 
 	private void loadServices(){
 		r = SocialCDERequestFactory.getWServiceRequest();
@@ -331,6 +343,18 @@ public class HomeActivity extends Activity   implements RequestListener {
 	}
 
 
+	private void setFollow(Boolean followChecked, WUser wuser_profile) {
+		r = SocialCDERequestFactory.setFollowed();
+		r.put(Preferences.PROXYSERVER, this.proxy_string);
+		r.put(Preferences.USERNAME, this.userName_string);
+		r.put(Preferences.PASSWORD, this.passw_string);
+		r.put(Consts.BOOLEAN_FOLLOW, followChecked);
+		r.put(Consts.COLLEAGUE_ID, wuser_profile.getId());
+		r.setMemoryCacheEnabled(true);
+		StartProgressDialog();
+		mRequestManager.execute(r, this);
+	}
+
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
 		//StopProgressDialog();
@@ -340,9 +364,9 @@ public class HomeActivity extends Activity   implements RequestListener {
 
 			case(Consts.REQUESTTYPE_RETRIEVESERVICES):
 				if (resultData.getBoolean(Consts.FOUND_WSERVICES)){
-						Parcelable[] parcelableArray =	resultData.getParcelableArray(Consts.WSERVICES);
-						if (parcelableArray != null) 
-							wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
+					Parcelable[] parcelableArray =	resultData.getParcelableArray(Consts.WSERVICES);
+					if (parcelableArray != null) 
+						wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
 				}else{
 					Toast.makeText(this, "No services found."  , Toast.LENGTH_LONG).show();
 				}
@@ -359,9 +383,32 @@ public class HomeActivity extends Activity   implements RequestListener {
 			populateDrawerRight();
 			StopProgressDialog();
 			break;
+
+
+			case(Consts.REQUESTTYPE_GET_COLLEAGUE_PROFILE):
+				if (resultData.getBoolean(Consts.FOUND_WUSER)){
+					WUser wuser_colleague = resultData.getParcelable(Consts.WUSER);
+					selectItemRight(wuser_colleague);
+				}else{
+					Toast.makeText(this, "Error retrieving colleague profile."  , Toast.LENGTH_LONG).show();
+				}
+			StopProgressDialog();
+			break;
+			
+			
+			case(Consts.REQUESTTYPE_SET_FOLLOWED):
+				//il valore è stato settato
+				//è necessario ricaricare il drawer destro
+				loadFriends();
+		//	StopProgressDialog();
+			break;
 			}
 		}
+
+
+
 	}
+
 
 
 
@@ -409,5 +456,20 @@ public class HomeActivity extends Activity   implements RequestListener {
 			}
 		}, 2000);
 	}
+
+
+
+	@Override
+	public void onProfileFragmentCheckBoxChanged(Boolean followChecked, WUser wuser_profile) {
+			setFollow(followChecked, wuser_profile);
+
+	}
+
+
+
+
+
+
+	
 
 } 

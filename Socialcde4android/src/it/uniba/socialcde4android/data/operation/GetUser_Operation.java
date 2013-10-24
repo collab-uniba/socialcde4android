@@ -11,11 +11,9 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 
 import com.foxykeep.datadroid.exception.ConnectionException;

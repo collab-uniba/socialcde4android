@@ -81,6 +81,9 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
+	public int getUserTypeID(){
+		return this.TYPE_USER;
+	}
 
 	@Override
 	public int getViewTypeCount() {
