@@ -52,10 +52,9 @@ public class IsUsernameAvailable_Operation implements Operation {
 
 			}
 		}catch(java.net.SocketTimeoutException e) {
-			
-			throw new ConnectionException("Connection error",status);
-			
-		} catch (Exception e) {
+			status = Consts.TIMEOUT_STATUS;
+			throw new ConnectionException("Error setting new password",status);
+		}  catch (Exception e) {
 
 			throw new ConnectionException("Connection error",status);
 		}

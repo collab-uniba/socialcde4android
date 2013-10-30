@@ -80,9 +80,9 @@ public class SubscribeUser_Operation implements Operation {
 			}
 			conn.disconnect();
 		}catch(java.net.SocketTimeoutException e) {
-			
-			throw new ConnectionException("Connection error",status);
-		}catch (Exception e) {
+			status = Consts.TIMEOUT_STATUS;
+			throw new ConnectionException("Error setting new password",status);
+		} catch (Exception e) {
 			throw new ConnectionException("Connection error",status);
 		}
 		response = Integer.parseInt(result);

@@ -51,8 +51,8 @@ public class IsWebServiceRunning_Operation implements Operation {
 				throw new ConnectionException("Error connecting to the server",status);
 			}
 		}catch(java.net.SocketTimeoutException e) {
-			throw new ConnectionException("Error connecting to the server",status);
-		
+			status = Consts.TIMEOUT_STATUS;
+			throw new ConnectionException("Error setting new password",status);
 		} catch (Exception e) {
 			throw new ConnectionException("Error connecting to the server",status);
 

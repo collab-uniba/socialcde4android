@@ -308,8 +308,9 @@ public class RegistrationActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		Toast.makeText(this, "Connection error. Status: " + statusCode, Toast.LENGTH_SHORT).show();
-
+		if (statusCode == Consts.TIMEOUT_STATUS)
+			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
+		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
 
 	}
 

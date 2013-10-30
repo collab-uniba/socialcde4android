@@ -9,43 +9,42 @@ import it.uniba.socialcde4android.adapters.ServicesAdapter;
 import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
+import it.uniba.socialcde4android.fragments.HomeTimeLine_Fragment;
+import it.uniba.socialcde4android.fragments.HomeTimeLine_Fragment.OnHomeTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserProfileFragment;
 import it.uniba.socialcde4android.fragments.WUserProfileFragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
-
+import it.uniba.socialcde4android.utility.ScreenUtility;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
-
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class HomeActivity extends Activity   implements RequestListener, OnProfileFragmentInteractionListener {
+public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFragmentInteractionListener, RequestListener, OnProfileFragmentInteractionListener {
 
 
 
 	private DrawerLayout mDrawerLayout;
-
 	private ListView mDrawerList_left;
 	private ListView mDrawerList_right;
 	private ActionBarDrawerToggle mDrawerToggle_left;
@@ -65,10 +64,6 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 	private RequestManager mRequestManager;
 	private Request r;
 
-
-
-
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,19 +82,30 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 				userName_string = (String)getIntent().getExtras().getString(Preferences.USERNAME);
 				passw_string = (String)getIntent().getExtras().getString(Preferences.PASSWORD);
 				loadServices();
-			}
+			}	
+		}
+		Log.i("looooooooooooooooooooog","oncreaaaaaaate");
+		if (savedInstanceState==null) {
+			Log.i("looooooooooooooooooooog","frrrrrrrrrrrgment");
+
+		Fragment fragment = HomeTimeLine_Fragment.newInstance();
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
+		fragmentTransaction.commit();
 		}
 	}
-
-
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (wservice != null) outState.putParcelableArray(Consts.WSERVICES, wservice);
-		if (wuser_all != null) outState.putParcelableArrayList(Consts.WUSERS, this.wuser_all);
-		if (wUsersNumType_SuggFingFersHidd != null) outState.putIntArray(Consts.WUSERS_NUMBERS, wUsersNumType_SuggFingFersHidd);
-		if (wuser != null) outState.putParcelable(Consts.WUSER, wuser);
+		outState.putParcelableArray(Consts.WSERVICES, wservice);
+		outState.putParcelableArrayList(Consts.WUSERS, this.wuser_all);
+		outState.putIntArray(Consts.WUSERS_NUMBERS, wUsersNumType_SuggFingFersHidd);
+		outState.putParcelable(Consts.WUSER, wuser);
+		outState.putString(Preferences.PROXYSERVER, this.proxy_string);
+		outState.putString(Preferences.USERNAME, this.userName_string);
+		outState.putString(Preferences.PASSWORD, this.passw_string);
 		if (progressDialog != null && progressDialog.isShowing()) {
 			// Dismiss the dialog, in order to avoid a memory leak
 			StopProgressDialog();
@@ -107,7 +113,7 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 			outState.putBoolean(DIALOG_SHOWN, true);
 			outState.putParcelable(PARCELABLE_REQUEST, r);
 		} else
-			outState.putBoolean(DIALOG_SHOWN, false);
+			outState.putBoolean(DIALOG_SHOWN, false);	
 	}
 
 
@@ -126,6 +132,10 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 			wuser_all = savedInstanceState.getParcelableArrayList(Consts.WUSERS);
 			wUsersNumType_SuggFingFersHidd = savedInstanceState.getIntArray(Consts.WUSERS_NUMBERS);
 			wuser = savedInstanceState.getParcelable(Consts.WUSER);
+			proxy_string = savedInstanceState.getString(Preferences.PROXYSERVER);
+			userName_string = savedInstanceState.getString(Preferences.USERNAME);
+			passw_string = savedInstanceState.getString(Preferences.PASSWORD);
+
 			populateDrawerLeft();
 			populateDrawerRight();
 		}
@@ -134,15 +144,14 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 
 	public   void StartProgressDialog(){
 		if (progressDialog == null || !progressDialog.isShowing()){
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+			ScreenUtility.lockScreenOrientation(this);
 			progressDialog = ProgressDialog.show(this, "Loading..", "Wait a moment please", true, false);
 		}
 	}
 
-
 	public  void StopProgressDialog(){
 		if (progressDialog != null){
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 			progressDialog.dismiss();
 		}
 	}
@@ -200,7 +209,7 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 		}
 		mDrawerToggle_right = new ActionBarDrawerToggle(this,   mDrawerLayout,  R.drawable.ic_action_group, 
 				R.string.null_string, R.string.null_string  ) {
-
+			
 			public void onDrawerClosed(View view) {
 				getActionBar().setTitle("");
 			}
@@ -214,8 +223,6 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 		UsersAdapter adapter = new UsersAdapter(getBaseContext(), 0, this.wuser_all, this.wUsersNumType_SuggFingFersHidd);
 		mDrawerList_right.setAdapter(adapter);
 		mDrawerList_right.setOnItemClickListener(new DrawerRightItemClickListener());
-		//getActionBar().setDisplayHomeAsUpEnabled(true);
-		//getActionBar().setHomeButtonEnabled(true);
 	}
 
 
@@ -231,10 +238,8 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 				}
 				loadColleagueProfile(array_position);
 			}else 		mDrawerLayout.closeDrawer(mDrawerList_right);
-
 		}
 	}
-
 
 
 	@Override
@@ -268,18 +273,14 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 
 		case android.R.id.home:
 			if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
-			else{
-				if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
-				mDrawerLayout.openDrawer(mDrawerList_left);
-			}
+			else{if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
+				mDrawerLayout.openDrawer(mDrawerList_left); }
 			break;
 
 		case R.id.action_drawer:
 			if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
-			else {
-				if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
-				mDrawerLayout.openDrawer(mDrawerList_right);
-			}
+			else {if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
+				mDrawerLayout.openDrawer(mDrawerList_right);}
 			break;
 		default:
 
@@ -294,10 +295,13 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 	private void selectItemRight(WUser wuser_colleague) {
 		// create a new fragment and specify the planet to show based on position
 		Fragment fragment = WUserProfileFragment.newInstance(wuser_colleague);
-		// Insert the fragment by replacing any existing fragment
-		FragmentManager fragmentManager = getFragmentManager();
-		fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
+		// Insert the fragment by replacing any existing fragment
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
+		fragmentTransaction.addToBackStack(null);
+		fragmentTransaction.commit();
 		// Highlight the selected item, update the title, and close the drawer
 		getActionBar().setTitle("User Profile");
 		mDrawerLayout.closeDrawer(mDrawerList_right);
@@ -357,7 +361,6 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
-		//StopProgressDialog();
 		if (resultData != null){
 			switch(resultData.getInt(Consts.REQUEST_TYPE)){
 
@@ -394,28 +397,23 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 				}
 			StopProgressDialog();
 			break;
-			
-			
+
+
 			case(Consts.REQUESTTYPE_SET_FOLLOWED):
-				//il valore è stato settato
-				//è necessario ricaricare il drawer destro
-				loadFriends();
-		//	StopProgressDialog();
+				loadFriends(); //valore settato, ricarica il drawer destro
 			break;
 			}
 		}
-
-
-
 	}
-
-
 
 
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
+		if (statusCode == Consts.TIMEOUT_STATUS)
+			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
+		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
+
 	}
 
 
@@ -442,6 +440,11 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 
 	@Override
 	public void onBackPressed() {
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		if (fragmentManager.getBackStackEntryCount()>0){
+			super.onBackPressed();
+			return;
+		}else{
 		if (doubleBackToExitPressedOnce) {
 			super.onBackPressed();
 			return;
@@ -455,21 +458,22 @@ public class HomeActivity extends Activity   implements RequestListener, OnProfi
 				doubleBackToExitPressedOnce=false;   
 			}
 		}, 2000);
-	}
+		}
 
+	}
 
 
 	@Override
 	public void onProfileFragmentCheckBoxChanged(Boolean followChecked, WUser wuser_profile) {
-			setFollow(followChecked, wuser_profile);
+		setFollow(followChecked, wuser_profile);
 
 	}
 
 
-
-
-
-
-	
+	@Override
+	public void onHomeTimeLineFragmentEvent() {
+		// TODO Auto-generated method stub
+		
+	}
 
 } 

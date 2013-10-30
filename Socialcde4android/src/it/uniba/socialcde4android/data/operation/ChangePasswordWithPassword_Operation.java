@@ -78,6 +78,7 @@ public class ChangePasswordWithPassword_Operation implements Operation {
 
 			conn.disconnect();
 		}catch(java.net.SocketTimeoutException e) {
+			status = Consts.TIMEOUT_STATUS;
 			throw new ConnectionException("Error setting new password",status);
 		} catch (Exception e) {
 			throw new ConnectionException("Error setting new password",status);

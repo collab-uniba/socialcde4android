@@ -26,7 +26,7 @@ import com.google.gson.Gson;
 
 public class GetUser_Operation implements Operation {
 
-	private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
+	private static final String TAG = GetUser_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)
@@ -41,6 +41,8 @@ public class GetUser_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetUser");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setConnectTimeout(5000);
+			conn.setReadTimeout(20000);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -77,7 +79,10 @@ public class GetUser_Operation implements Operation {
 			}
 
 			conn.disconnect();
-		} catch (Exception e) {
+		}catch(java.net.SocketTimeoutException e) {
+			status = Consts.TIMEOUT_STATUS;
+			throw new ConnectionException("Error setting new password",status);
+		}  catch (Exception e) {
 			throw new ConnectionException("Error retrieving user",status);
 		}
 		

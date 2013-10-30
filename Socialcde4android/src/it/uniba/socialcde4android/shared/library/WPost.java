@@ -3,7 +3,10 @@ package it.uniba.socialcde4android.shared.library;
 import java.util.Calendar;
 import java.util.Date;
 
-public class WPost {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class WPost implements Parcelable{
 	// / <summary>
 	// / Identifier of the post.
 	// / </summary>
@@ -67,5 +70,43 @@ public class WPost {
 
 	public void setCreateAt(Calendar createAt) {
 		CreateAt = createAt;
+	}
+
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel out, int flags) {
+		out.writeParcelable(User, flags);
+		out.writeParcelable(Service, flags);
+		out.writeString(Message);
+		out.writeSerializable(CreateAt);
+	}
+	
+
+	public static final Parcelable.Creator<WPost> CREATOR = new Parcelable.Creator<WPost>() {
+		public WPost createFromParcel(Parcel in) {
+			return new WPost(in);
+		}
+
+		public WPost[] newArray(int size) {
+			return new WPost[size];
+		}
+	};
+	
+	
+	/** recreate object from parcel */
+	private WPost(Parcel in) {
+		User = in.readParcelable(getClass().getClassLoader());
+		Service = in.readParcelable(getClass().getClassLoader());
+		Message = in.readString();
+		CreateAt = (Calendar) in.readSerializable();
+		}
+	
+	public WPost(){
+		// TODO Auto-generated constructor stub
 	}
 }
