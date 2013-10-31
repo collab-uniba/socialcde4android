@@ -33,5 +33,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="follow">Follow</string>
     <string name="nomoreposts">There are no older posts to show.</string>
+    <string name="loading">Loading..</string>
      
 </resources>

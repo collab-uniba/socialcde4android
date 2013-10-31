@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -41,8 +42,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFragmentInteractionListener, RequestListener, OnProfileFragmentInteractionListener {
-
-
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -60,9 +59,12 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 	private boolean doubleBackToExitPressedOnce = false;
 	private static final String DIALOG_SHOWN = "DIALOG_SHOWN";
 	private static final String PARCELABLE_REQUEST = "PARCELABLE_REQUEST";
+	private static final String PARCELABLE_REQUEST2 = "PARCELABLE_REQUEST2";
 	private static ProgressDialog progressDialog; 
 	private RequestManager mRequestManager;
 	private Request r;
+	private Request r2;
+	private Boolean isFragmentLoading;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -82,17 +84,16 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 				userName_string = (String)getIntent().getExtras().getString(Preferences.USERNAME);
 				passw_string = (String)getIntent().getExtras().getString(Preferences.PASSWORD);
 				loadServices();
+				this.loadFriends();
 			}	
 		}
-		Log.i("looooooooooooooooooooog","oncreaaaaaaate");
-		if (savedInstanceState==null) {
-			Log.i("looooooooooooooooooooog","frrrrrrrrrrrgment");
 
-		Fragment fragment = HomeTimeLine_Fragment.newInstance();
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
-		fragmentTransaction.commit();
+		if (savedInstanceState==null) {
+			Fragment fragment = HomeTimeLine_Fragment.newInstance();
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
+			fragmentTransaction.commit();
 		}
 	}
 
@@ -112,6 +113,7 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 			// Adds the status to the outState Bundle
 			outState.putBoolean(DIALOG_SHOWN, true);
 			outState.putParcelable(PARCELABLE_REQUEST, r);
+			outState.putParcelable(PARCELABLE_REQUEST2, r2);
 		} else
 			outState.putBoolean(DIALOG_SHOWN, false);	
 	}
@@ -123,8 +125,10 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 
 		if (savedInstanceState != null) {
 			r = savedInstanceState.getParcelable(PARCELABLE_REQUEST);
+			r2 = savedInstanceState.getParcelable(PARCELABLE_REQUEST2);
+
 			// Show the dialog, if there has to be one
-			if (savedInstanceState.getBoolean(DIALOG_SHOWN) && mRequestManager.isRequestInProgress(r))
+			if (savedInstanceState.getBoolean(DIALOG_SHOWN) && (mRequestManager.isRequestInProgress(r)||mRequestManager.isRequestInProgress(r2)))
 				StartProgressDialog();
 
 			Parcelable[] parcelableArray =	savedInstanceState.getParcelableArray(Consts.WSERVICES);
@@ -144,16 +148,27 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 
 	public   void StartProgressDialog(){
 		if (progressDialog == null || !progressDialog.isShowing()){
-			ScreenUtility.lockScreenOrientation(this);
+			lockScreenOrientation();
 			progressDialog = ProgressDialog.show(this, "Loading..", "Wait a moment please", true, false);
 		}
 	}
 
 	public  void StopProgressDialog(){
-		if (progressDialog != null){
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+		if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r2 == null || !mRequestManager.isRequestInProgress(r2))) && !isFragmentLoading){
+			unlockScreenOrientation();
 			progressDialog.dismiss();
 		}
+	}
+
+	public void lockScreenOrientation(){
+		ScreenUtility.lockScreenOrientation(this);
+	}
+
+	public void unlockScreenOrientation(){
+		 
+		
+		        	 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+			
 	}
 
 
@@ -163,6 +178,10 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 		if (r != null && mRequestManager.isRequestInProgress(r)){
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r);
+		}
+		if (r2 != null && mRequestManager.isRequestInProgress(r2)){
+			StartProgressDialog();
+			mRequestManager.addRequestListener(this, r2);
 		}
 	}
 
@@ -209,7 +228,7 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 		}
 		mDrawerToggle_right = new ActionBarDrawerToggle(this,   mDrawerLayout,  R.drawable.ic_action_group, 
 				R.string.null_string, R.string.null_string  ) {
-			
+
 			public void onDrawerClosed(View view) {
 				getActionBar().setTitle("");
 			}
@@ -274,13 +293,13 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 		case android.R.id.home:
 			if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
 			else{if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
-				mDrawerLayout.openDrawer(mDrawerList_left); }
+			mDrawerLayout.openDrawer(mDrawerList_left); }
 			break;
 
 		case R.id.action_drawer:
 			if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
 			else {if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
-				mDrawerLayout.openDrawer(mDrawerList_right);}
+			mDrawerLayout.openDrawer(mDrawerList_right);}
 			break;
 		default:
 
@@ -337,13 +356,13 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 
 
 	private void loadFriends(){
-		r = SocialCDERequestFactory.GetFriends();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_string);
-		r.put(Preferences.PASSWORD, this.passw_string);
-		r.setMemoryCacheEnabled(true);
+		r2 = SocialCDERequestFactory.GetFriends();
+		r2.put(Preferences.PROXYSERVER, this.proxy_string);
+		r2.put(Preferences.USERNAME, this.userName_string);
+		r2.put(Preferences.PASSWORD, this.passw_string);
+		r2.setMemoryCacheEnabled(true);
 		StartProgressDialog();
-		mRequestManager.execute(r, this);
+		mRequestManager.execute(r2, this);
 	}
 
 
@@ -374,7 +393,8 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 					Toast.makeText(this, "No services found."  , Toast.LENGTH_LONG).show();
 				}
 			populateDrawerLeft(); //posso il drawer sinistro
-			loadFriends(); //carico gli utenti dal server..
+			//loadFriends(); //carico gli utenti dal server..
+			StopProgressDialog();
 			break;
 
 
@@ -445,19 +465,19 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 			super.onBackPressed();
 			return;
 		}else{
-		if (doubleBackToExitPressedOnce) {
-			super.onBackPressed();
-			return;
-		}
-		this.doubleBackToExitPressedOnce = true;
-		Toast.makeText(this, "Please press BACK again to exit", Toast.LENGTH_SHORT).show();
-		new Handler().postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				doubleBackToExitPressedOnce=false;   
+			if (doubleBackToExitPressedOnce) {
+				super.onBackPressed();
+				return;
 			}
-		}, 2000);
+			this.doubleBackToExitPressedOnce = true;
+			Toast.makeText(this, "Please press BACK again to exit", Toast.LENGTH_SHORT).show();
+			new Handler().postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					doubleBackToExitPressedOnce=false;   
+				}
+			}, 2000);
 		}
 
 	}
@@ -473,7 +493,13 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 	@Override
 	public void onHomeTimeLineFragmentEvent() {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void setFragmentLoading(Boolean isFragmentLoading) {
+		this.isFragmentLoading = isFragmentLoading;  
+
 	}
 
 } 

@@ -35,8 +35,8 @@ public class IsWebServiceRunning_Operation implements Operation {
 			URL url = new URL(host + "/IsWebServiceRunning");
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(20000);
+			conn.setReadTimeout(25000);
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
 			status = conn.getResponseCode();

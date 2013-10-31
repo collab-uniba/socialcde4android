@@ -39,8 +39,8 @@ public class ChangePasswordWithPassword_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/ChangePassword");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(20000);
+			conn.setReadTimeout(25000);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);

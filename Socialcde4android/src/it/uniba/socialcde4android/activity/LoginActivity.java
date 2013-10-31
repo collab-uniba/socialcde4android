@@ -58,9 +58,11 @@ public class LoginActivity extends Activity implements RequestListener {
 	private boolean doubleBackToExitPressedOnce = false;
 	private static final String DIALOG_SHOWN = "DIALOG_SHOWN";
 	private static final String PARCELABLE_REQUEST = "PARCELABLE_REQUEST";
+	private static final String PARCELABLE_REQUEST2 = "PARCELABLE_REQUEST2";
 	private static ProgressDialog progressDialog; 
 	private RequestManager mRequestManager;
 	private Request r;
+	private Request r2;
 	private Button signButton;
 
 
@@ -129,6 +131,8 @@ public class LoginActivity extends Activity implements RequestListener {
 			// Adds the status to the outState Bundle
 			outState.putBoolean(DIALOG_SHOWN, true);
 			outState.putParcelable(PARCELABLE_REQUEST, r);
+			outState.putParcelable(PARCELABLE_REQUEST2, r2);
+
 		} else
 			outState.putBoolean(DIALOG_SHOWN, false);
 	}
@@ -152,7 +156,10 @@ public class LoginActivity extends Activity implements RequestListener {
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r);
 		}
-
+		if (r2 != null && mRequestManager.isRequestInProgress(r2)){
+			StartProgressDialog();
+			mRequestManager.addRequestListener(this, r2);
+		}
 	}
 
 
@@ -202,6 +209,8 @@ public class LoginActivity extends Activity implements RequestListener {
 			if (isOnline()){
 				//posso chiamare il metodo per il login
 				verifyServerAndLogin();
+				login();
+				
 			}else{
 				new NoNetworkDialog().show(getFragmentManager(), "alert");
 			}
@@ -219,13 +228,13 @@ public class LoginActivity extends Activity implements RequestListener {
 	}
 
 	private void login(){
-		r = SocialCDERequestFactory.getWUser();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_string);
-		r.put(Preferences.PASSWORD, this.passw_string);
-		r.setMemoryCacheEnabled(true);
+		r2 = SocialCDERequestFactory.getWUser();
+		r2.put(Preferences.PROXYSERVER, this.proxy_string);
+		r2.put(Preferences.USERNAME, this.userName_string);
+		r2.put(Preferences.PASSWORD, this.passw_string);
+		r2.setMemoryCacheEnabled(true);
 		StartProgressDialog();
-		mRequestManager.execute(r, this);
+		mRequestManager.execute(r2, this);
 	}
 
 
@@ -276,9 +285,10 @@ public class LoginActivity extends Activity implements RequestListener {
 	}
 
 
+
 	public  void StopProgressDialog(){
-		if (progressDialog != null){
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+		if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r2 == null || !mRequestManager.isRequestInProgress(r2)))){
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 			progressDialog.dismiss();
 		}
 	}
@@ -309,8 +319,6 @@ public class LoginActivity extends Activity implements RequestListener {
 			switch(resultData.getInt(Consts.REQUEST_TYPE)){
 
 
-
-
 			case(Consts.REQUESTTYPE_GETUSER):
 
 				if (resultData.getBoolean(Consts.FOUND_WUSER)){//OK
@@ -334,22 +342,18 @@ public class LoginActivity extends Activity implements RequestListener {
 			break;
 
 
-
-
 			case(Consts.REQUESTTYPE_WEBSERVICEVAILABLE):
 
 				Boolean online = resultData.getBoolean(Consts.WEBSERVICE_AVAILABLE);
 			if (online){
-				login();
+				//login();
 			}else{
 				Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
 				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 				this.proxyEdit.startAnimation(shake);
+				StopProgressDialog();
 			}
-
-			StopProgressDialog();
 			break;
-
 			}
 		}
 	}
@@ -359,10 +363,15 @@ public class LoginActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
+		if (request.getString(Preferences.USERNAME) == null){//allora la richiesta è quella del server
+			Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
+			Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+			this.proxyEdit.startAnimation(shake);
+			StopProgressDialog();
+		}
 		if (statusCode == Consts.TIMEOUT_STATUS)
 			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
 		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
-
 	}
 
 
@@ -385,7 +394,6 @@ public class LoginActivity extends Activity implements RequestListener {
 		super.onPause();
 		mRequestManager.removeRequestListener(this);
 	}
-
 
 
 }
