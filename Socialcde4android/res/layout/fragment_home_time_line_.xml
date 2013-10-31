@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <com.handmark.pulltorefresh.library.PullToRefreshListView
+        android:id="@+id/listView1"
+        android:layout_width="match_parent"
+        android:layout_height="353dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" 
+        android:layout_below="@+id/relativeoverlayout">
+    </com.handmark.pulltorefresh.library.PullToRefreshListView>
+
+    <RelativeLayout
+        android:id="@+id/relativeoverlayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="bottom" >
+
+        <ImageButton
+            android:id="@+id/buttonEditTextHOMETIMELINE"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="30dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_action_edit" />
+
+        <LinearLayout
+            android:id="@+id/layout_edittext_TIMELINE"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@color/White"
+            android:gravity="bottom"
+            android:paddingBottom="2dp"
+            android:paddingTop="2dp" >
+
+            <ImageButton
+                android:id="@+id/imageButtonCancelEditTextTIMELINE"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_action_cancel" />
+
+            <EditText
+                android:id="@+id/editTextMessageHOMETIMELINE"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:ems="10"
+                android:gravity="bottom"
+                android:inputType="textMultiLine" />
+
+            <ImageButton
+                android:id="@+id/imageButton2"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_action_send_now" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>
