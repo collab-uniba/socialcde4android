@@ -1,11 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/LinearLayout2"
+    android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/White"
     android:orientation="vertical"
-    tools:context=".WUserProfile_Fragment" >
+    tools:context=".WUserColleagueProfile_Fragment" >
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content" >
 
         <ImageView
-            android:id="@+id/imageViewFrament2"
+            android:id="@+id/imageViewFrament"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_margin="10dp"
@@ -26,7 +26,7 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/textViewUsernameFragment2"
+                android:id="@+id/textViewUsernameFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -37,7 +37,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textViewPostsFragment2"
+                android:id="@+id/textViewPostsFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
@@ -46,7 +46,7 @@
                 android:textSize="15sp" />
 
             <TextView
-                android:id="@+id/textViewFollowingFragment2"
+                android:id="@+id/textViewFollowingFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Small Text"
@@ -54,7 +54,7 @@
                 android:textSize="15sp" />
 
             <TextView
-                android:id="@+id/textViewFollowersFragment2"
+                android:id="@+id/textViewFollowersFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Small Text"
@@ -62,6 +62,14 @@
                 android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/checkBoxFollowFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="10dp"
+        android:text="@string/follow" />
 
     <View
         android:layout_width="match_parent"

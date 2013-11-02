@@ -8,11 +8,13 @@
     <com.handmark.pulltorefresh.library.PullToRefreshListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"
-        android:layout_height="353dp"
+        android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" 
-        android:layout_below="@+id/relativeoverlayout">
+        android:layout_alignParentTop="true"
+        android:layout_below="@+id/relativeoverlayout"
+        android:divider="@null"
+        android:dividerHeight="0dp" >
     </com.handmark.pulltorefresh.library.PullToRefreshListView>
 
     <RelativeLayout
@@ -29,7 +31,8 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_marginTop="30dp"
-            android:background="@android:color/transparent"
+            android:background="@drawable/semitrasparent_imagebutton"
+            android:padding="5dp"
             android:src="@drawable/ic_action_edit" />
 
         <LinearLayout
@@ -44,10 +47,11 @@
 
             <ImageButton
                 android:id="@+id/imageButtonCancelEditTextTIMELINE"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="45dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
-                android:background="@android:color/transparent"
+                android:background="@drawable/semitrasparent_imagebutton"
+                android:padding="5dp"
                 android:src="@drawable/ic_action_cancel" />
 
             <EditText
@@ -62,13 +66,20 @@
 
             <ImageButton
                 android:id="@+id/imageButton2"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="45dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
-                android:background="@android:color/transparent"
+                android:background="@drawable/semitrasparent_imagebutton"
+                android:padding="5dp"
                 android:src="@drawable/ic_action_send_now" />
-
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_above="@+id/layout_edittext_TIMELINE"
+            android:layout_alignParentLeft="true"
+            android:background="@color/Gainsboro" />
     </RelativeLayout>
 
 </RelativeLayout>

@@ -84,7 +84,9 @@ public class Consts {
 
 	public static final String FOLLOW_SETTED = "Follow setted";
 
-	public static final int TIMEOUT_STATUS = 14;
+	public static final int TIMEOUT_STATUS = 125;
+
+	public static final int SETFOLLOWED_ERROR = 126;
 
 
 

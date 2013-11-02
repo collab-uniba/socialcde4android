@@ -9,10 +9,11 @@ import it.uniba.socialcde4android.adapters.ServicesAdapter;
 import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
-import it.uniba.socialcde4android.fragments.HomeTimeLine_Fragment;
-import it.uniba.socialcde4android.fragments.HomeTimeLine_Fragment.OnHomeTimeLineFragmentInteractionListener;
-import it.uniba.socialcde4android.fragments.WUserProfileFragment;
-import it.uniba.socialcde4android.fragments.WUserProfileFragment.OnProfileFragmentInteractionListener;
+import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
+import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnHomeTimeLineFragmentInteractionListener;
+import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
+import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnProfileFragmentInteractionListener;
+import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
@@ -26,7 +27,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -41,7 +41,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFragmentInteractionListener, RequestListener, OnProfileFragmentInteractionListener {
+public class HomeActivity extends FragmentActivity   implements OnProfileFragmentInteractionListener, OnHomeTimeLineFragmentInteractionListener, RequestListener {
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -60,6 +60,8 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 	private static final String DIALOG_SHOWN = "DIALOG_SHOWN";
 	private static final String PARCELABLE_REQUEST = "PARCELABLE_REQUEST";
 	private static final String PARCELABLE_REQUEST2 = "PARCELABLE_REQUEST2";
+	private static final String FRAGMENT_WUSERCOLLEAGUE_PROFILE = "fragment colleague";
+	private static final String FRAGMENT_WUSER_PROFILE = "fragment wuser";
 	private static ProgressDialog progressDialog; 
 	private RequestManager mRequestManager;
 	private Request r;
@@ -89,7 +91,7 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 		}
 
 		if (savedInstanceState==null) {
-			Fragment fragment = HomeTimeLine_Fragment.newInstance();
+			Fragment fragment = TimeLine_Fragment.newInstance();
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 			fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
@@ -165,10 +167,9 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 	}
 
 	public void unlockScreenOrientation(){
-		 
-		
-		        	 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-			
+
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
 	}
 
 
@@ -313,12 +314,13 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 
 	private void selectItemRight(WUser wuser_colleague) {
 		// create a new fragment and specify the planet to show based on position
-		Fragment fragment = WUserProfileFragment.newInstance(wuser_colleague);
+		Fragment fragment = WUserColleagueProfile_Fragment.newInstance(wuser_colleague);
 
 		// Insert the fragment by replacing any existing fragment
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
+		fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+		fragmentManager.popBackStack();
 		fragmentTransaction.addToBackStack(null);
 		fragmentTransaction.commit();
 		// Highlight the selected item, update the title, and close the drawer
@@ -328,8 +330,22 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 
 
 	private void selectItemLeft(int position) {
+		if (position == 0){
+		Fragment fragment = WUserProfile_Fragment.newInstance(wuser);
 
+		// Insert the fragment by replacing any existing fragment
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSER_PROFILE);
+		fragmentManager.popBackStack();
+		fragmentTransaction.addToBackStack(null);
+		fragmentTransaction.commit();
+		// Highlight the selected item, update the title, and close the drawer
+		getActionBar().setTitle("User Profile");
+		}
 		mDrawerLayout.closeDrawer(mDrawerList_left);
+
+		
 	}
 
 
@@ -432,7 +448,14 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 		StopProgressDialog();
 		if (statusCode == Consts.TIMEOUT_STATUS)
 			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
-		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
+		else if (statusCode==Consts.SETFOLLOWED_ERROR){
+			Toast.makeText(this, "Error setting user's status", Toast.LENGTH_SHORT).show();
+			//è necessario notificarlo al fragment..
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			fragment.changeCheckBoxState();
+		}else
+			Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
 
 	}
 
@@ -483,11 +506,6 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 	}
 
 
-	@Override
-	public void onProfileFragmentCheckBoxChanged(Boolean followChecked, WUser wuser_profile) {
-		setFollow(followChecked, wuser_profile);
-
-	}
 
 
 	@Override
@@ -500,6 +518,13 @@ public class HomeActivity extends FragmentActivity   implements OnHomeTimeLineFr
 	public void setFragmentLoading(Boolean isFragmentLoading) {
 		this.isFragmentLoading = isFragmentLoading;  
 
+	}
+
+	@Override
+	public void onProfileFragmentCheckBoxChanged(Boolean followChecked,
+			WUser wuser_profile) {
+		setFollow( followChecked,  wuser_profile);
+		
 	}
 
 } 

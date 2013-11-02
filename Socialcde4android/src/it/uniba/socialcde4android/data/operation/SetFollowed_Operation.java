@@ -81,7 +81,7 @@ public class SetFollowed_Operation implements Operation {
 					br.close();
 
 				}else{
-					throw new ConnectionException("Error ",status);
+					throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
 
 				}
 
@@ -89,13 +89,13 @@ public class SetFollowed_Operation implements Operation {
 			}
 		}catch(java.net.SocketTimeoutException e) {
 			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
 		}  catch (Exception e) {
-			throw new ConnectionException("Error ",status);
+			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
 		}
 
 		if (colleague_id == -1) {
-			throw new ConnectionException("Error ",status);
+			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
 		}
 
 		if (result.equals("true")) {
@@ -103,7 +103,7 @@ public class SetFollowed_Operation implements Operation {
 			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SET_FOLLOWED);
 			return bundle;		
 		} else {
-			throw new ConnectionException("Error ",status);
+			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
 		}
 
 	}
