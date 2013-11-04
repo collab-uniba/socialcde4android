@@ -13,18 +13,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WService;
-import it.uniba.socialcde4android.shared.library.WUser;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.CustomRequestException;
 import com.foxykeep.datadroid.exception.DataException;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
-//import com.google.gson.Gson;
-import com.google.gson.Gson;
+
 
 public class SetFollowed_Operation implements Operation {
 
@@ -48,8 +47,8 @@ public class SetFollowed_Operation implements Operation {
 			if (colleague_id != -1) {
 				URL url = new URL(host + (follow? "/Follow" : "/UnFollow"));
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-				conn.setConnectTimeout(20000);
-				conn.setReadTimeout(25000);
+				conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+				conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 				conn.setRequestMethod("POST");
 				conn.setDoOutput(true);
 				conn.setDoInput(true);
@@ -81,29 +80,32 @@ public class SetFollowed_Operation implements Operation {
 					br.close();
 
 				}else{
-					throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
+					throw new ConnectionException("Error ",Error_consts.SETFOLLOWED_ERROR);
 
 				}
 
 				conn.disconnect();
 			}
 		}catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
+			
+			throw new ConnectionException("Error ",Error_consts.SETFOLLOWED_ERROR * Error_consts.TIMEOUT_FACTOR);
 		}  catch (Exception e) {
-			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
+			throw new ConnectionException("Error ",Error_consts.SETFOLLOWED_ERROR);
 		}
 
 		if (colleague_id == -1) {
-			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
+			throw new ConnectionException("Error ",Error_consts.SETFOLLOWED_ERROR);
 		}
+		Bundle bundle = new Bundle();
 
 		if (result.equals("true")) {
-			Bundle bundle = new Bundle();
+			bundle.putBoolean(Consts.SETTED_FOLLOWED, true);
 			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SET_FOLLOWED);
 			return bundle;		
 		} else {
-			throw new ConnectionException("Error ",Consts.SETFOLLOWED_ERROR);
+			bundle.putBoolean(Consts.SETTED_FOLLOWED, false);
+			return bundle;		
+
 		}
 
 	}

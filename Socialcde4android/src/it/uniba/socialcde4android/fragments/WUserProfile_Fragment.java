@@ -22,7 +22,7 @@ public class WUserProfile_Fragment extends TimeLine_AbstractFragment{
 	private TextView postsText;
 	private TextView followersText;
 	private TextView followingText;
-	private CheckBox followCheckBox;
+	//private CheckBox followCheckBox;
 
 	@Override
 	public int getFragmentViewId() {
@@ -85,7 +85,7 @@ public class WUserProfile_Fragment extends TimeLine_AbstractFragment{
 	public void onPause() {
 		super.onPause();
 		if (getDataTask != null ) 	getDataTask.cancel(true);
-		if (getMoreDataTask != null )getMoreDataTask.cancel(true);
+	//	if (getMoreDataTask != null )getMoreDataTask.cancel(true);
 	}
 
 	@Override

@@ -5,10 +5,12 @@ import java.util.Arrays;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.adapters.ServicesAdapter;
 import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
+import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
 import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnHomeTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
@@ -22,8 +24,12 @@ import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -331,67 +337,87 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 
 	private void selectItemLeft(int position) {
 		if (position == 0){
-		Fragment fragment = WUserProfile_Fragment.newInstance(wuser);
+			Fragment fragment = WUserProfile_Fragment.newInstance(wuser);
 
-		// Insert the fragment by replacing any existing fragment
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSER_PROFILE);
-		fragmentManager.popBackStack();
-		fragmentTransaction.addToBackStack(null);
-		fragmentTransaction.commit();
-		// Highlight the selected item, update the title, and close the drawer
-		getActionBar().setTitle("User Profile");
+			// Insert the fragment by replacing any existing fragment
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSER_PROFILE);
+			fragmentManager.popBackStack();
+			fragmentTransaction.addToBackStack(null);
+			fragmentTransaction.commit();
+			// Highlight the selected item, update the title, and close the drawer
+			getActionBar().setTitle("User Profile");
 		}
 		mDrawerLayout.closeDrawer(mDrawerList_left);
 
-		
+
 	}
 
 
 	private void loadColleagueProfile(int array_position){
-		r = SocialCDERequestFactory.getColleagueProfileRequest();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_string);
-		r.put(Preferences.PASSWORD, this.passw_string);
-		r.put(Consts.COLLEAGUE_ID, String.valueOf(this.wuser_all.get(array_position).getId()));
-		r.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r, this);
+		if (isOnline()){
+			r = SocialCDERequestFactory.getColleagueProfileRequest();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.COLLEAGUE_ID, String.valueOf(this.wuser_all.get(array_position).getId()));
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+
 	}
 
 	private void loadServices(){
-		r = SocialCDERequestFactory.getWServiceRequest();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_string);
-		r.put(Preferences.PASSWORD, this.passw_string);
-		r.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r, this);
+		if (isOnline()){
+			r = SocialCDERequestFactory.getWServiceRequest();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+
 	}
 
 
 	private void loadFriends(){
-		r2 = SocialCDERequestFactory.GetFriends();
-		r2.put(Preferences.PROXYSERVER, this.proxy_string);
-		r2.put(Preferences.USERNAME, this.userName_string);
-		r2.put(Preferences.PASSWORD, this.passw_string);
-		r2.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r2, this);
+		if (isOnline()){
+			r2 = SocialCDERequestFactory.GetFriends();
+			r2.put(Preferences.PROXYSERVER, this.proxy_string);
+			r2.put(Preferences.USERNAME, this.userName_string);
+			r2.put(Preferences.PASSWORD, this.passw_string);
+			r2.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r2, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+
 	}
 
 
 	private void setFollow(Boolean followChecked, WUser wuser_profile) {
-		r = SocialCDERequestFactory.setFollowed();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_string);
-		r.put(Preferences.PASSWORD, this.passw_string);
-		r.put(Consts.BOOLEAN_FOLLOW, followChecked);
-		r.put(Consts.COLLEAGUE_ID, wuser_profile.getId());
-		r.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r, this);
+		if (isOnline()){
+			r = SocialCDERequestFactory.setFollowed();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.BOOLEAN_FOLLOW, followChecked);
+			r.put(Consts.COLLEAGUE_ID, wuser_profile.getId());
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+
 	}
 
 	@Override
@@ -436,7 +462,15 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 
 
 			case(Consts.REQUESTTYPE_SET_FOLLOWED):
-				loadFriends(); //valore settato, ricarica il drawer destro
+				if (resultData.getBoolean(Consts.SETTED_FOLLOWED)){
+					loadFriends(); //valore settato, ricarica il drawer destro
+				} else{
+					Toast.makeText(this, "Error setting user's status", Toast.LENGTH_SHORT).show();
+					//è necessario notificarlo al fragment..
+					FragmentManager fragmentManager = getSupportFragmentManager();
+					WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+					fragment.changeCheckBoxState();
+				}
 			break;
 			}
 		}
@@ -446,19 +480,73 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		if (statusCode == Consts.TIMEOUT_STATUS)
-			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
-		else if (statusCode==Consts.SETFOLLOWED_ERROR){
+		switch(statusCode){
+		case Error_consts.SETFOLLOWED_ERROR:
+		{
 			Toast.makeText(this, "Error setting user's status", Toast.LENGTH_SHORT).show();
-			//è necessario notificarlo al fragment..
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 			fragment.changeCheckBoxState();
-		}else
-			Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
+		}
+		break;
+		case Error_consts.SETFOLLOWED_ERROR * Error_consts.TIMEOUT_FACTOR:
+		{ 
+			Toast.makeText(this, "Error setting user's status. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			fragment.changeCheckBoxState();
+		}
+		break;
+		case Error_consts.ERROR_GET_FRIENDS:
+			Toast.makeText(this, "Error retrieving users list. Exiting to login. ", Toast.LENGTH_SHORT).show();
+			exitToLogin();
+			break;
+		case Error_consts.ERROR_GET_FRIENDS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving users list. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
+			exitToLogin();
+			break;
 
+		case Error_consts.ERROR_RETRIEVING_SERVICES:
+			Toast.makeText(this, "Error retrieving services.  Exiting to login.", Toast.LENGTH_SHORT).show();
+			exitToLogin();
+			break;
+		case Error_consts.ERROR_RETRIEVING_SERVICES * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving services. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
+			exitToLogin();
+			break;
+		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE:
+			Toast.makeText(this, "Error retrieving colleague profile. ", Toast.LENGTH_SHORT).show();
+
+			break;
+		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving colleague profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
+
+			break;
+		case Error_consts.ERROR_SETTINGPASSW:
+			Toast.makeText(this, "Error setting password. ", Toast.LENGTH_SHORT).show();
+
+			break;
+		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_USERNAME_AVAILABLE:
+			Toast.makeText(this, "Error retrieving username availability. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_USERNAME_AVAILABLE * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving username availability. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+
+
+		}
 	}
 
+	public void exitToLogin(){
+		//se ci sono fragment eliminali.. TODO
+		mRequestManager.removeRequestListener(this);
+		Intent i = new Intent(HomeActivity.this, LoginActivity.class);
+		startActivity(i);
+		HomeActivity.this.finish();
+	}
 
 	@Override
 	public void onRequestDataError(Request request) {
@@ -506,7 +594,14 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	}
 
 
-
+	private boolean isOnline() {
+		ConnectivityManager cm =     (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+			return true;
+		}
+		return false;
+	}
 
 	@Override
 	public void onHomeTimeLineFragmentEvent() {
@@ -524,7 +619,13 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	public void onProfileFragmentCheckBoxChanged(Boolean followChecked,
 			WUser wuser_profile) {
 		setFollow( followChecked,  wuser_profile);
-		
+
+	}
+
+	@Override
+	public void removeThisFragment(Fragment fragment) {
+		// TODO Auto-generated method stub
+
 	}
 
 } 

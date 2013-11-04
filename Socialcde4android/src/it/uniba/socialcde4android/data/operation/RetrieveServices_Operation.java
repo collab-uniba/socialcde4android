@@ -13,7 +13,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
 
@@ -41,8 +43,8 @@ public class RetrieveServices_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetServices");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(20000);
-			conn.setReadTimeout(25000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -75,17 +77,16 @@ public class RetrieveServices_Operation implements Operation {
 				Gson gson = new Gson();
 				wservice = gson.fromJson(result, WService[].class);
 			}else{
-				throw new ConnectionException	("Error retrieving services", status);		
+				throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_RETRIEVING_SERVICES);		
 
 			}
 
 			conn.disconnect();
 		} catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_RETRIEVING_SERVICES * Error_consts.TIMEOUT_FACTOR);		
 		}  catch (Exception e) {
 			
-			throw new ConnectionException	("Error retrieving services", status);		
+			throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_RETRIEVING_SERVICES);		
 		}
 
 		Bundle bundle = new Bundle();

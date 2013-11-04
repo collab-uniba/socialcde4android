@@ -9,7 +9,9 @@ import java.net.URL;
 import android.content.Context;
 import android.os.Bundle;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
@@ -35,8 +37,8 @@ public class IsUsernameAvailable_Operation implements Operation {
 
 			URL url = new URL(host + "/IsAvailable?username=" + username);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(20000);
-			conn.setReadTimeout(25000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
 			status = conn.getResponseCode();
@@ -48,15 +50,16 @@ public class IsUsernameAvailable_Operation implements Operation {
 				output = br.readLine();
 
 			}else{
-				throw new ConnectionException("Connection error",status);
+				throw new ConnectionException("Connection error",Error_consts.ERROR_USERNAME_AVAILABLE);
 
 			}
 		}catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException("Connection error",Error_consts.ERROR_USERNAME_AVAILABLE * Error_consts.TIMEOUT_FACTOR);
+
 		}  catch (Exception e) {
 
-			throw new ConnectionException("Connection error",status);
+			throw new ConnectionException("Connection error",Error_consts.ERROR_USERNAME_AVAILABLE);
+
 		}
 
 		if (output.equals("true")) {

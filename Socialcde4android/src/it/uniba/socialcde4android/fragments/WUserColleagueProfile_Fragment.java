@@ -128,7 +128,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	public void onPause() {
 		super.onPause();
 		if (getDataTask != null ) 	getDataTask.cancel(true);
-		if (getMoreDataTask != null )getMoreDataTask.cancel(true);
+		//if (getMoreDataTask != null )getMoreDataTask.cancel(true);
 	}
 
 	@Override

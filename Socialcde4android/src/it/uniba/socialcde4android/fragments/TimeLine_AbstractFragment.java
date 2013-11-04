@@ -22,6 +22,7 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.adapters.TimeLineAdapter;
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.JsonDateDeserializer;
 import it.uniba.socialcde4android.shared.library.WPost;
@@ -64,29 +65,10 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected ArrayList<WPost> mListWpostItems = null;
 	protected OnHomeTimeLineFragmentInteractionListener mListener;
 	public boolean noMoreMessages = false;
-	private final String NO_MORE_MESSAGES = "no more messages";
+	private static final String NO_MORE_MESSAGES = "no more messages";
 	protected GetDataTask getDataTask ;
-	protected GetMoreDataTask getMoreDataTask ;
 	protected Map<String,String> preferences; 
 
-	//private Boolean noMorePosts_status = false;
-
-
-
-	/**
-	 * Use this factory method to create a new instance of this fragment using
-	 * the provided parameters.
-	 * @return A new instance of fragment WUserProfileFragment.
-	 */
-	//	public static TimeLine_Fragment newInstance() {
-	//		TimeLine_Fragment fragment = new TimeLine_Fragment();
-	//		//Bundle args = new Bundle();
-	//		//args.putParcelable(ARG_WUSER, wuser);
-	//		//	args.putString(ARG_PARAM2, param2);
-	//		//fragment.setArguments(args);
-	//	//	fragment.setRetainInstance(true);
-	//		return fragment;
-	//	}
 
 	public String getTAG(){
 		return TAG;
@@ -125,8 +107,9 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				switch(view.getId()) {
 				case android.R.id.list:     
 
-					final int lastItem = firstVisibleItem + visibleItemCount ;
+					int lastItem = firstVisibleItem + visibleItemCount ;
 					if(lastItem >= totalItemCount-1) {
+						Log.i("inside listview listener","lastitem: "+lastItem+ "totoalcont-1: "+String.valueOf(totalItemCount-1));
 						onLastItemVIsible();
 					}
 				}
@@ -136,8 +119,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 
 				if(!TimeLine_AbstractFragment.this.loading && !noMoreMessages){
 					TimeLine_AbstractFragment.this.loading = true;
-					getMoreDataTask =	new GetMoreDataTask();
-					getMoreDataTask.execute() ;
+					getDataTask =	new GetDataTask();
+					getDataTask.execute(GET_MOREDATA_TYPE) ;
 				}		
 			}
 
@@ -165,7 +148,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				mListener.StartProgressDialog();
 				Log.i("astraaaaaaaaaaact","savedinstace == null");
 				getDataTask = new GetDataTask();
-				getDataTask.execute();
+				getDataTask.execute(GET_DATA_TYPE);
 			}
 			else {
 				noMoreMessages = savedInstanceState.getBoolean(NO_MORE_MESSAGES);
@@ -185,7 +168,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					Log.i("astraaaaaaaaaaact","savedinstace not null ma list o activity null");
 
 					getDataTask = 	new GetDataTask();
-					getDataTask.execute();
+					getDataTask.execute(GET_DATA_TYPE);
 				}
 			}
 		}
@@ -200,10 +183,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			getDataTask.cancel(true);
 			pullListView.onRefreshComplete();
 		}
-		if (getMoreDataTask != null )getMoreDataTask.cancel(true);
+		//if (getMoreDataTask != null )getMoreDataTask.cancel(true);
 	}
-
-
 
 
 	@Override
@@ -243,24 +224,29 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 
 		public void setFragmentLoading(Boolean isFragmentLoading);
 
+		public void exitToLogin();
 
+		public void removeThisFragment(Fragment fragment);
 	}
 
 
 	public void onRefresh(PullToRefreshBase<ListView> refreshView) {
 		TimeLine_AbstractFragment.this.loading = true;
 		getDataTask = new GetDataTask();
-		getDataTask.execute();
+		getDataTask.execute(GET_DATA_TYPE);
 
 	}
 
 
 
-	class GetDataTask extends AsyncTask<Void, Void, WPost[]> {
+	class GetDataTask extends AsyncTask<Integer, Void, WPost[]> {
+
+		private Integer type_request;
 
 		@Override
-		protected WPost[] doInBackground(Void... params) {
+		protected WPost[] doInBackground(Integer... params) {
 			// Simulates a background job.
+			type_request = params[0];
 			preferences = Preferences.loadPreferences(getActivity());
 			String host = preferences.get(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
 			WPost[] wpost;
@@ -270,8 +256,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				URL url = new URL(host + getRequestType());
 
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-				conn.setConnectTimeout(20000);
-				conn.setReadTimeout(25000);
+				conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+				conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 				conn.setRequestMethod("POST");
 				conn.setDoOutput(true);
 				conn.setDoInput(true);
@@ -282,7 +268,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				// Create the form content
 				OutputStream out = conn.getOutputStream();
 				Writer writer = new OutputStreamWriter(out, "UTF-8");
-				writer.write(getRequest(GET_DATA_TYPE));
+				writer.write(getRequest(type_request));
 
 				writer.close();
 				out.close();
@@ -297,111 +283,6 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					while ((output = br.readLine()) != null) {
 						result += output;
 
-					}
-					br.close();
-					int count = 0;
-					if (result.equals("[]")) {
-						wpost = new WPost[0];
-					} else {
-						String haystack = result;
-						char needle = '{';
-						for (int i = 0; i < haystack.length(); i++) {
-							if (haystack.charAt(i) == needle) 
-								count++;	}
-						if (count == 0) count += 1;
-
-						wpost = new WPost[count/3];
-						Gson gson = new GsonBuilder().registerTypeAdapter(
-								Calendar.class, new JsonDateDeserializer()).create();
-						wpost = gson.fromJson(result, WPost[].class);
-					}
-				} else {
-					wpost = new WPost[0];
-				}
-
-				conn.disconnect();
-			} catch(java.net.SocketTimeoutException e) {
-				e.printStackTrace();
-				wpost = new WPost[0];
-			} catch (Exception e) {
-				e.printStackTrace();
-				wpost = new WPost[0];
-			}
-			return wpost;
-		}
-
-		@Override
-		protected void onPostExecute(WPost[] wposts) {
-			super.onPostExecute(wposts);
-
-			if (wposts.length>0){
-				//controlla che non ci sia già una lista aggiornata
-				if (mListWpostItems != null && (mListWpostItems.get(0).getId() == wposts[0].getId())){
-					pullListView.onRefreshComplete();
-				}else{
-					mListWpostItems = new ArrayList<WPost>( Arrays.asList(wposts));
-					noMoreMessages = false;
-					mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
-					listView.setAdapter(mAdapter);
-					setListViewListener();
-					// Call onRefreshComplete when the list has been refreshed.
-					pullListView.onRefreshComplete();
-				}
-			}else{
-				showError();
-				pullListView.onRefreshComplete();
-			}
-			TimeLine_AbstractFragment.this.loading = false;
-			mListener.setFragmentLoading(TimeLine_AbstractFragment.this.loading);
-			mListener.StopProgressDialog();
-		}
-	}
-
-
-
-	class GetMoreDataTask extends AsyncTask<Void, Void, WPost[]> {
-
-		//boolean error = false;
-
-		@Override
-		protected WPost[] doInBackground(Void... params) {
-			// Simulates a background job.
-			preferences = Preferences.loadPreferences(getActivity());
-			String host = preferences.get(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
-
-			WPost[] wpost;
-			wpost = new WPost[2];
-
-			try {
-				URL url = new URL(host + getRequestType());
-
-				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-				conn.setConnectTimeout(20000);
-				conn.setReadTimeout(25000);
-				conn.setRequestMethod("POST");
-				conn.setDoOutput(true);
-				conn.setDoInput(true);
-				conn.setUseCaches(false);
-				conn.setAllowUserInteraction(false);
-				conn.setRequestProperty("Content-Type", "application/json");
-
-				// Create the form content
-				OutputStream out = conn.getOutputStream();
-				Writer writer = new OutputStreamWriter(out, "UTF-8");
-				writer.write(getRequest(GET_MOREDATA_TYPE));
-
-				writer.close();
-				out.close();
-				int status = conn.getResponseCode();
-
-				if (status >= 200 && status <= 299) {
-					InputStreamReader in = new InputStreamReader(
-							conn.getInputStream(), "UTF-8");
-					BufferedReader br = new BufferedReader(in);
-					String output;
-					String result = "";
-					while ((output = br.readLine()) != null) {
-						result += output;
 					}
 					br.close();
 					int count = 0;
@@ -421,6 +302,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 								Calendar.class, new JsonDateDeserializer()).create();
 						wpost = gson.fromJson(result, WPost[].class);
 					}
+					
 				} else if (status == 400){
 					wpost = new WPost[0];
 					noMoreMessages=true;
@@ -442,41 +324,69 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		@Override
 		protected void onPostExecute(WPost[] wposts) {
 			super.onPostExecute(wposts);
-			Parcelable listViewState;
-			if (wposts.length>0){
-				for (int j=0; j< wposts.length; j++)
-					mListWpostItems.add(wposts[j]);
-				listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
-				mAdapter.notifyDataSetChanged();
-				listView.onRestoreInstanceState(listViewState);
-				pullListView.onRefreshComplete();
-			}else{//wpost==0
-				if (noMoreMessages){
-					//è necessario cambiare l'ultimo elemento per comunicare l'assenza di altri post
-					listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
+			switch(type_request){
+			case GET_DATA_TYPE:
+				if (wposts.length>0){
+					mListWpostItems = new ArrayList<WPost>( Arrays.asList(wposts));
+					noMoreMessages = false;
 					mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
 					listView.setAdapter(mAdapter);
+					setListViewListener();
+					// Call onRefreshComplete when the list has been refreshed.
+					pullListView.onRefreshComplete();
+					//}
+				}else{
+					Log.i("abstractfragment","error in get more data type");
+					showErrorAndExit();
+				//	pullListView.onRefreshComplete();
+				}
+				TimeLine_AbstractFragment.this.loading = false;
+				mListener.setFragmentLoading(TimeLine_AbstractFragment.this.loading);
+				mListener.StopProgressDialog();
+				break;
+
+			case GET_MOREDATA_TYPE:
+				Parcelable listViewState;
+				if (wposts.length>0){
+					for (int j=0; j< wposts.length; j++)
+						mListWpostItems.add(wposts[j]);
+					listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
+					mAdapter.notifyDataSetChanged();
+					//setListViewListener();
 					listView.onRestoreInstanceState(listViewState);
 					pullListView.onRefreshComplete();
-				}else {
-					showError();
-				}
+				}else{//wpost==0
+					if (noMoreMessages){
+						//è necessario cambiare l'ultimo elemento per comunicare l'assenza di altri post
+						listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
+						mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
+						listView.setAdapter(mAdapter);
+						listView.onRestoreInstanceState(listViewState);
+						pullListView.onRefreshComplete();
+					}else {
+						Log.i("abstractfragment","error in get more data type");
+						showErrorAndExit();
+					}
 
-			}
-			TimeLine_AbstractFragment.this.loading = false;
-			mListener.setFragmentLoading(loading);
+				}
+				TimeLine_AbstractFragment.this.loading = false;
+				mListener.setFragmentLoading(loading);
+			break;
 		}
 	}
+}
 
 
-	public void showError(){
 
-		Toast.makeText(TimeLine_AbstractFragment.this.getActivity(), "Connection error.", Toast.LENGTH_SHORT).show();
+public void showErrorAndExit(){
 
-	}
+	Toast.makeText(TimeLine_AbstractFragment.this.getActivity(), "Connection error.", Toast.LENGTH_SHORT).show();
+	mListener.exitToLogin();
 
-	public abstract String getRequest(int dataType);
+}
 
-	public abstract String getRequestType();
+public abstract String getRequest(int dataType);
+
+public abstract String getRequestType();
 
 }

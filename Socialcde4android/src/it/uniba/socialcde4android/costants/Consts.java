@@ -47,6 +47,8 @@ public class Consts {
 	public static final String WUSERS_SUG = "wuser_sugg";
 
 	public static final String WUSERS_NUMBERS = "WUsers numebrs per type";
+	
+	public static final String  SETTED_FOLLOWED = "setted followed";
 
 	//type requests:
 	
@@ -86,7 +88,9 @@ public class Consts {
 
 	public static final int TIMEOUT_STATUS = 125;
 
-	public static final int SETFOLLOWED_ERROR = 126;
+	
+
+	
 
 
 

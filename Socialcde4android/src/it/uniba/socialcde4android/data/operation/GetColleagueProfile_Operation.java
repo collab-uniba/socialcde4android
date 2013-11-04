@@ -13,7 +13,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
@@ -44,8 +46,8 @@ public class GetColleagueProfile_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetColleagueProfile");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(20000);
-			conn.setReadTimeout(25000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -79,15 +81,14 @@ public class GetColleagueProfile_Operation implements Operation {
 				Gson gson = new Gson();
 				wuser = gson.fromJson(result, WUser.class);
 			}else{
-				throw new ConnectionException("Error retrieving colleague profile",status);
+				throw new ConnectionException("Error retrieving colleague profile",Error_consts.ERROR_RETRIVENG_GOLLEAGUE);
 			}
 
 			conn.disconnect();
 		}catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException("Error setting new password",Error_consts.ERROR_RETRIVENG_GOLLEAGUE * Error_consts.TIMEOUT_FACTOR);
 		}  catch (Exception e) {
-			throw new ConnectionException("Error retrieving colleague profile",status);
+			throw new ConnectionException("Error retrieving colleague profile",Error_consts.ERROR_RETRIVENG_GOLLEAGUE);
 
 		}
 		

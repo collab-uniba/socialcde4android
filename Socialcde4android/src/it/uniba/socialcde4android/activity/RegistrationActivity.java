@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
@@ -17,26 +18,21 @@ import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.provider.Settings;
-import android.app.ActionBar;
+
 import android.app.Activity;
-import android.app.AlertDialog;
+
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.DialogInterface.OnClickListener;
-import android.util.Log;
+
 import android.view.Menu;
-import android.view.MenuItem;
+
 import android.view.View;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
+
 import android.widget.Toast;
 
 public class RegistrationActivity extends Activity implements RequestListener {
@@ -246,41 +242,41 @@ public class RegistrationActivity extends Activity implements RequestListener {
 
 			case(Consts.REQUESTTYPE_SUBSCRIBEUSER):
 				int response = resultData.getInt(Consts.SUBSCRIPTION_RESPONSE);
-				switch(response){
-				case -3:
-					Toast.makeText(this, "Please compile all the fields correctly."  , Toast.LENGTH_SHORT).show();
-					break;
-				case -2:
-					Toast.makeText(this, "Please enter a valid proxy."  , Toast.LENGTH_SHORT).show();
-					Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-					proxyEdit.startAnimation(shake);
-					break;
-				case -1:
-					Toast.makeText(this, "There's a problem. Check your connection and try again"  , Toast.LENGTH_SHORT).show();
-					break;
-				case 0:
-					//TODO
-					//chiama change password per l'iscrizione vera e propria..
-					changeInvitationCodeWithPassword();
-					break;
-				case 1: // if e-mail address does not exist in the database
-					Toast.makeText(this, "Please enter the email on which you recived the invite"  , Toast.LENGTH_SHORT).show();
-					Animation shake1 = AnimationUtils.loadAnimation(this, R.anim.shake);
-					mailEdit.startAnimation(shake1);
-					break;
-				case 2:
-					Toast.makeText(this, "Please enter the invitation code that you recived in the invite"  , Toast.LENGTH_SHORT).show();
-					Animation shake2 = AnimationUtils.loadAnimation(this, R.anim.shake);
-					this.invitationEdit.startAnimation(shake2);
-					break;
-				case 3: // if username is already used by another user
-					Toast.makeText(this, "The Username chosen is not available"  , Toast.LENGTH_SHORT).show();
-					Animation shake3 = AnimationUtils.loadAnimation(this, R.anim.shake);
-					userEdit.startAnimation(shake3);
-					break;
-				default:
-					Toast.makeText(this, "Response not valid from the server"  , Toast.LENGTH_SHORT).show();
-				}
+			switch(response){
+			case -3:
+				Toast.makeText(this, "Please compile all the fields correctly."  , Toast.LENGTH_SHORT).show();
+				break;
+			case -2:
+				Toast.makeText(this, "Please enter a valid proxy."  , Toast.LENGTH_SHORT).show();
+				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+				proxyEdit.startAnimation(shake);
+				break;
+			case -1:
+				Toast.makeText(this, "There's a problem. Check your connection and try again"  , Toast.LENGTH_SHORT).show();
+				break;
+			case 0:
+				//TODO
+				//chiama change password per l'iscrizione vera e propria..
+				changeInvitationCodeWithPassword();
+				break;
+			case 1: // if e-mail address does not exist in the database
+				Toast.makeText(this, "Please enter the email on which you recived the invite"  , Toast.LENGTH_SHORT).show();
+				Animation shake1 = AnimationUtils.loadAnimation(this, R.anim.shake);
+				mailEdit.startAnimation(shake1);
+				break;
+			case 2:
+				Toast.makeText(this, "Please enter the invitation code that you recived in the invite"  , Toast.LENGTH_SHORT).show();
+				Animation shake2 = AnimationUtils.loadAnimation(this, R.anim.shake);
+				this.invitationEdit.startAnimation(shake2);
+				break;
+			case 3: // if username is already used by another user
+				Toast.makeText(this, "The Username chosen is not available"  , Toast.LENGTH_SHORT).show();
+				Animation shake3 = AnimationUtils.loadAnimation(this, R.anim.shake);
+				userEdit.startAnimation(shake3);
+				break;
+			default:
+				Toast.makeText(this, "Response not valid from the server"  , Toast.LENGTH_SHORT).show();
+			}
 
 			break;
 
@@ -295,8 +291,8 @@ public class RegistrationActivity extends Activity implements RequestListener {
 					Toast.makeText(this, "Registration failed; please contact the administrator"  , Toast.LENGTH_SHORT).show();
 				}
 			break;
-			
-			
+
+
 			}		
 		}else{
 			Toast.makeText(this, "ERROR"  , Toast.LENGTH_SHORT).show();
@@ -308,10 +304,22 @@ public class RegistrationActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		if (statusCode == Consts.TIMEOUT_STATUS)
-			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
-		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
+		switch(statusCode){
 
+		case Error_consts.ERROR_SUBSCRIBE_USER:
+			Toast.makeText(this, "Error subscribing user. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_SUBSCRIBE_USER * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error subscribing user. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_SETTINGPASSW:
+			Toast.makeText(this, "Error setting password. ", Toast.LENGTH_SHORT).show();
+
+			break;
+		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			break;
+		}
 	}
 
 	@Override

@@ -12,11 +12,10 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
@@ -45,8 +44,8 @@ public class GetFriends_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetSuggestedFriends");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(20000);
-			conn.setReadTimeout(25000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -79,14 +78,13 @@ public class GetFriends_Operation implements Operation {
 				wuser_sugg = new WUser[countOccurrences(result, '{')];
 				wuser_sugg = gson.fromJson(result, WUser[].class);
 			}else {
-				throw new ConnectionException("Error retrieving suggested users",status);
+				throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 			}
 			conn.disconnect();
 		} catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 		}catch (Exception e) {
-			throw new ConnectionException("Error retrieving suggested users",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 		}
 
 
@@ -94,8 +92,8 @@ public class GetFriends_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetFollowings");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -127,16 +125,15 @@ public class GetFriends_Operation implements Operation {
 				wuser_following = new WUser[countOccurrences(result, '{')];
 				wuser_following = gson.fromJson(result, WUser[].class);
 			}else{
-				throw new ConnectionException("Error retrieving following users",status);
+				throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 
 			}
 
 			conn.disconnect();
 		}catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 		} catch (Exception e) {
-			throw new ConnectionException("Error retrieving following users",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 
 		}
 
@@ -146,8 +143,8 @@ public class GetFriends_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetFollowers");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -181,14 +178,14 @@ public class GetFriends_Operation implements Operation {
 				wuser_followers = new WUser[countOccurrences(result, '{')];
 				wuser_followers = gson.fromJson(result, WUser[].class);
 			}else{
-				throw new ConnectionException("Error retrieving followers users",status);
+				throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 			}
 			conn.disconnect();
 		} catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
+
 		} catch (Exception e) {
-			throw new ConnectionException("Error retrieving followers users",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 		}
 
 
@@ -197,8 +194,8 @@ public class GetFriends_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetHiddenUsers");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -232,15 +229,15 @@ public class GetFriends_Operation implements Operation {
 				wuser_hidden = new WUser[countOccurrences(result, '{')];
 				wuser_hidden = gson.fromJson(result, WUser[].class);
 			}else{
-				throw new ConnectionException("Error retrieving hidden users",status);
+				throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 			}
 
 			conn.disconnect();
 		} catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS * Error_consts.TIMEOUT_FACTOR);
+
 		} catch (Exception e) {
-			throw new ConnectionException("Error retrieving hidden users",status);
+			throw new ConnectionException("Error retrieving suggested users",Error_consts.ERROR_GET_FRIENDS);
 
 		}
 

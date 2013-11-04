@@ -27,9 +27,9 @@ public class Preferences {
 			editor.putString(key, preferences.get(key));
 		}
 		//se savepass == false allora salva una password vuota
-		if ((preferences.get(SAVEPASS)).equals(false)){
-			editor.putString(PASSWORD, "");
-		}
+//		if ((preferences.get(SAVEPASS)).equals(false)){
+//			editor.putString(PASSWORD, "");
+//		}
 		editor.putString(SAVEDPREF,"true");
 		editor.commit();
 	}
