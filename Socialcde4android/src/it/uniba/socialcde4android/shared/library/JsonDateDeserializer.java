@@ -21,7 +21,6 @@ public class JsonDateDeserializer implements JsonDeserializer<Calendar> {
 		Calendar date_selected = Calendar.getInstance();
 		
 		try {
-			
 		
 		date_selected.setTimeInMillis(Long.parseLong(dataLong));
 		
@@ -39,12 +38,7 @@ public class JsonDateDeserializer implements JsonDeserializer<Calendar> {
 			// TODO: handle exception
 			System.out.println("Metodo non riuscito");
 		}
-		
 
-		
-		
-
-	
 
 		return date_selected;
 

@@ -13,7 +13,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
@@ -26,9 +28,9 @@ import com.foxykeep.datadroid.service.RequestService.Operation;
 //import com.google.gson.Gson;
 import com.google.gson.Gson;
 
-public class GetHidden_Operation implements Operation {
+public class GetColleagueProfile_Operation implements Operation {
 
-	//private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
+	private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)
@@ -36,15 +38,16 @@ public class GetHidden_Operation implements Operation {
 
 		String userName = request.getString(Preferences.USERNAME);
 		String password = request.getString(Preferences.PASSWORD);
+		String colleagueId = request.getString(Consts.COLLEAGUE_ID);
 		String host = request.getString(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
-		int status =0;
-		//WUser wuser = new WUser();
-
-		WUser[] wuser = new WUser[2];
+		WUser wuser = new WUser();
+		int status = 0;
 
 		try {
-			URL url = new URL(host + "/GetHiddenUsers");
+			URL url = new URL(host + "/GetColleagueProfile");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -56,7 +59,8 @@ public class GetHidden_Operation implements Operation {
 			OutputStream out = conn.getOutputStream();
 			Writer writer = new OutputStreamWriter(out, "UTF-8");
 			writer.write("{ \"username\":\"" + userName + "\", \"password\":\""
-					+ password + "\"}");
+					+ password + "\" , \"colleagueId\":\"" + colleagueId
+					+ "\" }");
 
 			writer.close();
 			out.close();
@@ -75,43 +79,28 @@ public class GetHidden_Operation implements Operation {
 				br.close();
 
 				Gson gson = new Gson();
-				wuser = new WUser[countOccurrences(result, '{')];
-				wuser = gson.fromJson(result, WUser[].class);
+				wuser = gson.fromJson(result, WUser.class);
+			}else{
+				throw new ConnectionException("Error retrieving colleague profile",Error_consts.ERROR_RETRIVENG_GOLLEAGUE);
 			}
 
 			conn.disconnect();
-		} catch (Exception e) {
-			wuser = null;
+		}catch(java.net.SocketTimeoutException e) {
+			throw new ConnectionException("Error setting new password",Error_consts.ERROR_RETRIVENG_GOLLEAGUE * Error_consts.TIMEOUT_FACTOR);
+		}  catch (Exception e) {
+			throw new ConnectionException("Error retrieving colleague profile",Error_consts.ERROR_RETRIVENG_GOLLEAGUE);
 
 		}
-
-		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
 		
-		if (wuser != null && wuser.length>0){
-			bundle.putParcelableArray(Consts.WUSERS, wuser);
-			bundle.putBoolean(Consts.FOUND_WUSERS, true);
+		Bundle bundle = new Bundle();
+		if (wuser != null){
+			bundle.putParcelable(Consts.WUSER, wuser);
+			bundle.putBoolean(Consts.FOUND_WUSER, true);
 		}else{
-			bundle.putBoolean(Consts.FOUND_WUSERS, false);
+			bundle.putBoolean(Consts.FOUND_WUSER, false);
 		}
-		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_HIDDENUSERS);
+		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_GET_COLLEAGUE_PROFILE);
 		return bundle;
-
-	}
-	
-	private static int countOccurrences(String haystack, char needle) {
-		int count = 0;
-		for (int i = 0; i < haystack.length(); i++) {
-			if (haystack.charAt(i) == needle) {
-				count++;
-			}
-		}
-
-		if (count == 0) {
-			count += 1;
-		}
-
-		return count;
 	}
 
 }

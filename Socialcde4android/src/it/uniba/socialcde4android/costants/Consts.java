@@ -44,6 +44,12 @@ public class Consts {
 
 	public static final String WUSERS_HIDDEN = "wuser_hidden";
 	
+	public static final String WUSERS_SUG = "wuser_sugg";
+
+	public static final String WUSERS_NUMBERS = "WUsers numebrs per type";
+	
+	public static final String  SETTED_FOLLOWED = "setted followed";
+
 	//type requests:
 	
 	public final static int REQUESTTYPE_WEBSERVICEVAILABLE = 0;
@@ -66,7 +72,25 @@ public class Consts {
 
 	public static final int REQUESTTYPE_HIDDENUSERS = 9;
 
-	public static final String WUSERS_SUG = "wuser_sugg";
+	public static final int REQUESTTYPE_LOADUSERS = 10;
+
+	public static final int REQUESTTYPE_ALL_USERS = 11;
+
+	public static final String COLLEAGUE_ID = "colleague ID";
+
+	public static final int REQUESTTYPE_GET_COLLEAGUE_PROFILE = 12;
+
+	public static final String BOOLEAN_FOLLOW = "boolean follow";
+
+	public static final int REQUESTTYPE_SET_FOLLOWED = 13;
+
+	public static final String FOLLOW_SETTED = "Follow setted";
+
+	public static final int TIMEOUT_STATUS = 125;
+
+	
+
+	
 
 
 

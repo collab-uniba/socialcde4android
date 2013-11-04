@@ -13,7 +13,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
 
@@ -27,7 +29,7 @@ import com.google.gson.Gson;
 
 public class RetrieveServices_Operation implements Operation {
 
-	//private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
+	private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)
@@ -41,8 +43,8 @@ public class RetrieveServices_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetServices");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -59,7 +61,6 @@ public class RetrieveServices_Operation implements Operation {
 			writer.close();
 			out.close();
 			status = conn.getResponseCode();
-			Log.i("operatioooooooooooooooooooon", String.valueOf(status));
 			if (status >= 200 && status <= 299) {
 				InputStreamReader in = new InputStreamReader(
 						conn.getInputStream());
@@ -75,20 +76,21 @@ public class RetrieveServices_Operation implements Operation {
 				wservice = new WService[countOccurrences(result, '{')];
 				Gson gson = new Gson();
 				wservice = gson.fromJson(result, WService[].class);
+			}else{
+				throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_RETRIEVING_SERVICES);		
+
 			}
 
 			conn.disconnect();
 		} catch(java.net.SocketTimeoutException e) {
+			throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_RETRIEVING_SERVICES * Error_consts.TIMEOUT_FACTOR);		
+		}  catch (Exception e) {
 			
-			wservice = null;
-			
-		} catch (Exception e) {
-			
-			wservice = null;
+			throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_RETRIEVING_SERVICES);		
 		}
 
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STAUS_WSERVICESREQUEST, status);
+		
 
 		if (wservice != null && wservice.length>0){
 			bundle.putParcelableArray(Consts.WSERVICES, wservice);

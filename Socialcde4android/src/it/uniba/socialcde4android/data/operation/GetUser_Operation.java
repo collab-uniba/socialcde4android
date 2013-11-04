@@ -11,11 +11,11 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 
 public class GetUser_Operation implements Operation {
 
-	//private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
+	private static final String TAG = GetUser_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)
@@ -43,6 +43,8 @@ public class GetUser_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/GetUser");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -74,16 +76,19 @@ public class GetUser_Operation implements Operation {
 				
 				Gson gson = new Gson();
 				wuser = gson.fromJson(result, WUser.class);
+			}else{
+				throw new ConnectionException("Error setting new password",Error_consts.ERROR_GETTING_USER);
 			}
 
 			conn.disconnect();
-		} catch (Exception e) {
-			wuser = null;
-
+		}catch(java.net.SocketTimeoutException e) {
+			throw new ConnectionException("Error setting new password",Error_consts.ERROR_GETTING_USER * Error_consts.TIMEOUT_FACTOR);
+		}  catch (Exception e) {
+			throw new ConnectionException("Error setting new password",Error_consts.ERROR_GETTING_USER);
 		}
 		
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
+	
 		
 		if (wuser != null){
 			bundle.putParcelable(Consts.WUSER, wuser);

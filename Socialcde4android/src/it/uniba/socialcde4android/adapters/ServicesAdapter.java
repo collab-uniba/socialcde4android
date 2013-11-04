@@ -71,10 +71,10 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 	{
 		
 		int type = getItemViewType(position);
-		if (rowView == null) {
+		
 			switch (type) {
 			case TYPE_AVATAR:
-				rowView = infalInflater.inflate(R.layout.drawer_avatar_item, null);
+				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.drawer_avatar_item, null);
 				TextView textViewAvatar = (TextView) rowView.findViewById(R.id.textViewdrawerAVATAR);
 				textViewAvatar.setText(name);
 				ImageView imageviewAvatar = (ImageView) rowView.findViewById(R.id.imageViewdrawerAVATAR); 
@@ -90,12 +90,12 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 				break;
 
 			case TYPE_TITLE:
-				rowView = infalInflater.inflate(R.layout.drawer_services_title, null);
+				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.drawer_services_title, null);
 				break;
 
 			case TYPE_SERVICE:
 				WService wservice = (WService) ServicesAdapter.this.getItem(position-2);
-				rowView = infalInflater.inflate(R.layout.drawer_item, null);
+				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.drawer_item, null);
 				TextView textViewService = (TextView) rowView.findViewById(R.id.textViewdrawer);
 				textViewService.setText(wservice.getName());
 				ImageView imageviewStatusDot = (ImageView) rowView.findViewById(R.id.imageViewStausDot); 
@@ -110,7 +110,7 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 
 			}
 
-		}
+		
 
 	
 		return rowView;

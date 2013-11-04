@@ -9,26 +9,18 @@ import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WService;
-
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
 import android.content.Intent;
 import android.util.Log;
@@ -58,9 +50,11 @@ public class LoginActivity extends Activity implements RequestListener {
 	private boolean doubleBackToExitPressedOnce = false;
 	private static final String DIALOG_SHOWN = "DIALOG_SHOWN";
 	private static final String PARCELABLE_REQUEST = "PARCELABLE_REQUEST";
+	private static final String PARCELABLE_REQUEST2 = "PARCELABLE_REQUEST2";
 	private static ProgressDialog progressDialog; 
 	private RequestManager mRequestManager;
 	private Request r;
+	private Request r2;
 	private Button signButton;
 
 
@@ -73,8 +67,11 @@ public class LoginActivity extends Activity implements RequestListener {
 		Preferences.setFalseAutolog(this);
 		setContentView(R.layout.activity_login);
 		proxyEdit = (EditText)findViewById(R.id.editTextRegProxy);
+		proxyEdit.setText("http://apat.di.uniba.it:8081");
 		userNameEdit = (EditText)findViewById(R.id.editTextRegName);
+		userNameEdit.setText("Bob");
 		passwEdit = (EditText)findViewById(R.id.editTextloginpassw);
+		passwEdit.setText("2+3=cinque");
 		loginButton = (Button)findViewById(R.id.buttonSendRegistration);
 		autoLogCheck = (CheckBox)findViewById(R.id.checkBoxAutoLog);
 		savePasswCheck = (CheckBox)findViewById(R.id.checkBoxSavePassw);
@@ -129,6 +126,8 @@ public class LoginActivity extends Activity implements RequestListener {
 			// Adds the status to the outState Bundle
 			outState.putBoolean(DIALOG_SHOWN, true);
 			outState.putParcelable(PARCELABLE_REQUEST, r);
+			outState.putParcelable(PARCELABLE_REQUEST2, r2);
+
 		} else
 			outState.putBoolean(DIALOG_SHOWN, false);
 	}
@@ -152,7 +151,10 @@ public class LoginActivity extends Activity implements RequestListener {
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r);
 		}
-
+		if (r2 != null && mRequestManager.isRequestInProgress(r2)){
+			StartProgressDialog();
+			mRequestManager.addRequestListener(this, r2);
+		}
 	}
 
 
@@ -202,6 +204,8 @@ public class LoginActivity extends Activity implements RequestListener {
 			if (isOnline()){
 				//posso chiamare il metodo per il login
 				verifyServerAndLogin();
+				login();
+
 			}else{
 				new NoNetworkDialog().show(getFragmentManager(), "alert");
 			}
@@ -219,13 +223,13 @@ public class LoginActivity extends Activity implements RequestListener {
 	}
 
 	private void login(){
-		r = SocialCDERequestFactory.getWUser();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_string);
-		r.put(Preferences.PASSWORD, this.passw_string);
-		r.setMemoryCacheEnabled(true);
+		r2 = SocialCDERequestFactory.getWUser();
+		r2.put(Preferences.PROXYSERVER, this.proxy_string);
+		r2.put(Preferences.USERNAME, this.userName_string);
+		r2.put(Preferences.PASSWORD, this.passw_string);
+		r2.setMemoryCacheEnabled(true);
 		StartProgressDialog();
-		mRequestManager.execute(r, this);
+		mRequestManager.execute(r2, this);
 	}
 
 
@@ -276,9 +280,10 @@ public class LoginActivity extends Activity implements RequestListener {
 	}
 
 
+
 	public  void StopProgressDialog(){
-		if (progressDialog != null){
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+		if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r2 == null || !mRequestManager.isRequestInProgress(r2)))){
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 			progressDialog.dismiss();
 		}
 	}
@@ -304,16 +309,13 @@ public class LoginActivity extends Activity implements RequestListener {
 
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
-		
+
 		if (resultData != null){
 			switch(resultData.getInt(Consts.REQUEST_TYPE)){
 
-			
-
 
 			case(Consts.REQUESTTYPE_GETUSER):
-				int status_get = resultData.getInt(Consts.STATUS_WEBSERVICE);
-			if (status_get >= 200 && status_get <= 299) { //OK
+
 				if (resultData.getBoolean(Consts.FOUND_WUSER)){//OK
 					savePreferences();
 					Intent i = new Intent(LoginActivity.this, HomeActivity.class);
@@ -330,38 +332,23 @@ public class LoginActivity extends Activity implements RequestListener {
 					this.passwEdit.startAnimation(shake);
 				}
 
-			}else{ //errore 
-				Toast.makeText(this, "Please check your entries."  , Toast.LENGTH_SHORT).show();
-				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-				this.proxyEdit.startAnimation(shake);
-				this.userNameEdit.startAnimation(shake);
-				this.passwEdit.startAnimation(shake);
-			}
+
 			StopProgressDialog();
 			break;
 
-			
-			
-			
+
 			case(Consts.REQUESTTYPE_WEBSERVICEVAILABLE):
-				int status = resultData.getInt(Consts.STATUS_WEBSERVICE);
-			if (status >= 200 && status <= 299) {
+
 				Boolean online = resultData.getBoolean(Consts.WEBSERVICE_AVAILABLE);
-				if (online){
-					login();
-				}else{
-					Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
-					Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-					this.proxyEdit.startAnimation(shake);
-				}
+			if (online){
+				//login();
 			}else{
-				Toast.makeText(this, "Please check the proxy address entered."  , Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
 				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 				this.proxyEdit.startAnimation(shake);
+				StopProgressDialog();
 			}
-			StopProgressDialog();
 			break;
-
 			}
 		}
 	}
@@ -371,7 +358,30 @@ public class LoginActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		Toast.makeText(this, "Connection error", Toast.LENGTH_SHORT).show();
+		//		if (request.getString(Preferences.USERNAME) == null){//allora la richiesta è quella del server
+		//			Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
+		//			Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+		//			this.proxyEdit.startAnimation(shake);
+		//			StopProgressDialog();
+		//		}
+		
+		//		if (statusCode == Consts.TIMEOUT_STATUS)
+		//			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
+		//		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
+		switch(statusCode){
+		case Error_consts.ERROR_GETTING_USER:
+			Toast.makeText(this, "Error retrieving user profile. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_GETTING_USER * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving user profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_WEBSERVICE_RUNNING:
+			Toast.makeText(this, "Error retrieving webservice availability. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_WEBSERVICE_RUNNING * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving webservice availability.  Connection Timeout.", Toast.LENGTH_SHORT).show();
+			break;
+		}
 	}
 
 
@@ -394,7 +404,6 @@ public class LoginActivity extends Activity implements RequestListener {
 		super.onPause();
 		mRequestManager.removeRequestListener(this);
 	}
-
 
 
 }

@@ -10,15 +10,14 @@ package it.uniba.socialcde4android.data.service;
 
 
 
-import it.uniba.socialcde4android.data.operation.ChangeInvitationWithPassword_Operation;
-import it.uniba.socialcde4android.data.operation.GetFollowers_Operation;
-import it.uniba.socialcde4android.data.operation.GetFollowings_Operation;
-import it.uniba.socialcde4android.data.operation.GetHidden_Operation;
-import it.uniba.socialcde4android.data.operation.GetSuggestedFriend_Operation;
+import it.uniba.socialcde4android.data.operation.ChangePasswordWithPassword_Operation;
+import it.uniba.socialcde4android.data.operation.GetColleagueProfile_Operation;
+import it.uniba.socialcde4android.data.operation.GetFriends_Operation;
 import it.uniba.socialcde4android.data.operation.GetUser_Operation;
 import it.uniba.socialcde4android.data.operation.IsUsernameAvailable_Operation;
 import it.uniba.socialcde4android.data.operation.IsWebServiceRunning_Operation;
 import it.uniba.socialcde4android.data.operation.RetrieveServices_Operation;
+import it.uniba.socialcde4android.data.operation.SetFollowed_Operation;
 import it.uniba.socialcde4android.data.operation.SubscribeUser_Operation;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 
@@ -50,19 +49,17 @@ public final class SocialCDERequestService extends RequestService {
 		case SocialCDERequestFactory.SUBSCRIBE_USER:
 			return new SubscribeUser_Operation();
 		case SocialCDERequestFactory.CHANGE_INVITATION_WITH_PASSWORD:
-			return new ChangeInvitationWithPassword_Operation();
+			return new ChangePasswordWithPassword_Operation();
 		case SocialCDERequestFactory.GET_USER:
 			return new GetUser_Operation();
-		case SocialCDERequestFactory.GET_SUGGESTED_FRIEND:
-			return new GetSuggestedFriend_Operation();
-		case SocialCDERequestFactory.GET_FOLLOWINGS:
-			return new GetFollowings_Operation();
-		case SocialCDERequestFactory.GET_FOLLOWERS:
-			return new GetFollowers_Operation();
-		case SocialCDERequestFactory.GET_HIDDEN:
-			return new GetHidden_Operation();
-		
+		case SocialCDERequestFactory.GET_FRIENDS:
+			return new GetFriends_Operation();
+		case SocialCDERequestFactory.GET_COLLEAGUE:
+			return new GetColleagueProfile_Operation();
+		case SocialCDERequestFactory.SET_FOLLOWED:
+			return new SetFollowed_Operation();
 		}
+		
 		
 		return null;
 	}

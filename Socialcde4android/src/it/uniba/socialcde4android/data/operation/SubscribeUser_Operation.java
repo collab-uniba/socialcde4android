@@ -11,20 +11,16 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WService;
-
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.CustomRequestException;
 import com.foxykeep.datadroid.exception.DataException;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
 //import com.google.gson.Gson;
-import com.google.gson.Gson;
 
 public class SubscribeUser_Operation implements Operation {
 
@@ -44,8 +40,8 @@ public class SubscribeUser_Operation implements Operation {
 		try {
 			URL url = new URL(host + "/SubscribeUser");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
@@ -75,18 +71,18 @@ public class SubscribeUser_Operation implements Operation {
 				}
 				br.close();
 
+			}else{
+				throw new ConnectionException("Connection error",Error_consts.ERROR_SUBSCRIBE_USER);
 			}
-
 			conn.disconnect();
 		}catch(java.net.SocketTimeoutException e) {
-			
-			response = -1;			
-		}catch (Exception e) {
-			response = -1;
+			throw new ConnectionException("Connection error",Error_consts.ERROR_SUBSCRIBE_USER * Error_consts.TIMEOUT_FACTOR);
+
+		} catch (Exception e) {
+			throw new ConnectionException("Connection error",Error_consts.ERROR_SUBSCRIBE_USER);
 		}
 		response = Integer.parseInt(result);
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
 		bundle.putInt(Consts.SUBSCRIPTION_RESPONSE, response);
 		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SUBSCRIBEUSER);
 

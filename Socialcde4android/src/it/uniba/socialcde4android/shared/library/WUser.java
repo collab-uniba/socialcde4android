@@ -157,12 +157,12 @@ public class WUser implements Parcelable{
 
 
 		Id = in.readInt();
-		Username = in. readString();
-		Email = in. readString();
-		Avatar = in. readString();
-		Statuses = in. readInt();
-		Followings = in. readInt();
-		Followers = in. readInt();
+		Username = in.readString();
+		Email = in.readString();
+		Avatar = in.readString();
+		Statuses = in.readInt();
+		Followings = in.readInt();
+		Followers = in.readInt();
 		Followed = in.readByte() != 0;
 
 		}

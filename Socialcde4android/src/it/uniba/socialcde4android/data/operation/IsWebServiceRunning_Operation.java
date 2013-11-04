@@ -9,7 +9,9 @@ import java.net.URL;
 import android.content.Context;
 import android.os.Bundle;
 
+import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
@@ -35,8 +37,8 @@ public class IsWebServiceRunning_Operation implements Operation {
 			URL url = new URL(host + "/IsWebServiceRunning");
 
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			conn.setConnectTimeout(5000);
-			conn.setReadTimeout(20000);
+			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
+			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
 			status = conn.getResponseCode();
@@ -47,14 +49,15 @@ public class IsWebServiceRunning_Operation implements Operation {
 				BufferedReader br = new BufferedReader(in);
 				output = br.readLine();
 
+			}else{
+				throw new ConnectionException("Error connecting to the server",Error_consts.ERROR_WEBSERVICE_RUNNING);
 			}
 		}catch(java.net.SocketTimeoutException e) {
-			
-			online = false;
-			
-		} catch (Exception e) {
+			throw new ConnectionException("Error connecting to the server",Error_consts.ERROR_WEBSERVICE_RUNNING * Error_consts.TIMEOUT_FACTOR);
 
-			online = false;
+		} catch (Exception e) {
+			throw new ConnectionException("Error connecting to the server",Error_consts.ERROR_WEBSERVICE_RUNNING);
+
 		}
 
 		if (output.equals("true")) {
@@ -65,7 +68,6 @@ public class IsWebServiceRunning_Operation implements Operation {
 			online = false;
 		}
 		Bundle bundle = new Bundle();
-		bundle.putInt(Consts.STATUS_WEBSERVICE, status);
 		bundle.putBoolean(Consts.WEBSERVICE_AVAILABLE, online);
 		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_WEBSERVICEVAILABLE);
 
