@@ -31,6 +31,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -41,6 +42,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.Toast;
+
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass. Activities that
@@ -68,6 +70,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	private static final String NO_MORE_MESSAGES = "no more messages";
 	protected GetDataTask getDataTask ;
 	protected Map<String,String> preferences; 
+	protected boolean loadAgainRequestedInASecond = false;
 
 
 	public String getTAG(){
@@ -104,31 +107,37 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
-				switch(view.getId()) {
-				case android.R.id.list:     
-
-					int lastItem = firstVisibleItem + visibleItemCount ;
-					if(lastItem >= totalItemCount-1) {
-						Log.i("inside listview listener","lastitem: "+lastItem+ "totoalcont-1: "+String.valueOf(totalItemCount-1));
-						onLastItemVIsible();
-					}
-				}
-			}
-
-			private void onLastItemVIsible() {
-
-				if(!TimeLine_AbstractFragment.this.loading && !noMoreMessages){
-					TimeLine_AbstractFragment.this.loading = true;
-					getDataTask =	new GetDataTask();
-					getDataTask.execute(GET_MOREDATA_TYPE) ;
-				}		
 			}
 
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
-				// TODO Auto-generated method stub
+				switch (scrollState) {
+				case OnScrollListener.SCROLL_STATE_IDLE:
+					checkLastItemInView(view);
+					break;
+				case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+					break;
+				case OnScrollListener.SCROLL_STATE_FLING:
+					break;
+				}
 			}
 		});
+	}
+
+	private void checkLastItemInView(AbsListView   view){
+		int count = view.getCount(); // visible views count
+		int lastVisibleItemPosition = view.getLastVisiblePosition();
+		//Log.i("inside listview listener","lastitem: "+lastVisibleItemPosition+ "count-1: "+String.valueOf(count-1));
+
+		if (lastVisibleItemPosition >= count-2){
+			if(!TimeLine_AbstractFragment.this.loading && !noMoreMessages){
+			//	Log.i("inside listview before getdata listener","lastitem: "+lastVisibleItemPosition+ "count-1: "+String.valueOf(count-1));
+
+				TimeLine_AbstractFragment.this.loading = true;
+				getDataTask =	new GetDataTask();
+				getDataTask.execute(GET_MOREDATA_TYPE) ;
+			}	
+		}
 	}
 
 
@@ -165,7 +174,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					TimeLine_AbstractFragment.this.loading = true;
 					mListener.setFragmentLoading(loading);
 					mListener.StartProgressDialog();
-					Log.i("astraaaaaaaaaaact","savedinstace not null ma list o activity null");
+					//Log.i("astraaaaaaaaaaact","savedinstace not null ma list o activity null");
 
 					getDataTask = 	new GetDataTask();
 					getDataTask.execute(GET_DATA_TYPE);
@@ -351,7 +360,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					for (int j=0; j< wposts.length; j++)
 						mListWpostItems.add(wposts[j]);
 					listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
-					mAdapter.notifyDataSetChanged();
+					mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
+					listView.setAdapter(mAdapter);
 					//setListViewListener();
 					listView.onRestoreInstanceState(listViewState);
 					pullListView.onRefreshComplete();
