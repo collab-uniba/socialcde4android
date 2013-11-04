@@ -364,6 +364,7 @@ public class LoginActivity extends Activity implements RequestListener {
 		//			this.proxyEdit.startAnimation(shake);
 		//			StopProgressDialog();
 		//		}
+		
 		//		if (statusCode == Consts.TIMEOUT_STATUS)
 		//			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
 		//		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();

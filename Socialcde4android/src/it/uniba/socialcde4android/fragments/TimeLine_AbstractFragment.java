@@ -192,7 +192,6 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			getDataTask.cancel(true);
 			pullListView.onRefreshComplete();
 		}
-		//if (getMoreDataTask != null )getMoreDataTask.cancel(true);
 	}
 
 
@@ -208,6 +207,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		}
 	}
 
+	
 	@Override
 	public void onDetach() {
 		super.onDetach();

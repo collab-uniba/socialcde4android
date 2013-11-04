@@ -546,7 +546,6 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 		if (mRequestManager.isRequestInProgress(r)) mRequestManager.removeRequestListener(this, r);
 		if (mRequestManager.isRequestInProgress(r2)) mRequestManager.removeRequestListener(this, r2);
 
-		//mRequestManager.removeRequestListener(this);
 		Intent i = new Intent(HomeActivity.this, LoginActivity.class);
 		startActivity(i);
 		HomeActivity.this.finish();
