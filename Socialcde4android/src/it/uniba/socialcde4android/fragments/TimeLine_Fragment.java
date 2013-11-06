@@ -118,9 +118,18 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 		savedInstanceState.putBoolean(EDIT_SHOWING, isEditShowing);
+	//	((OnTimeLineFragmentInteractionListener)this.mListener).onHomeTimeLineFragmentEvent();
 
 
 	}
+	
+
+	public interface OnTimeLineFragmentInteractionListener extends OnGenericTimeLineFragmentInteractionListener{
+
+		public void onHomeTimeLineFragmentEvent();
+
+	}
+	
 	//	@Override
 	//	public void onCreate(Bundle savedInstanceState) {
 	//		super.onCreate(savedInstanceState);

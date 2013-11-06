@@ -65,7 +65,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	private TimeLineAdapter mAdapter;
 	private Boolean loading = false;
 	protected ArrayList<WPost> mListWpostItems = null;
-	protected OnHomeTimeLineFragmentInteractionListener mListener;
+	protected OnGenericTimeLineFragmentInteractionListener mListener;
 	public boolean noMoreMessages = false;
 	private static final String NO_MORE_MESSAGES = "no more messages";
 	protected GetDataTask getDataTask ;
@@ -199,7 +199,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		try {
-			mListener = (OnHomeTimeLineFragmentInteractionListener) activity;
+			mListener = (OnGenericTimeLineFragmentInteractionListener) activity;
 			mListener.setFragmentLoading(loading);
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString()
@@ -223,11 +223,11 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	 * "http://developer.android.com/training/basics/fragments/communicating.html"
 	 * >Communicating with Other Fragments</a> for more information.
 	 */
-	public interface OnHomeTimeLineFragmentInteractionListener {
+	public interface OnGenericTimeLineFragmentInteractionListener {
 
-		public void onHomeTimeLineFragmentEvent();
+		//public void onHomeTimeLineFragmentEvent();
 
-		public   void StartProgressDialog();
+		public  void StartProgressDialog();
 
 		public  void StopProgressDialog();
 
@@ -235,7 +235,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 
 		public void exitToLogin();
 
-		public void removeThisFragment(Fragment fragment);
+		//public void removeThisFragment(Fragment fragment);
 	}
 
 

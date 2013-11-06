@@ -34,6 +34,12 @@ public final class SocialCDERequestManager extends RequestManager {
         return sInstance;
     }
 
+    
+    public synchronized static SocialCDERequestManager newIstancefrom(Context context) {
+         return new SocialCDERequestManager(context);
+    }
+    
+    
     private SocialCDERequestManager(Context context) {
         super(context, SocialCDERequestService.class);
     }

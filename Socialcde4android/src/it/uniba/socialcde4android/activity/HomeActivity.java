@@ -11,8 +11,9 @@ import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
+import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnGenericTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
-import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnHomeTimeLineFragmentInteractionListener;
+import it.uniba.socialcde4android.fragments.TimeLine_Fragment.OnTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
@@ -47,7 +48,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class HomeActivity extends FragmentActivity   implements OnProfileFragmentInteractionListener, OnHomeTimeLineFragmentInteractionListener, RequestListener {
+public class HomeActivity extends FragmentActivity   implements OnTimeLineFragmentInteractionListener,  OnProfileFragmentInteractionListener, OnGenericTimeLineFragmentInteractionListener, RequestListener {
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -105,6 +106,9 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 		}
 	}
 
+	
+	
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -413,6 +417,7 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 			r.put(Consts.BOOLEAN_FOLLOW, followChecked);
 			r.put(Consts.COLLEAGUE_ID, wuser_profile.getId());
 			r.setMemoryCacheEnabled(true);
+			
 			StartProgressDialog();
 			mRequestManager.execute(r, this);
 		}else{
@@ -545,7 +550,7 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 		//se ci sono fragment eliminali.. TODO
 		if (mRequestManager.isRequestInProgress(r)) mRequestManager.removeRequestListener(this, r);
 		if (mRequestManager.isRequestInProgress(r2)) mRequestManager.removeRequestListener(this, r2);
-
+		
 		Intent i = new Intent(HomeActivity.this, LoginActivity.class);
 		startActivity(i);
 		HomeActivity.this.finish();
@@ -606,11 +611,6 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 		return false;
 	}
 
-	@Override
-	public void onHomeTimeLineFragmentEvent() {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void setFragmentLoading(Boolean isFragmentLoading) {
@@ -626,9 +626,11 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	}
 
 	@Override
-	public void removeThisFragment(Fragment fragment) {
+	public void onHomeTimeLineFragmentEvent() {
 		// TODO Auto-generated method stub
-
+		
 	}
+
+
 
 } 
