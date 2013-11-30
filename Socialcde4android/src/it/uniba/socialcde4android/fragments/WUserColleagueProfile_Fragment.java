@@ -7,6 +7,7 @@ import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WUser;
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -148,6 +149,22 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		+ password + "\" , \"ownerName\":\"" + wuser.getUsername()
 		+ "\" , \"since\":\"" + since + "\" , \"to\":\"" + to
 		+ "\"}";
+	}
+
+	@Override
+	protected Boolean getClickable() {
+		return false;
+	}
+
+	@Override
+	public void openUserProfileFromActivity(WUser wuser) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Fragment getFragment() {
+		return this;
 	}
 
 

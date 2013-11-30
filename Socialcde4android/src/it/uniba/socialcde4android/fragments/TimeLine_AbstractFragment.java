@@ -17,21 +17,21 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
-//import com.handmark.pulltorefresh.library.PullTltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.adapters.TimeLineAdapter;
+import it.uniba.socialcde4android.adapters.TimeLineAdapter.OnTimeLineAdapterListener;
 import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.JsonDateDeserializer;
 import it.uniba.socialcde4android.shared.library.WPost;
+import it.uniba.socialcde4android.shared.library.WUser;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -52,7 +52,7 @@ import android.widget.Toast;
  * factory method to create an instance of this fragment.
  * 
  */
-public abstract class TimeLine_AbstractFragment extends Fragment implements  OnRefreshListener<ListView> {
+public abstract class TimeLine_AbstractFragment extends Fragment implements  OnRefreshListener<ListView>, OnTimeLineAdapterListener {
 
 
 	private static final String TAG = TimeLine_AbstractFragment.class.getSimpleName();
@@ -62,7 +62,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected static final int GET_MOREDATA_TYPE  = 1;
 	protected PullToRefreshListView pullListView;
 	ListView listView;
-	private TimeLineAdapter mAdapter;
+	protected TimeLineAdapter mAdapter;
 	private Boolean loading = false;
 	protected ArrayList<WPost> mListWpostItems = null;
 	protected OnGenericTimeLineFragmentInteractionListener mListener;
@@ -146,7 +146,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		super.onActivityCreated(savedInstanceState);
 		if (mListWpostItems!=null && TimeLine_AbstractFragment.this.getActivity()!=null){
 			Context context = TimeLine_AbstractFragment.this.getActivity();
-			mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
+			mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
 			listView.setAdapter(mAdapter);
 			setListViewListener();
 			pullListView.onRefreshComplete();
@@ -164,7 +164,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				mListWpostItems = savedInstanceState.getParcelableArrayList(WPOST_ARRAY);
 				if (mListWpostItems!=null && TimeLine_AbstractFragment.this.getActivity()!=null){
 					Context context = TimeLine_AbstractFragment.this.getActivity();
-					mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
+					mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
 					listView.setAdapter(mAdapter);
 					setListViewListener();
 					pullListView.onRefreshComplete();
@@ -182,6 +182,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			}
 		}
 	}
+
+	protected abstract Boolean getClickable();
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -234,6 +236,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		public void setFragmentLoading(Boolean isFragmentLoading);
 
 		public void exitToLogin();
+		
+		public void openUserProfileFromFragment(WUser wuser);
 
 		//public void removeThisFragment(Fragment fragment);
 	}
@@ -337,8 +341,11 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			case GET_DATA_TYPE:
 				if (wposts.length>0){
 					mListWpostItems = new ArrayList<WPost>( Arrays.asList(wposts));
-					noMoreMessages = false;
-					mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
+					if (wposts.length<5)
+						noMoreMessages = true;
+					else
+						noMoreMessages = false;
+					mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
 					listView.setAdapter(mAdapter);
 					setListViewListener();
 					// Call onRefreshComplete when the list has been refreshed.
@@ -360,7 +367,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					for (int j=0; j< wposts.length; j++)
 						mListWpostItems.add(wposts[j]);
 					listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
-					mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
+					mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(),getFragment());
 					listView.setAdapter(mAdapter);
 					//setListViewListener();
 					listView.onRestoreInstanceState(listViewState);
@@ -369,7 +376,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					if (noMoreMessages){
 						//è necessario cambiare l'ultimo elemento per comunicare l'assenza di altri post
 						listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
-						mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages);
+						mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(),getFragment());
 						listView.setAdapter(mAdapter);
 						listView.onRestoreInstanceState(listViewState);
 						pullListView.onRefreshComplete();
@@ -395,8 +402,14 @@ public void showErrorAndExit(){
 
 }
 
+
+
 public abstract String getRequest(int dataType);
 
 public abstract String getRequestType();
+
+public abstract void openUserProfileFromActivity(WUser wuser);
+
+public abstract Fragment getFragment();
 
 }

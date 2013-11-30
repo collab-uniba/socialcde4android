@@ -64,7 +64,7 @@ public class LoginActivity extends Activity implements RequestListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		Preferences.setFalseAutolog(this);
+		//Preferences.setFalseAutolog(this);
 		setContentView(R.layout.activity_login);
 		proxyEdit = (EditText)findViewById(R.id.editTextRegProxy);
 		proxyEdit.setText("http://apat.di.uniba.it:8081");

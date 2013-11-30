@@ -18,10 +18,12 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 
 	private Context context;
  	private int num_sevice;
-	private final int TYPE_MAX_COUNT = 3;
+	private final int TYPE_MAX_COUNT = 4;
 	private final int TYPE_AVATAR = 0;
 	private final int TYPE_TITLE = 1;
 	private final int TYPE_SERVICE = 2;
+	private final int TYPE_LOGOUT = 3;
+
 	private LayoutInflater infalInflater;
 	private String name;
 	private String avatar_address;
@@ -48,7 +50,7 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 	}
 
 	public int getCount() {
-		return num_sevice+2;
+		return num_sevice+3;
 	}
 	
 	@Override
@@ -58,8 +60,9 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 
 	@Override
 	public int getItemViewType(int position) {
-		if (position == 0) return TYPE_AVATAR;
-		else if (position == 1) return TYPE_TITLE;
+		if (position == 0) return TYPE_LOGOUT;
+		else if (position == 1) return TYPE_AVATAR;
+		else if (position == 2) return TYPE_TITLE;
 		else return TYPE_SERVICE;
 	}
 
@@ -89,12 +92,17 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 				textViewAvatarFollowers.setText("Followers: "+followers);
 				break;
 
+			case TYPE_LOGOUT:
+				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.logout_item, null);
+				break;
+				
+
 			case TYPE_TITLE:
 				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.drawer_services_title, null);
 				break;
 
 			case TYPE_SERVICE:
-				WService wservice = (WService) ServicesAdapter.this.getItem(position-2);
+				WService wservice = (WService) ServicesAdapter.this.getItem(position-3);
 				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.drawer_item, null);
 				TextView textViewService = (TextView) rowView.findViewById(R.id.textViewdrawer);
 				textViewService.setText(wservice.getName());

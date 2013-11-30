@@ -6,7 +6,7 @@ public class Config {
 	
 	public static final boolean LOGD = true;
 	
-	public static final int CONN_TIMEOUT_MS = 10000;
+	public static final int CONN_TIMEOUT_MS = 15000;
 	
-	public static final int READ_TIMEOUT_MS = 12000;
+	public static final int READ_TIMEOUT_MS = 15000;
 }
