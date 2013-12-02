@@ -7,7 +7,9 @@ import com.squareup.picasso.Picasso;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.shared.library.WPost;
+import it.uniba.socialcde4android.shared.library.WUser;
 import android.content.Context;
+import android.support.v4.app.Fragment;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,14 +28,25 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 	private final int TYPE_NO_MORE_ITEMS = 2;
 	private LayoutInflater infalInflater;
 	private int num_post;
-	private Boolean noMoreItems = false;
+	private Boolean noMoreItems = false;	
+	private Boolean clickable;
+	private OnTimeLineAdapterListener frgmentListener;
 
 
-	public TimeLineAdapter(Context context, int resource, ArrayList<WPost> mListWpostItems, Boolean noMoreItems) {
+
+	public TimeLineAdapter(Context context, int resource, ArrayList<WPost> mListWpostItems, Boolean noMoreItems, Boolean clickable, Fragment fragment) {
 		super(context, resource, mListWpostItems);
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		num_post = mListWpostItems.size();
+		frgmentListener = (OnTimeLineAdapterListener) fragment;
 		this.noMoreItems = noMoreItems;
+		this.clickable = clickable;
+	}
+
+	public interface OnTimeLineAdapterListener {
+
+		public  void openUserProfileFromActivity(WUser wuser);
+
 	}
 
 	public int getCount() {
@@ -79,12 +92,30 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 				view = (ViewHolder) rowView.getTag();
 			}
 
-			WPost wpost = (WPost) TimeLineAdapter.this.getItem(position);
+			final WPost wpost = (WPost) TimeLineAdapter.this.getItem(position);
 			view.textViewUsername.setText(wpost.getUser().getUsername());
+			if (clickable){
+
+
+				view.textViewUsername.setOnClickListener(new View.OnClickListener(){
+					@Override
+					public void onClick(View v) {
+						frgmentListener.openUserProfileFromActivity(wpost.getUser());
+						}
+				});  
+			}
 			view.textViewAbout.setText(getTimeElpased(wpost.getCreateAt(), wpost.getService().getName()));
 			view.textViewMessage.setText(wpost.getMessage());
 			Linkify.addLinks(view.textViewMessage, Linkify.ALL);
 			String userImage_adress = wpost.getUser().getAvatar();
+			if (clickable){
+				view.imageviewUser.setOnClickListener(new View.OnClickListener(){
+					@Override
+					public void onClick(View v) {
+						frgmentListener.openUserProfileFromActivity(wpost.getUser());
+					}
+				});  
+			}
 			if (userImage_adress != null){
 				Picasso.with(this.getContext()).load(userImage_adress).into(view.imageviewUser);
 			}
@@ -100,6 +131,12 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 		}
 		return rowView;
 	}
+
+
+	//	protected void openProfile(WUser user) {
+	//		// TODO Auto-generated method stub
+	//		
+	//	}
 
 
 	protected static class ViewHolder{

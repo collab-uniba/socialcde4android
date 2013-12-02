@@ -4,6 +4,7 @@ import java.util.Map;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.preferences.Preferences;
+import it.uniba.socialcde4android.shared.library.WUser;
 
 
 /**
@@ -118,9 +120,18 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 		savedInstanceState.putBoolean(EDIT_SHOWING, isEditShowing);
+	//	((OnTimeLineFragmentInteractionListener)this.mListener).onHomeTimeLineFragmentEvent();
 
 
 	}
+	
+
+	public interface OnTimeLineFragmentInteractionListener extends OnGenericTimeLineFragmentInteractionListener{
+
+		public void onHomeTimeLineFragmentEvent();
+
+	}
+	
 	//	@Override
 	//	public void onCreate(Bundle savedInstanceState) {
 	//		super.onCreate(savedInstanceState);
@@ -155,6 +166,22 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 		return "{ \"username\":\"" + username + "\", \"password\":\""
 		+ password + "\" , \"since\":\"" + since + "\" , \"to\":\""
 		+ to + "\"}";
+	}
+
+	@Override
+	protected Boolean getClickable() {
+		
+		return true;
+	}
+
+	@Override
+	public void openUserProfileFromActivity(WUser wuser) {
+		mListener.openUserProfileFromFragment(wuser);
+	}
+
+	@Override
+	public Fragment getFragment() {
+		return this;
 	}
 
 }

@@ -64,7 +64,7 @@ public class LoginActivity extends Activity implements RequestListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		Preferences.setFalseAutolog(this);
+		//Preferences.setFalseAutolog(this);
 		setContentView(R.layout.activity_login);
 		proxyEdit = (EditText)findViewById(R.id.editTextRegProxy);
 		proxyEdit.setText("http://apat.di.uniba.it:8081");
@@ -110,7 +110,7 @@ public class LoginActivity extends Activity implements RequestListener {
 			}
 
 		});
-		mRequestManager = SocialCDERequestManager.from(this);
+		mRequestManager = SocialCDERequestManager.newIstancefrom(this);
 		loadPreferences();	
 
 	}
@@ -203,7 +203,7 @@ public class LoginActivity extends Activity implements RequestListener {
 			//prima controllo che ci sia la rete attiva e da lì chiamo il resto
 			if (isOnline()){
 				//posso chiamare il metodo per il login
-				verifyServerAndLogin();
+				//verifyServer();
 				login();
 
 			}else{
@@ -213,7 +213,7 @@ public class LoginActivity extends Activity implements RequestListener {
 	}
 
 
-	private void verifyServerAndLogin(){
+	private void verifyServer(){
 		//controllo che il server sia online
 		r = SocialCDERequestFactory.isWebServRunRequest();
 		r.put(Preferences.PROXYSERVER, this.proxy_string);
@@ -323,9 +323,11 @@ public class LoginActivity extends Activity implements RequestListener {
 					i.putExtra(Preferences.PROXYSERVER,this.proxy_string);
 					i.putExtra(Preferences.USERNAME,this.userName_string);
 					i.putExtra(Preferences.PASSWORD,this.passw_string);
+					StopProgressDialog();
 					startActivity(i);
 					LoginActivity.this.finish();
 				}else{
+					StopProgressDialog();
 					Toast.makeText(this, "Please check username and password."  , Toast.LENGTH_SHORT).show();
 					Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 					this.userNameEdit.startAnimation(shake);
@@ -333,7 +335,6 @@ public class LoginActivity extends Activity implements RequestListener {
 				}
 
 
-			StopProgressDialog();
 			break;
 
 
@@ -343,7 +344,7 @@ public class LoginActivity extends Activity implements RequestListener {
 			if (online){
 				//login();
 			}else{
-				Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "The web service seems unavailable."  , Toast.LENGTH_SHORT).show();
 				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 				this.proxyEdit.startAnimation(shake);
 				StopProgressDialog();
@@ -359,7 +360,7 @@ public class LoginActivity extends Activity implements RequestListener {
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
 		//		if (request.getString(Preferences.USERNAME) == null){//allora la richiesta è quella del server
-		//			Toast.makeText(this, "Please check the proxy address entered. The web service seems uavailable"  , Toast.LENGTH_SHORT).show();
+		//			Toast.makeText(this, "Please check the proxy address entered. The web service seems unavailable"  , Toast.LENGTH_SHORT).show();
 		//			Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 		//			this.proxyEdit.startAnimation(shake);
 		//			StopProgressDialog();
@@ -371,9 +372,11 @@ public class LoginActivity extends Activity implements RequestListener {
 		switch(statusCode){
 		case Error_consts.ERROR_GETTING_USER:
 			Toast.makeText(this, "Error retrieving user profile. ", Toast.LENGTH_SHORT).show();
+			//verifyServer();
 			break;
 		case Error_consts.ERROR_GETTING_USER * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error retrieving user profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
+		//	verifyServer();
 			break;
 		case Error_consts.ERROR_WEBSERVICE_RUNNING:
 			Toast.makeText(this, "Error retrieving webservice availability. ", Toast.LENGTH_SHORT).show();

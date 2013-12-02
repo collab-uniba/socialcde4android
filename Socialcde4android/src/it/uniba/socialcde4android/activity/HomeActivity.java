@@ -11,8 +11,9 @@ import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
+import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnGenericTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
-import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnHomeTimeLineFragmentInteractionListener;
+import it.uniba.socialcde4android.fragments.TimeLine_Fragment.OnTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
@@ -47,7 +48,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class HomeActivity extends FragmentActivity   implements OnProfileFragmentInteractionListener, OnHomeTimeLineFragmentInteractionListener, RequestListener {
+public class HomeActivity extends FragmentActivity   implements OnTimeLineFragmentInteractionListener,  OnProfileFragmentInteractionListener, OnGenericTimeLineFragmentInteractionListener, RequestListener {
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -104,6 +105,9 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 			fragmentTransaction.commit();
 		}
 	}
+
+
+
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -222,7 +226,11 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	private class DrawerLeftItemClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id) {
-			selectItemLeft(position);
+			if (position == 0)exitToLogin();
+			else if (position == 1){
+				openUserProfile(wuser);
+			}
+			mDrawerLayout.closeDrawer(mDrawerList_left);
 		}
 	}
 
@@ -239,13 +247,11 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 			public void onDrawerClosed(View view) {
 				getActionBar().setTitle("");
 			}
-
 			public void onDrawerOpened(View drawerView) {
 				getActionBar().setTitle("");
 			}
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle_right);
-
 		UsersAdapter adapter = new UsersAdapter(getBaseContext(), 0, this.wuser_all, this.wUsersNumType_SuggFingFersHidd);
 		mDrawerList_right.setAdapter(adapter);
 		mDrawerList_right.setOnItemClickListener(new DrawerRightItemClickListener());
@@ -262,8 +268,9 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 					if (mDrawerList_right.getAdapter().getItemViewType(i) == ((UsersAdapter) mDrawerList_right.getAdapter()).getUserTypeID())
 						array_position++;
 				}
-				loadColleagueProfile(array_position);
-			}else 		mDrawerLayout.closeDrawer(mDrawerList_right);
+				loadColleagueProfile(wuser_all.get(array_position).getId());
+			}
+			mDrawerLayout.closeDrawer(mDrawerList_right);
 		}
 	}
 
@@ -315,17 +322,23 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	}
 
 
-
-	/** Swaps fragments in the main content view */
-
-	private void selectItemRight(WUser wuser_colleague) {
+	private void openUserProfile(WUser wuserToOpen){
 		// create a new fragment and specify the planet to show based on position
-		Fragment fragment = WUserColleagueProfile_Fragment.newInstance(wuser_colleague);
-
+		Fragment fragment = null;
+		if (wuserToOpen.getId() == wuser.getId())	{
+			fragment = WUserProfile_Fragment.newInstance(wuser);
+		}
+		else	{
+			fragment = WUserColleagueProfile_Fragment.newInstance(wuserToOpen);
+		}
 		// Insert the fragment by replacing any existing fragment
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+		if (wuserToOpen.getId() == wuser.getId()){
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSER_PROFILE);
+		}else{
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+		}
 		fragmentManager.popBackStack();
 		fragmentTransaction.addToBackStack(null);
 		fragmentTransaction.commit();
@@ -335,37 +348,18 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	}
 
 
-	private void selectItemLeft(int position) {
-		if (position == 0){
-			Fragment fragment = WUserProfile_Fragment.newInstance(wuser);
 
-			// Insert the fragment by replacing any existing fragment
-			FragmentManager fragmentManager = getSupportFragmentManager();
-			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSER_PROFILE);
-			fragmentManager.popBackStack();
-			fragmentTransaction.addToBackStack(null);
-			fragmentTransaction.commit();
-			// Highlight the selected item, update the title, and close the drawer
-			getActionBar().setTitle("User Profile");
-		}
-		mDrawerLayout.closeDrawer(mDrawerList_left);
-
-
-	}
-
-
-	private void loadColleagueProfile(int array_position){
+	private void loadColleagueProfile(int wuserID){
 		if (isOnline()){
 			r = SocialCDERequestFactory.getColleagueProfileRequest();
 			r.put(Preferences.PROXYSERVER, this.proxy_string);
 			r.put(Preferences.USERNAME, this.userName_string);
 			r.put(Preferences.PASSWORD, this.passw_string);
-			r.put(Consts.COLLEAGUE_ID, String.valueOf(this.wuser_all.get(array_position).getId()));
+			r.put(Consts.COLLEAGUE_ID, String.valueOf(wuserID));
 			r.setMemoryCacheEnabled(true);
 			StartProgressDialog();
 			mRequestManager.execute(r, this);
-			
+
 		}else{
 			new NoNetworkDialog().show(getFragmentManager(), "alert");
 		}
@@ -413,6 +407,7 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 			r.put(Consts.BOOLEAN_FOLLOW, followChecked);
 			r.put(Consts.COLLEAGUE_ID, wuser_profile.getId());
 			r.setMemoryCacheEnabled(true);
+
 			StartProgressDialog();
 			mRequestManager.execute(r, this);
 		}else{
@@ -435,8 +430,7 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 				}else{
 					Toast.makeText(this, "No services found."  , Toast.LENGTH_LONG).show();
 				}
-			populateDrawerLeft(); //posso il drawer sinistro
-			//loadFriends(); //carico gli utenti dal server..
+			populateDrawerLeft(); //posso popolare il drawer sinistro
 			StopProgressDialog();
 			break;
 
@@ -454,11 +448,11 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 			case(Consts.REQUESTTYPE_GET_COLLEAGUE_PROFILE):
 				if (resultData.getBoolean(Consts.FOUND_WUSER)){
 					WUser wuser_colleague = resultData.getParcelable(Consts.WUSER);
-					selectItemRight(wuser_colleague);
+					openUserProfile(wuser_colleague);
 				}else{
 					Toast.makeText(this, "Error retrieving colleague profile."  , Toast.LENGTH_LONG).show();
+					StopProgressDialog();
 				}
-			StopProgressDialog();
 			break;
 
 
@@ -542,10 +536,11 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	}
 
 	public void exitToLogin(){
+		StopProgressDialog();
 		//se ci sono fragment eliminali.. TODO
 		if (mRequestManager.isRequestInProgress(r)) mRequestManager.removeRequestListener(this, r);
 		if (mRequestManager.isRequestInProgress(r2)) mRequestManager.removeRequestListener(this, r2);
-
+		Preferences.setFalseAutolog(this);
 		Intent i = new Intent(HomeActivity.this, LoginActivity.class);
 		startActivity(i);
 		HomeActivity.this.finish();
@@ -606,11 +601,6 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 		return false;
 	}
 
-	@Override
-	public void onHomeTimeLineFragmentEvent() {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void setFragmentLoading(Boolean isFragmentLoading) {
@@ -626,9 +616,22 @@ public class HomeActivity extends FragmentActivity   implements OnProfileFragmen
 	}
 
 	@Override
-	public void removeThisFragment(Fragment fragment) {
+	public void onHomeTimeLineFragmentEvent() {
 		// TODO Auto-generated method stub
 
 	}
+
+
+	@Override
+	public void openUserProfileFromFragment(WUser wuserToOpen) {
+		if (wuserToOpen.getId() == wuser.getId()){
+			openUserProfile(wuserToOpen);
+		}else{
+			loadColleagueProfile(wuserToOpen.getId());
+		}
+		
+	}
+
+
 
 } 

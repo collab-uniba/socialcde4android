@@ -33,7 +33,7 @@ public class JsonDateDeserializer implements JsonDeserializer<Calendar> {
 			date_selected.set(Calendar.HOUR, date_selected.HOUR - Integer.parseInt(timezone.substring(1,3))); 
 		}
 		
-		System.out.println("Timezone selezionato " + timezone);
+		//System.out.println("Timezone selezionato " + timezone);
 		} catch (Exception e) {
 			// TODO: handle exception
 			System.out.println("Metodo non riuscito");

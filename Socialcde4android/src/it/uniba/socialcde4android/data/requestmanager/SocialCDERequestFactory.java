@@ -8,14 +8,12 @@
 
 package it.uniba.socialcde4android.data.requestmanager;
 
-import android.os.Parcel;
-
 import com.foxykeep.datadroid.requestmanager.Request;
 
 /**
  * Class used to create the {@link Request}s.
  *
- * @author Foxykeep, Francesco Pontillo
+ * @author Foxykeep, Francesco Ditrani
  */
 public final class SocialCDERequestFactory {
 
