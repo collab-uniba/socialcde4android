@@ -60,8 +60,7 @@ public class IsWebServiceRunning_Operation implements Operation {
 
 		}
 
-		if (output.equals("true")) {
-
+		if (output.equals("true")){
 			online = true;
 		} else {
 

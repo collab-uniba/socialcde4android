@@ -13,6 +13,7 @@ package it.uniba.socialcde4android.data.service;
 import it.uniba.socialcde4android.data.operation.ChangePasswordWithPassword_Operation;
 import it.uniba.socialcde4android.data.operation.GetColleagueProfile_Operation;
 import it.uniba.socialcde4android.data.operation.GetFriends_Operation;
+import it.uniba.socialcde4android.data.operation.GetOAuthData_Operation;
 import it.uniba.socialcde4android.data.operation.GetUser_Operation;
 import it.uniba.socialcde4android.data.operation.IsUsernameAvailable_Operation;
 import it.uniba.socialcde4android.data.operation.IsWebServiceRunning_Operation;
@@ -58,6 +59,8 @@ public final class SocialCDERequestService extends RequestService {
 			return new GetColleagueProfile_Operation();
 		case SocialCDERequestFactory.SET_FOLLOWED:
 			return new SetFollowed_Operation();
+		case SocialCDERequestFactory.GET_OAUTHDATA:
+			return new GetOAuthData_Operation();
 		}
 		
 		

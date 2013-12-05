@@ -67,11 +67,11 @@ public class LoginActivity extends Activity implements RequestListener {
 		//Preferences.setFalseAutolog(this);
 		setContentView(R.layout.activity_login);
 		proxyEdit = (EditText)findViewById(R.id.editTextRegProxy);
-		proxyEdit.setText("http://apat.di.uniba.it:8081");
+		//proxyEdit.setText("http://apat.di.uniba.it:8081");
 		userNameEdit = (EditText)findViewById(R.id.editTextRegName);
-		userNameEdit.setText("Bob");
+		//userNameEdit.setText("Bob");
 		passwEdit = (EditText)findViewById(R.id.editTextloginpassw);
-		passwEdit.setText("2+3=cinque");
+		//passwEdit.setText("2+3=cinque");
 		loginButton = (Button)findViewById(R.id.buttonSendRegistration);
 		autoLogCheck = (CheckBox)findViewById(R.id.checkBoxAutoLog);
 		savePasswCheck = (CheckBox)findViewById(R.id.checkBoxSavePassw);

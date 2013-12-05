@@ -18,6 +18,7 @@ import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
 import it.uniba.socialcde4android.preferences.Preferences;
+import it.uniba.socialcde4android.shared.library.WOAuthData;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 import it.uniba.socialcde4android.utility.ScreenUtility;
@@ -229,11 +230,30 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 			if (position == 0)exitToLogin();
 			else if (position == 1){
 				openUserProfile(wuser);
+			}else{
+				if (mDrawerList_left.getAdapter().getItemViewType(position) == ((ServicesAdapter) mDrawerList_left.getAdapter()).getServiceTypeID()){
+					WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-3);
+					loadOAuthData(wservice.getId());
+				}
 			}
 			mDrawerLayout.closeDrawer(mDrawerList_left);
 		}
 	}
 
+	private void loadOAuthData(int serviceID){
+		if (isOnline()){
+			r = SocialCDERequestFactory.getOAuthDataRequest();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, String.valueOf(serviceID));
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
 
 	private void populateDrawerRight(){
 
@@ -434,6 +454,17 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 			StopProgressDialog();
 			break;
 
+			case(Consts.REQUESTTYPE_GETOAUTDATA):
+				WOAuthData woauthdata =	resultData.getParcelable(Consts.OAUTH_DATA);
+			StopProgressDialog();
+			final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+			intent.putExtra(Consts.OAUTH_DATA, woauthdata);
+			intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
+			startActivity(intent);
+			//startActivityForResult(intent, Constant.LOGIN_REQUEST);
+
+			break;
 
 			case(Consts.REQUESTTYPE_ALL_USERS):
 				if (resultData.getBoolean(Consts.FOUND_WUSERS)){
@@ -515,11 +546,9 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 			break;
 		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error retrieving colleague profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
-
 			break;
 		case Error_consts.ERROR_SETTINGPASSW:
 			Toast.makeText(this, "Error setting password. ", Toast.LENGTH_SHORT).show();
-
 			break;
 		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
@@ -530,7 +559,12 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 		case Error_consts.ERROR_USERNAME_AVAILABLE * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error retrieving username availability. Connection Timeout. ", Toast.LENGTH_SHORT).show();
 			break;
-
+		case Error_consts.ERROR_GET_OAUTHDATA:
+			Toast.makeText(this, "Error retrieving OAuth Data. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_GET_OAUTHDATA * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving OAuth Data. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
 
 		}
 	}
@@ -629,7 +663,7 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 		}else{
 			loadColleagueProfile(wuserToOpen.getId());
 		}
-		
+
 	}
 
 
