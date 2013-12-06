@@ -10,6 +10,7 @@ package it.uniba.socialcde4android.data.service;
 
 
 
+import it.uniba.socialcde4android.data.operation.Authorize_Operation;
 import it.uniba.socialcde4android.data.operation.ChangePasswordWithPassword_Operation;
 import it.uniba.socialcde4android.data.operation.GetColleagueProfile_Operation;
 import it.uniba.socialcde4android.data.operation.GetFriends_Operation;
@@ -61,6 +62,8 @@ public final class SocialCDERequestService extends RequestService {
 			return new SetFollowed_Operation();
 		case SocialCDERequestFactory.GET_OAUTHDATA:
 			return new GetOAuthData_Operation();
+		case SocialCDERequestFactory.AUTHORIZE:
+			return new Authorize_Operation();
 		}
 		
 		

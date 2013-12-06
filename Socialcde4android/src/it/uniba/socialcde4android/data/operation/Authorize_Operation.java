@@ -1,5 +1,10 @@
 package it.uniba.socialcde4android.data.operation;
 
+import it.uniba.socialcde4android.config.Config;
+import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
+import it.uniba.socialcde4android.preferences.Preferences;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -8,35 +13,30 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import it.uniba.socialcde4android.config.Config;
-import it.uniba.socialcde4android.costants.Consts;
-import it.uniba.socialcde4android.costants.Error_consts;
-import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WOAuthData;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.CustomRequestException;
 import com.foxykeep.datadroid.exception.DataException;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
-import com.google.gson.Gson;
 
-public class GetOAuthData_Operation implements Operation{
+public class Authorize_Operation implements Operation {
 
 	@Override
 	public Bundle execute(Context context, Request request)
 			throws ConnectionException, DataException, CustomRequestException {
-
 		String username = request.getString(Preferences.USERNAME);
 		String password = request.getString(Preferences.PASSWORD);
-		String service = request.getString(Consts.SERVICE_ID);
 		String host = request.getString(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
-		WOAuthData woutAuthData = null;
+		String service = request.getString(Consts.SERVICE_ID);
+		String accessToken = request.getString(Consts.ACCESS_TOKEN);
+		String verifier = request.getString(Consts.VERIFIER);
+		String accessSecret = request.getString(Consts.ACCESS_SECRET);
+		String result = "";
 		try {
-			URL url = new URL(host + "/GetOAuth1Data");
+			URL url = new URL(host + "/Authorize");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
 			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
@@ -47,12 +47,14 @@ public class GetOAuthData_Operation implements Operation{
 			conn.setAllowUserInteraction(false);
 			conn.setRequestProperty("Content-Type", "application/json");
 
-
 			// Create the form content
 			OutputStream out = conn.getOutputStream();
 			Writer writer = new OutputStreamWriter(out, "UTF-8");
 			writer.write("{ \"username\":\"" + username + "\", \"password\":\""
-					+ password + "\" , \"service\":\"" + service + "\" }");
+					+ password + "\" , \"service\":\"" + service
+					+ "\", \"verifier\":\"" + verifier
+					+ "\", \"accessToken\": \"" + accessToken
+					+ "\", \"accessSecret\":\"" + accessSecret + "\"}");
 
 			writer.close();
 			out.close();
@@ -63,36 +65,35 @@ public class GetOAuthData_Operation implements Operation{
 						conn.getInputStream());
 				BufferedReader br = new BufferedReader(in);
 				String output;
-				String result = "";
+
 				while ((output = br.readLine()) != null) {
 					result += output;
 
 				}
 				br.close();
 
-				Gson gson = new Gson();
-				woutAuthData = gson.fromJson(result, WOAuthData.class);
 			}else{
-				throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_RETRIEVING_SERVICES);		
+				throw new ConnectionException("Error ",Error_consts.AUTHORIZE_ERROR);
 
 			}
 
 			conn.disconnect();
-
 		} catch(java.net.SocketTimeoutException e) {
-			throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_GET_OAUTHDATA * Error_consts.TIMEOUT_FACTOR);		
+			
+			throw new ConnectionException("Error ",Error_consts.AUTHORIZE_ERROR * Error_consts.TIMEOUT_FACTOR);
 		}  catch (Exception e) {
-			throw new ConnectionException	("Error retrieving services", Error_consts.ERROR_GET_OAUTHDATA);		
+			throw new ConnectionException("Error ",Error_consts.AUTHORIZE_ERROR);
 		}
-		
 		Bundle bundle = new Bundle();
-Log.i("woutdata",woutAuthData.toString());
-		bundle.putParcelable(Consts.OAUTH_DATA, woutAuthData);
-		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_GETOAUTDATA);
-		bundle.putString(Consts.SERVICE_ID, service);
 
-		
-		return bundle;
+		if (result.equals("true")) {
+			bundle.putBoolean(Consts.AUTHORIZED, true);
+			bundle.putInt(Consts.SERVICE_ID,Integer.valueOf(service));
+			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_AUTHORIZE);
+			return bundle;	
+		} else {
+			throw new ConnectionException("Error ",Error_consts.AUTHORIZE_ERROR);
+		}
 	}
 
 }

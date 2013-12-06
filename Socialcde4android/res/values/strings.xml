@@ -36,5 +36,6 @@
     <string name="loading">Loading..</string>
     <string name="logout">Logout</string>
     <string name="title_activity_web_view">WebViewActivity</string>
+    <string name="insertPIN">Eventually enter the Pin..</string>
 
 </resources>

@@ -14,4 +14,5 @@ public class Error_consts {
 	public static final int TIMEOUT_FACTOR = 10;
 	public static final int ERROR_RETRIEVING_SERVICES = 134;
 	public static final int ERROR_GET_OAUTHDATA = 135;
+	public static final int AUTHORIZE_ERROR = 136;
 }

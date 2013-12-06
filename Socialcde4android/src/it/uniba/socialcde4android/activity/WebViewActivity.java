@@ -23,6 +23,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +33,8 @@ public class WebViewActivity extends Activity {
 	private static ProgressDialog progressDialog; 
 	private WOAuthData woauthdata = null;
 	private String service_id = "";
+	Button ok_twitter;
+	EditText editText_twitter;
 
 
 	@Override
@@ -38,14 +42,28 @@ public class WebViewActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); 
-		setContentView(R.layout.activity_web_view);
+		
 
 		if (getIntent().hasExtra(Consts.OAUTH_DATA) && savedInstanceState==null){
 			woauthdata = getIntent().getParcelableExtra(Consts.OAUTH_DATA);
 			service_id = getIntent().getStringExtra(Consts.SERVICE_ID);
 		}
+		
+		if (woauthdata.getAuthorizationLink().contains("twitter")){
+			setContentView(R.layout.activity_web_view_twitter);
+			editText_twitter = (EditText) findViewById(R.id.editText_twitter);
+			ok_twitter = (Button) findViewById(R.id.button_twitter_ok);
+			ok_twitter.setOnClickListener(new Button.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					authorize_twitter();
+				}
+			});
+		}else{
+			setContentView(R.layout.activity_web_view);
+		}
 		final WebView webView = new WebView(this);
-		final ViewGroup viewGroup = (ViewGroup)findViewById(R.id.webview_root);
+		final ViewGroup viewGroup = (ViewGroup)findViewById(R.id.root_webview_twitter);
 		viewGroup.addView(webView);
 
 		// Open keyboard when focusing on Twitter login form.
@@ -77,6 +95,24 @@ public class WebViewActivity extends Activity {
 
 	}
 
+	protected void authorize_twitter() {
+		String pin = editText_twitter.getText().toString();
+		if (!pin.equals("")){
+			String token =  woauthdata.getAccessToken();
+			String secret = woauthdata.getAccessSecret();
+			Intent returnIntent = new Intent();
+			returnIntent.putExtra(Consts.SERVICE_ID, service_id);
+			returnIntent.putExtra(Consts.ACCESS_TOKEN, token);
+			returnIntent.putExtra(Consts.ACCESS_SECRET, secret);
+			returnIntent.putExtra(Consts.VERIFIER_PIN, pin);
+			returnIntent.putExtra(Consts.OAUTH_VERSION, 1);
+			setResult(RESULT_OK,returnIntent);     
+			finish();
+		}
+
+		
+	}
+
 	private class CustomWebViewClient extends WebViewClient {
 
 		@Override
@@ -91,15 +127,46 @@ public class WebViewActivity extends Activity {
 
 		@Override
 		public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
+
 			if ( url.contains("#access_token=")  && woauthdata.getAuthorizationLink().contains("facebook")){
 				String token =  url.toString().substring(url.indexOf("#access_token=")+14, url.indexOf("&expires"));
+				Intent returnIntent = new Intent();
+				returnIntent.putExtra(Consts.SERVICE_ID, service_id);
+				returnIntent.putExtra(Consts.ACCESS_TOKEN, token);
+				returnIntent.putExtra(Consts.OAUTH_VERSION, 2);
+				setResult(RESULT_OK,returnIntent);     
+				finish();
+
+
+			}else if(url.contains("?code=")  && woauthdata.getAuthorizationLink().contains("github")){
+				String token =  url.toString().substring(url.indexOf("?code=")+6);
+				Intent returnIntent = new Intent();
+				returnIntent.putExtra(Consts.SERVICE_ID, service_id);
+				returnIntent.putExtra(Consts.ACCESS_TOKEN, token);
+				returnIntent.putExtra(Consts.OAUTH_VERSION, 2);
+				setResult(RESULT_OK,returnIntent);     
+				finish();
+
+
+			}else if(url.contains("?code=")  && woauthdata.getAuthorizationLink().contains("linkedin")){
+				String token =  url.toString().substring(url.indexOf("?code=")+6, url.indexOf("&state="));
+				Intent returnIntent = new Intent();
+				returnIntent.putExtra(Consts.SERVICE_ID, service_id);
+				returnIntent.putExtra(Consts.ACCESS_TOKEN, token);
+				returnIntent.putExtra(Consts.OAUTH_VERSION, 2);
+				setResult(RESULT_OK,returnIntent);     
+				finish();
+
+			}else if(url.contains("user_denied#")){
+				Intent returnIntent = new Intent();
+				setResult(RESULT_CANCELED, returnIntent);  
+				finish();
 			}else{
-				if(url.contains("user_denied#")){
-					finish();
-				}else{
-					view.loadUrl(url);
-				}
+				view.loadUrl(url);
+				Log.i("url in webview", url);
+
 			}
+
 			return true;
 		}  
 	}

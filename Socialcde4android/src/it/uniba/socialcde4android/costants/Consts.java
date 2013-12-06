@@ -95,6 +95,22 @@ public class Consts {
 
 	public static final int REQUESTTYPE_GETOAUTDATA = 14;
 
+	public static final int WEBVIEW_REQUEST = 0;
+
+	public static final String ACCESS_TOKEN = "access token";
+
+	public static final String OAUTH_VERSION = "oauth ver";
+
+	public static final String VERIFIER = "verifier";
+
+	public static final String ACCESS_SECRET = "access_secret";
+
+	public static final String AUTHORIZED = "authorized";
+
+	public static final int REQUESTTYPE_AUTHORIZE = 15;
+
+	public static final String VERIFIER_PIN = "verifier pin";
+
 	
 
 	
