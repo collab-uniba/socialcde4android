@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/LinearLayout_title_features"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/imageView1_logoFEATURE"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_margin="7dp"
+            android:layout_marginLeft="7dp"
+            android:background="@color/DarkBlue"
+            android:padding="5dp"
+            android:src="@drawable/facebook" />
+
+        <TextView
+            android:id="@+id/textView1_title_FEATURES"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:text="Medium Text"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1_buttons_features"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="bottom|center|center_horizontal|center_vertical" >
+
+        <Button
+            android:id="@+id/button1_dialog_features_UNSUBSCRIBE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:background="@drawable/rounded_little_button"
+            android:text="@string/button_unsubscribe" />
+
+        <Button
+            android:id="@+id/button2_dialog_features_SAVE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:background="@drawable/rounded_little_button"
+            android:text="@string/button_save" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/listViewCheckBoxFEATURES"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/linearLayout1_buttons_features"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/LinearLayout_title_features" >
+
+    </ListView>
+
+</RelativeLayout>

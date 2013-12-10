@@ -111,6 +111,22 @@ public class Consts {
 
 	public static final String VERIFIER_PIN = "verifier pin";
 
+	public static final String WFEATURES = "wfeatures";
+
+	public static final String FOUND_WFEATURES = "found wfeatures";
+
+	public static final int REQUESTTYPE_RETRIEVEFEATURES = 16;
+
+	public static final String ACTIVE_FEATURES = "active features";
+
+	public static final int REQUESTTYPE_SET_FEATURES = 17;
+
+	public static final String SETTED_FEATURES = "setted features";
+
+	public static final String UNREGISTERED_SERVICE = "unregistered service";
+
+	public static final int REQUESTTYPE_UNREG_SERVICE = 18;
+
 	
 
 	

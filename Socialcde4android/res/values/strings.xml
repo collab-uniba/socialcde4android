@@ -37,5 +37,7 @@
     <string name="logout">Logout</string>
     <string name="title_activity_web_view">WebViewActivity</string>
     <string name="insertPIN">Eventually enter the Pin..</string>
+    <string name="button_unsubscribe">Unsubscribe</string>
+    <string name="button_save">Save</string>
 
 </resources>

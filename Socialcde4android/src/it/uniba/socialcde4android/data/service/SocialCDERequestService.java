@@ -13,14 +13,17 @@ package it.uniba.socialcde4android.data.service;
 import it.uniba.socialcde4android.data.operation.Authorize_Operation;
 import it.uniba.socialcde4android.data.operation.ChangePasswordWithPassword_Operation;
 import it.uniba.socialcde4android.data.operation.GetColleagueProfile_Operation;
+import it.uniba.socialcde4android.data.operation.GetFeatures_Operation;
 import it.uniba.socialcde4android.data.operation.GetFriends_Operation;
 import it.uniba.socialcde4android.data.operation.GetOAuthData_Operation;
 import it.uniba.socialcde4android.data.operation.GetUser_Operation;
 import it.uniba.socialcde4android.data.operation.IsUsernameAvailable_Operation;
 import it.uniba.socialcde4android.data.operation.IsWebServiceRunning_Operation;
 import it.uniba.socialcde4android.data.operation.RetrieveServices_Operation;
+import it.uniba.socialcde4android.data.operation.SetActiveFeatures_Operation;
 import it.uniba.socialcde4android.data.operation.SetFollowed_Operation;
 import it.uniba.socialcde4android.data.operation.SubscribeUser_Operation;
+import it.uniba.socialcde4android.data.operation.UnregisterService_Operation;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 
 import com.foxykeep.datadroid.service.RequestService;
@@ -64,6 +67,12 @@ public final class SocialCDERequestService extends RequestService {
 			return new GetOAuthData_Operation();
 		case SocialCDERequestFactory.AUTHORIZE:
 			return new Authorize_Operation();
+		case SocialCDERequestFactory.GET_FEATURES:
+			return new GetFeatures_Operation();
+		case SocialCDERequestFactory.SET_FEATURES:
+			return new SetActiveFeatures_Operation();
+		case SocialCDERequestFactory.UNREG_SERVICE:
+			return new UnregisterService_Operation();
 		}
 		
 		

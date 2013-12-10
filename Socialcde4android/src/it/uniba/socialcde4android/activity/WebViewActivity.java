@@ -139,7 +139,9 @@ public class WebViewActivity extends Activity {
 
 
 			}else if(url.contains("?code=")  && woauthdata.getAuthorizationLink().contains("github")){
+				//Log.i("in github all", url.toString());
 				String token =  url.toString().substring(url.indexOf("?code=")+6);
+				//Log.i("in github only token", token);
 				Intent returnIntent = new Intent();
 				returnIntent.putExtra(Consts.SERVICE_ID, service_id);
 				returnIntent.putExtra(Consts.ACCESS_TOKEN, token);

@@ -15,4 +15,7 @@ public class Error_consts {
 	public static final int ERROR_RETRIEVING_SERVICES = 134;
 	public static final int ERROR_GET_OAUTHDATA = 135;
 	public static final int AUTHORIZE_ERROR = 136;
+	public static final int ERROR_RETRIEVING_FEATURES = 137;
+	public static final int SET_FEATURES_ERROR = 138;
+	public static final int UNREG_SERVICE_ERROR = 139;
 }
