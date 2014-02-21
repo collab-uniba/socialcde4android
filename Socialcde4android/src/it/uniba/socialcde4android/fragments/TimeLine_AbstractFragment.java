@@ -93,7 +93,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		// Inflate the layout for this fragment
 		View view = inflater.inflate(getFragmentViewId(), container,	false);
 
-		pullListView = (PullToRefreshListView) view.findViewById(R.id.listView1);
+		pullListView = (PullToRefreshListView) view.findViewById(R.id.listViewCheckBoxFEATURES);
 		listView = pullListView.getRefreshableView();
 		pullListView.setOnRefreshListener(TimeLine_AbstractFragment.this);
 		return view;
@@ -194,6 +194,10 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			getDataTask.cancel(true);
 			pullListView.onRefreshComplete();
 		}
+		TimeLine_AbstractFragment.this.loading = false;
+		mListener.setFragmentLoading(TimeLine_AbstractFragment.this.loading);
+		mListener.StopProgressDialog();
+		//pensare ad un modo per riavviare la richiesta REST
 	}
 
 

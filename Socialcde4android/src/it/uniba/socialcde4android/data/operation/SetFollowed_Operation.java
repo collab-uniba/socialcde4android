@@ -103,8 +103,7 @@ public class SetFollowed_Operation implements Operation {
 			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SET_FOLLOWED);
 			return bundle;		
 		} else {
-			bundle.putBoolean(Consts.SETTED_FOLLOWED, false);
-			return bundle;		
+			throw new ConnectionException("Error ",Error_consts.SETFOLLOWED_ERROR);	
 
 		}
 

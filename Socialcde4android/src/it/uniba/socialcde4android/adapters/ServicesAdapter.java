@@ -58,6 +58,10 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 		return TYPE_MAX_COUNT;
 	}
 
+	public int getServiceTypeID(){
+		return TYPE_SERVICE;
+	}
+	
 	@Override
 	public int getItemViewType(int position) {
 		if (position == 0) return TYPE_LOGOUT;

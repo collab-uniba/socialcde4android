@@ -11,6 +11,8 @@ import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
+import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog;
+import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog.OnFeaturesDialogInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnGenericTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment.OnTimeLineFragmentInteractionListener;
@@ -18,6 +20,8 @@ import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
 import it.uniba.socialcde4android.preferences.Preferences;
+import it.uniba.socialcde4android.shared.library.WFeature;
+import it.uniba.socialcde4android.shared.library.WOAuthData;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 import it.uniba.socialcde4android.utility.ScreenUtility;
@@ -48,7 +52,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class HomeActivity extends FragmentActivity   implements OnTimeLineFragmentInteractionListener,  OnProfileFragmentInteractionListener, OnGenericTimeLineFragmentInteractionListener, RequestListener {
+public class HomeActivity extends FragmentActivity   
+implements OnTimeLineFragmentInteractionListener,OnProfileFragmentInteractionListener, 
+OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener {
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -229,11 +235,34 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 			if (position == 0)exitToLogin();
 			else if (position == 1){
 				openUserProfile(wuser);
+			}else{
+				if (mDrawerList_left.getAdapter().getItemViewType(position) == ((ServicesAdapter) mDrawerList_left.getAdapter()).getServiceTypeID()){
+					WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-3);
+					if (wservice.isRegistered()){
+						getFeatures(wservice.getId());
+					}else{
+						loadOAuthData(wservice.getId());
+					}
+				}
 			}
 			mDrawerLayout.closeDrawer(mDrawerList_left);
 		}
 	}
 
+	private void loadOAuthData(int serviceID){
+		if (isOnline()){
+			r = SocialCDERequestFactory.getOAuthDataRequest();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, String.valueOf(serviceID));
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
 
 	private void populateDrawerRight(){
 
@@ -434,6 +463,43 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 			StopProgressDialog();
 			break;
 
+			case(Consts.REQUESTTYPE_RETRIEVEFEATURES):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.FOUND_WFEATURES)){
+				WFeature[] wfeature = null;
+				int service_id = resultData.getInt(Consts.SERVICE_ID);
+				Parcelable[] parcelableArray =	resultData.getParcelableArray(Consts.WFEATURES);
+				if (parcelableArray != null) 
+					wfeature = Arrays.copyOf(parcelableArray, parcelableArray.length, WFeature[].class);
+				for (int i=0; i<wfeature.length; i++){
+					Log.i("wfeature",wfeature[i].toString());
+				}
+				//qui carico un pannello per visualizzare le feature
+				for (int i=0; i<wservice.length;i++){
+					if (wservice[i].getId() == service_id){
+						SetServiceFeaturesDialog features_dialog = SetServiceFeaturesDialog.newInstance(wfeature, wservice[i]);
+						features_dialog.show(getFragmentManager(), "set features");
+						break;
+					}
+				}
+			}else{
+				Toast.makeText(this, "No features found."  , Toast.LENGTH_LONG).show();
+			}
+			break;
+
+
+			case(Consts.REQUESTTYPE_GETOAUTDATA):
+				WOAuthData woauthdata =	resultData.getParcelable(Consts.OAUTH_DATA);
+			final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+			intent.putExtra(Consts.OAUTH_DATA, woauthdata);
+			intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
+			//startActivity(intent);
+			StopProgressDialog();
+
+			startActivityForResult(intent, Consts.WEBVIEW_REQUEST);
+
+			break;
 
 			case(Consts.REQUESTTYPE_ALL_USERS):
 				if (resultData.getBoolean(Consts.FOUND_WUSERS)){
@@ -456,16 +522,42 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 			break;
 
 
-			case(Consts.REQUESTTYPE_SET_FOLLOWED):
-				if (resultData.getBoolean(Consts.SETTED_FOLLOWED)){
-					loadFriends(); //valore settato, ricarica il drawer destro
-				} else{
-					Toast.makeText(this, "Error setting user's status", Toast.LENGTH_SHORT).show();
-					//è necessario notificarlo al fragment..
-					FragmentManager fragmentManager = getSupportFragmentManager();
-					WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
-					fragment.changeCheckBoxState();
+			case(Consts.REQUESTTYPE_SET_FEATURES):
+				StopProgressDialog();
+				Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
+			break;
+			
+			case(Consts.REQUESTTYPE_UNREG_SERVICE):
+				int service_id = resultData.getInt(Consts.SERVICE_ID);
+				for (int i=0; i<wservice.length;i++){
+				if (wservice[i].getId() == service_id){
+					wservice[i].setRegistered(false);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+					mDrawerList_left.setAdapter(adapter);
+					break;
 				}
+			}
+				StopProgressDialog();
+				Toast.makeText(this, "Service unsubscribed."  , Toast.LENGTH_LONG).show();
+			break;
+			
+			case(Consts.REQUESTTYPE_SET_FOLLOWED):
+				loadFriends(); //valore settato, ricarica il drawer destro
+
+			break;
+
+			case(Consts.REQUESTTYPE_AUTHORIZE):
+				int service_id1 = resultData.getInt(Consts.SERVICE_ID);
+			for (int i=0; i<wservice.length;i++){
+				if (wservice[i].getId() == service_id1){
+					wservice[i].setRegistered(true);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+					mDrawerList_left.setAdapter(adapter);
+					break;
+				}
+			}
+			getFeatures(service_id1);
+			//StopProgressDialog();
 			break;
 			}
 		}
@@ -515,11 +607,9 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 			break;
 		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error retrieving colleague profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
-
 			break;
 		case Error_consts.ERROR_SETTINGPASSW:
 			Toast.makeText(this, "Error setting password. ", Toast.LENGTH_SHORT).show();
-
 			break;
 		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
@@ -530,8 +620,36 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 		case Error_consts.ERROR_USERNAME_AVAILABLE * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error retrieving username availability. Connection Timeout. ", Toast.LENGTH_SHORT).show();
 			break;
-
-
+		case Error_consts.ERROR_GET_OAUTHDATA:
+			Toast.makeText(this, "Error retrieving OAuth Data. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_GET_OAUTHDATA * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving OAuth Data. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.AUTHORIZE_ERROR:
+			Toast.makeText(this, "Error in Authorize operation. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.AUTHORIZE_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error in Authorize operation. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_FEATURES:
+			Toast.makeText(this, "Error in retrieving features. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_FEATURES * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error in retrieving features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.SET_FEATURES_ERROR:
+			Toast.makeText(this, "Error updating features. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.SET_FEATURES_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error updating features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.UNREG_SERVICE_ERROR:
+			Toast.makeText(this, "Error unsubscribing service. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.UNREG_SERVICE_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error unsubscribing service. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
 		}
 	}
 
@@ -629,9 +747,99 @@ public class HomeActivity extends FragmentActivity   implements OnTimeLineFragme
 		}else{
 			loadColleagueProfile(wuserToOpen.getId());
 		}
-		
+
+	}
+
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		if (requestCode == Consts.WEBVIEW_REQUEST) {
+
+			if(resultCode == RESULT_OK){      
+				String service_id = data.getStringExtra(Consts.SERVICE_ID);          
+				String token = data.getStringExtra(Consts.ACCESS_TOKEN); 
+				String secret = data.getStringExtra(Consts.ACCESS_SECRET);
+				String pin = data.getStringExtra(Consts.VERIFIER_PIN);
+				int oaut_version = data.getIntExtra(Consts.OAUTH_VERSION, -1);
+				Authorize(service_id, token, pin, secret);
+
+			}
+			if (resultCode == RESULT_CANCELED) {    
+				//Write your code if there's no result
+			}
+		}
 	}
 
 
 
+
+	private void Authorize(String service_id, String token, String verifier, String accessSecret) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.authorize();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, service_id);
+			r.put(Consts.ACCESS_TOKEN, token);
+			r.put(Consts.VERIFIER, verifier);
+			r.put(Consts.ACCESS_SECRET, accessSecret);
+			r.setMemoryCacheEnabled(true);
+
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+
+	}
+
+
+	private void getFeatures(int service_id) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.getFeatures();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, service_id);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+	
+	public void saveFeaturesStatus(int service_id, String active_features) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.setActiveFeatures();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, service_id);
+			r.put(Consts.ACTIVE_FEATURES, active_features);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+	
+	public void unregisterService(int service_id){
+		if (isOnline()){
+			r = SocialCDERequestFactory.unregisterService();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, service_id);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+	
 } 

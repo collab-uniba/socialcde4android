@@ -27,6 +27,14 @@ public final class SocialCDERequestFactory {
 	public static final int GET_FRIENDS = 6;
 	public static final int GET_COLLEAGUE = 7;
 	public static final int SET_FOLLOWED = 8;
+	public static final int GET_OAUTHDATA = 9;
+	public static final int AUTHORIZE = 10;
+	public static final int GET_FEATURES = 11;
+	public static final int SET_FEATURES = 12;
+	public static final int UNREG_SERVICE = 13;
+
+
+
 
 
 
@@ -93,6 +101,31 @@ public final class SocialCDERequestFactory {
 
 	public static Request setFollowed() {
 		Request request = new Request(SET_FOLLOWED);		
+		return request;
+	}
+
+	public static Request getOAuthDataRequest() {
+		Request request = new Request(GET_OAUTHDATA);		
+		return request;
+	}
+
+	public static Request authorize() {
+		Request request = new Request(AUTHORIZE);		
+		return request;
+	}
+
+	public static Request getFeatures() {
+		Request request = new Request(GET_FEATURES);		
+		return request;
+	}
+
+	public static Request setActiveFeatures() {
+		Request request = new Request(SET_FEATURES);		
+		return request;
+	}
+
+	public static Request unregisterService() {
+		Request request = new Request(UNREG_SERVICE);		
 		return request;
 	}
 

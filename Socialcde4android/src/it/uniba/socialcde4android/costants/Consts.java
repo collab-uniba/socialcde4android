@@ -49,6 +49,19 @@ public class Consts {
 	public static final String WUSERS_NUMBERS = "WUsers numebrs per type";
 	
 	public static final String  SETTED_FOLLOWED = "setted followed";
+	
+	public static final String BOOLEAN_FOLLOW = "boolean follow";
+
+	public static final String FOLLOW_SETTED = "Follow setted";
+
+	public static final String COLLEAGUE_ID = "colleague ID";
+
+	public static final int TIMEOUT_STATUS = 125;
+
+	public static final String SERVICE_ID = "wservice id";
+
+	public static final String OAUTH_DATA = "oauth data";
+	
 
 	//type requests:
 	
@@ -76,17 +89,43 @@ public class Consts {
 
 	public static final int REQUESTTYPE_ALL_USERS = 11;
 
-	public static final String COLLEAGUE_ID = "colleague ID";
-
 	public static final int REQUESTTYPE_GET_COLLEAGUE_PROFILE = 12;
-
-	public static final String BOOLEAN_FOLLOW = "boolean follow";
 
 	public static final int REQUESTTYPE_SET_FOLLOWED = 13;
 
-	public static final String FOLLOW_SETTED = "Follow setted";
+	public static final int REQUESTTYPE_GETOAUTDATA = 14;
 
-	public static final int TIMEOUT_STATUS = 125;
+	public static final int WEBVIEW_REQUEST = 0;
+
+	public static final String ACCESS_TOKEN = "access token";
+
+	public static final String OAUTH_VERSION = "oauth ver";
+
+	public static final String VERIFIER = "verifier";
+
+	public static final String ACCESS_SECRET = "access_secret";
+
+	public static final String AUTHORIZED = "authorized";
+
+	public static final int REQUESTTYPE_AUTHORIZE = 15;
+
+	public static final String VERIFIER_PIN = "verifier pin";
+
+	public static final String WFEATURES = "wfeatures";
+
+	public static final String FOUND_WFEATURES = "found wfeatures";
+
+	public static final int REQUESTTYPE_RETRIEVEFEATURES = 16;
+
+	public static final String ACTIVE_FEATURES = "active features";
+
+	public static final int REQUESTTYPE_SET_FEATURES = 17;
+
+	public static final String SETTED_FEATURES = "setted features";
+
+	public static final String UNREGISTERED_SERVICE = "unregistered service";
+
+	public static final int REQUESTTYPE_UNREG_SERVICE = 18;
 
 	
 
