@@ -14,6 +14,7 @@ import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.CustomRequestException;
@@ -50,6 +51,8 @@ public class UnregisterService_Operation implements Operation {
 			// Create the form content
 			OutputStream out = conn.getOutputStream();
 			Writer writer = new OutputStreamWriter(out, "UTF-8");
+			Log.i("unsubscribe","{ \"username\":\"" + username + "\", \"password\":\""
+					+ password + "\" , \"service\":\"" + service_id + "\" }");
 			writer.write("{ \"username\":\"" + username + "\", \"password\":\""
 					+ password + "\" , \"service\":\"" + service_id + "\" }");
 

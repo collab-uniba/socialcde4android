@@ -13,6 +13,8 @@ import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog.OnFeaturesDialogInteractionListener;
+import it.uniba.socialcde4android.dialogs.TFSAuthDialog;
+import it.uniba.socialcde4android.dialogs.TFSAuthDialog.OnTFSAuthInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnGenericTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment.OnTimeLineFragmentInteractionListener;
@@ -54,7 +56,8 @@ import android.widget.Toast;
 
 public class HomeActivity extends FragmentActivity   
 implements OnTimeLineFragmentInteractionListener,OnProfileFragmentInteractionListener, 
-OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener {
+OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener,
+OnTFSAuthInteractionListener{
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -241,7 +244,12 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 					if (wservice.isRegistered()){
 						getFeatures(wservice.getId());
 					}else{
-						loadOAuthData(wservice.getId());
+						if (wservice.isRequireOAuth()){
+							loadOAuthData(wservice.getId(), wservice.getOAuthVersion());
+						}else {
+							TFSAuthDialog tfs_dialog = TFSAuthDialog.newInstance(wservice);
+							tfs_dialog.show(getFragmentManager(), "TFS Auth");
+						}
 					}
 				}
 			}
@@ -249,13 +257,14 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		}
 	}
 
-	private void loadOAuthData(int serviceID){
+	private void loadOAuthData(int serviceID, int oAuthVersion){
 		if (isOnline()){
 			r = SocialCDERequestFactory.getOAuthDataRequest();
 			r.put(Preferences.PROXYSERVER, this.proxy_string);
 			r.put(Preferences.USERNAME, this.userName_string);
 			r.put(Preferences.PASSWORD, this.passw_string);
 			r.put(Consts.SERVICE_ID, String.valueOf(serviceID));
+			r.put(Consts.OAUTH_VERSION, String.valueOf(oAuthVersion));
 			r.setMemoryCacheEnabled(true);
 			StartProgressDialog();
 			mRequestManager.execute(r, this);
@@ -490,14 +499,14 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 
 			case(Consts.REQUESTTYPE_GETOAUTDATA):
 				WOAuthData woauthdata =	resultData.getParcelable(Consts.OAUTH_DATA);
-			final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-			intent.putExtra(Consts.OAUTH_DATA, woauthdata);
-			intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
-			//startActivity(intent);
-			StopProgressDialog();
+				final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
 
-			startActivityForResult(intent, Consts.WEBVIEW_REQUEST);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+				intent.putExtra(Consts.OAUTH_DATA, woauthdata);
+				intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
+				intent.putExtra(Consts.OAUTH_VERSION, resultData.getInt(Consts.OAUTH_VERSION) );
+				StopProgressDialog();
+				startActivityForResult(intent, Consts.WEBVIEW_REQUEST);				
 
 			break;
 
@@ -505,6 +514,9 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 				if (resultData.getBoolean(Consts.FOUND_WUSERS)){
 					wuser_all = resultData.getParcelableArrayList(Consts.WUSERS);
 					wUsersNumType_SuggFingFersHidd = resultData.getIntArray(Consts.WUSERS_NUMBERS);
+				}
+				else{
+					wUsersNumType_SuggFingFersHidd = new int[0];
 				}
 			populateDrawerRight();
 			StopProgressDialog();
@@ -522,14 +534,23 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			break;
 
 
-			case(Consts.REQUESTTYPE_SET_FEATURES):
+			case(Consts.REQUESTTYPE_RECORD):
 				StopProgressDialog();
-				Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
+				if (resultData.getBoolean(Consts.RECORDED)){
+					Toast.makeText(this, "Service recorded."  , Toast.LENGTH_LONG).show();
+				}else{
+					Toast.makeText(this, "Error recording service. Check the inserted values and try again."  , Toast.LENGTH_LONG).show();
+				}
 			break;
 			
+			case(Consts.REQUESTTYPE_SET_FEATURES):
+				StopProgressDialog();
+			Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
+			break;
+
 			case(Consts.REQUESTTYPE_UNREG_SERVICE):
 				int service_id = resultData.getInt(Consts.SERVICE_ID);
-				for (int i=0; i<wservice.length;i++){
+			for (int i=0; i<wservice.length;i++){
 				if (wservice[i].getId() == service_id){
 					wservice[i].setRegistered(false);
 					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
@@ -537,10 +558,10 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 					break;
 				}
 			}
-				StopProgressDialog();
-				Toast.makeText(this, "Service unsubscribed."  , Toast.LENGTH_LONG).show();
+			StopProgressDialog();
+			Toast.makeText(this, "Service unsubscribed."  , Toast.LENGTH_LONG).show();
 			break;
-			
+
 			case(Consts.REQUESTTYPE_SET_FOLLOWED):
 				loadFriends(); //valore settato, ricarica il drawer destro
 
@@ -592,7 +613,14 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			Toast.makeText(this, "Error retrieving users list. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
 			break;
-
+		case Error_consts.RECORD_ERROR:
+			Toast.makeText(this, "Error recording the service. Exiting to login. ", Toast.LENGTH_SHORT).show();
+			exitToLogin();
+			break;
+		case Error_consts.RECORD_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error recording the service. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
+			exitToLogin();
+			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES:
 			Toast.makeText(this, "Error retrieving services.  Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
@@ -809,7 +837,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		}
 	}
 
-	
+
 	public void saveFeaturesStatus(int service_id, String active_features) {
 		if (isOnline()){
 			r = SocialCDERequestFactory.setActiveFeatures();
@@ -826,7 +854,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		}
 	}
 
-	
+
 	public void unregisterService(int service_id){
 		if (isOnline()){
 			r = SocialCDERequestFactory.unregisterService();
@@ -841,5 +869,28 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			new NoNetworkDialog().show(getFragmentManager(), "alert");
 		}
 	}
-	
+
+
+
+
+	@Override
+	public void recordService(String service_id, String username,
+			String password, String domain) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.recordService();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, service_id);
+			r.put(Consts.TFSUSERNAME, username);
+			r.put(Consts.TFSPASSWORD, password);
+			r.put(Consts.TFSDOMAIN, domain);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
 } 

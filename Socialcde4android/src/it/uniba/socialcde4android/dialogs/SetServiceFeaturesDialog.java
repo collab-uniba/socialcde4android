@@ -3,24 +3,12 @@ package it.uniba.socialcde4android.dialogs;
 import java.util.Arrays;
 
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.activity.LoginActivity;
-import it.uniba.socialcde4android.activity.RegistrationActivity;
 import it.uniba.socialcde4android.adapters.FeaturesAdapter;
-import it.uniba.socialcde4android.costants.Consts;
-import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
 import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WService;
-import it.uniba.socialcde4android.shared.library.WUser;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +24,6 @@ public class SetServiceFeaturesDialog extends DialogFragment{
 	private WFeature[] wfeature;
 	private WService wservice;
 	private ListView listview;
-	private Button save_button;
-	private Button unsub_button;
 	private FeaturesAdapter adapter;
 	private OnFeaturesDialogInteractionListener mListener;
 	

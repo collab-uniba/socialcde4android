@@ -39,5 +39,10 @@
     <string name="insertPIN">Eventually enter the Pin..</string>
     <string name="button_unsubscribe">Unsubscribe</string>
     <string name="button_save">Save</string>
+    <string name="buttonOK">OK</string>
+    <string name="buttoncancel">Cancel</string>
+    <string name="name_dialog">Username</string>
+    <string name="passworddialog">Password</string>
+    <string name="domain">Domain</string>
 
 </resources>

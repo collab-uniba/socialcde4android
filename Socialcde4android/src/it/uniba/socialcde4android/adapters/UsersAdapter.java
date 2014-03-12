@@ -27,10 +27,10 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 	private final int TYPE_TITLE_HIDDEN = 3;
 	private final int TYPE_NOUSER = 2;
 	private LayoutInflater infalInflater;
-	private int length_suggested;
-	private int length_following;
-	private int length_followers;
-	private int length_hidden;
+	private int length_suggested = 0;
+	private int length_following = 0;
+	private int length_followers = 0;
+	private int length_hidden = 0;
 	private ArrayList<Integer> type_list = null;
 	private int add_positions = 0;
 	private Boolean[] added = new Boolean[5];
@@ -47,11 +47,12 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 			added[j]=false;
 		}
 		//	this.context = context;
+		if (wUsersNumType_SuggFingFersHidd.length != 0){
 		length_suggested = wUsersNumType_SuggFingFersHidd[0];
 		length_following = wUsersNumType_SuggFingFersHidd[1];
 		length_followers = wUsersNumType_SuggFingFersHidd[2];
 		length_hidden = wUsersNumType_SuggFingFersHidd[3];
-
+		}
 		//posso creare un array per memorizare i tipi
 		type_list = new ArrayList<Integer>();
 		type_list.add(this.TYPE_TITLE_SUGG);

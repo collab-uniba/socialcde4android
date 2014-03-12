@@ -56,7 +56,6 @@ public class Authorize_Operation implements Operation {
 					+ "\", \"verifier\":\"" + verifier
 					+ "\", \"accessToken\": \"" + accessToken
 					+ "\", \"accessSecret\":\"" + accessSecret + "\"}");
-
 			writer.close();
 			out.close();
 			int status = conn.getResponseCode();

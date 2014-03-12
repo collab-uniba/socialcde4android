@@ -90,6 +90,7 @@ Log.i("woutdata",woutAuthData.toString());
 		bundle.putParcelable(Consts.OAUTH_DATA, woutAuthData);
 		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_GETOAUTDATA);
 		bundle.putString(Consts.SERVICE_ID, service);
+		bundle.putInt(Consts.OAUTH_VERSION, Integer.valueOf(request.getString(Consts.OAUTH_VERSION)));
 
 		
 		return bundle;

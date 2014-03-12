@@ -19,6 +19,7 @@ import it.uniba.socialcde4android.data.operation.GetOAuthData_Operation;
 import it.uniba.socialcde4android.data.operation.GetUser_Operation;
 import it.uniba.socialcde4android.data.operation.IsUsernameAvailable_Operation;
 import it.uniba.socialcde4android.data.operation.IsWebServiceRunning_Operation;
+import it.uniba.socialcde4android.data.operation.RecordService_Operation;
 import it.uniba.socialcde4android.data.operation.RetrieveServices_Operation;
 import it.uniba.socialcde4android.data.operation.SetActiveFeatures_Operation;
 import it.uniba.socialcde4android.data.operation.SetFollowed_Operation;
@@ -73,6 +74,8 @@ public final class SocialCDERequestService extends RequestService {
 			return new SetActiveFeatures_Operation();
 		case SocialCDERequestFactory.UNREG_SERVICE:
 			return new UnregisterService_Operation();
+		case SocialCDERequestFactory.RECORD_SERVICE:
+			return new RecordService_Operation();
 		}
 		
 		

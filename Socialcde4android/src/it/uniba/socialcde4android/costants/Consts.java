@@ -127,6 +127,16 @@ public class Consts {
 
 	public static final int REQUESTTYPE_UNREG_SERVICE = 18;
 
+	public static final String TFSUSERNAME = "TFS username";
+
+	public static final String TFSPASSWORD = "TFS password";
+
+	public static final String TFSDOMAIN = "TFS domain";
+
+	public static final String RECORDED = "recorded";
+
+	public static final int REQUESTTYPE_RECORD = 19;
+
 	
 
 	

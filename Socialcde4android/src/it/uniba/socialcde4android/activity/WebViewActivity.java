@@ -1,12 +1,9 @@
 package it.uniba.socialcde4android.activity;
 
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.R.layout;
-import it.uniba.socialcde4android.R.menu;
+
 import it.uniba.socialcde4android.costants.Consts;
-import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WOAuthData;
-import it.uniba.socialcde4android.shared.library.WUser;
 import it.uniba.socialcde4android.utility.ScreenUtility;
 import android.os.Bundle;
 import android.app.Activity;
@@ -25,8 +22,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+
 
 public class WebViewActivity extends Activity {
 
@@ -35,6 +31,7 @@ public class WebViewActivity extends Activity {
 	private String service_id = "";
 	Button ok_twitter;
 	EditText editText_twitter;
+	int oAuthVersion;
 
 
 	@Override
@@ -47,22 +44,26 @@ public class WebViewActivity extends Activity {
 		if (getIntent().hasExtra(Consts.OAUTH_DATA) && savedInstanceState==null){
 			woauthdata = getIntent().getParcelableExtra(Consts.OAUTH_DATA);
 			service_id = getIntent().getStringExtra(Consts.SERVICE_ID);
+			oAuthVersion = getIntent().getIntExtra(Consts.OAUTH_VERSION, 0);
+		}else {
+			setResult(RESULT_CANCELED);     
 		}
 		
-		if (woauthdata.getAuthorizationLink().contains("twitter")){
+		if (oAuthVersion == 1){
 			setContentView(R.layout.activity_web_view_twitter);
 			editText_twitter = (EditText) findViewById(R.id.editText_twitter);
 			ok_twitter = (Button) findViewById(R.id.button_twitter_ok);
 			ok_twitter.setOnClickListener(new Button.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					authorize_twitter();
+					authorize_oAuth1();
 				}
 			});
 		}else{
 			setContentView(R.layout.activity_web_view);
 		}
 		final WebView webView = new WebView(this);
+		//R.id.root_webview_twitter è uguale per entrambi i layout
 		final ViewGroup viewGroup = (ViewGroup)findViewById(R.id.root_webview_twitter);
 		viewGroup.addView(webView);
 
@@ -91,11 +92,9 @@ public class WebViewActivity extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-
 	}
 
-	protected void authorize_twitter() {
+	protected void authorize_oAuth1() {
 		String pin = editText_twitter.getText().toString();
 		if (!pin.equals("")){
 			String token =  woauthdata.getAccessToken();
@@ -108,20 +107,21 @@ public class WebViewActivity extends Activity {
 			returnIntent.putExtra(Consts.OAUTH_VERSION, 1);
 			setResult(RESULT_OK,returnIntent);     
 			finish();
-		}
-
-		
+		}	
 	}
 
 	private class CustomWebViewClient extends WebViewClient {
 
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
+			super.onPageStarted( view,  url,  favicon);
 			StartProgressDialog();
 		}
 
 		@Override
 		public void onPageFinished(WebView view, final String url) {
+			super.onPageFinished( view,  url);
+			view.clearCache(true);
 			StopProgressDialog();
 		}
 
@@ -135,18 +135,20 @@ public class WebViewActivity extends Activity {
 				returnIntent.putExtra(Consts.ACCESS_TOKEN, token);
 				returnIntent.putExtra(Consts.OAUTH_VERSION, 2);
 				setResult(RESULT_OK,returnIntent);     
+				view.clearCache(true);
 				finish();
 
 
 			}else if(url.contains("?code=")  && woauthdata.getAuthorizationLink().contains("github")){
-				//Log.i("in github all", url.toString());
+				Log.i("in github all", url.toString());
 				String token =  url.toString().substring(url.indexOf("?code=")+6);
-				//Log.i("in github only token", token);
+				Log.i("in github only token", token);
 				Intent returnIntent = new Intent();
 				returnIntent.putExtra(Consts.SERVICE_ID, service_id);
 				returnIntent.putExtra(Consts.ACCESS_TOKEN, token);
 				returnIntent.putExtra(Consts.OAUTH_VERSION, 2);
-				setResult(RESULT_OK,returnIntent);     
+				setResult(RESULT_OK,returnIntent);    
+				view.clearCache(true);
 				finish();
 
 
@@ -157,14 +159,16 @@ public class WebViewActivity extends Activity {
 				returnIntent.putExtra(Consts.ACCESS_TOKEN, token);
 				returnIntent.putExtra(Consts.OAUTH_VERSION, 2);
 				setResult(RESULT_OK,returnIntent);     
+				view.clearCache(true);
 				finish();
 
 			}else if(url.contains("user_denied#")){
-				Intent returnIntent = new Intent();
-				setResult(RESULT_CANCELED, returnIntent);  
+				setResult(RESULT_CANCELED);  
+				view.clearCache(true);
 				finish();
 			}else{
 				view.loadUrl(url);
+				
 				Log.i("url in webview", url);
 
 			}

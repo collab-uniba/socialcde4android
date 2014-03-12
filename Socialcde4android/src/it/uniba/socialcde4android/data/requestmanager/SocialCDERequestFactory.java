@@ -8,6 +8,8 @@
 
 package it.uniba.socialcde4android.data.requestmanager;
 
+import android.os.Parcel;
+
 import com.foxykeep.datadroid.requestmanager.Request;
 
 /**
@@ -32,17 +34,14 @@ public final class SocialCDERequestFactory {
 	public static final int GET_FEATURES = 11;
 	public static final int SET_FEATURES = 12;
 	public static final int UNREG_SERVICE = 13;
-
-
-
-
-
+	public static final int RECORD_SERVICE = 14;
 
 
 
     // Response data
     public static final String BUNDLE_USER = "it.uniba.socialcde4android.extra.USER";
     public static final String BUNDLE_DESC = "it.uniba.socialcde4android.extra.DESC";
+	
 	
 
     private SocialCDERequestFactory() {
@@ -126,6 +125,11 @@ public final class SocialCDERequestFactory {
 
 	public static Request unregisterService() {
 		Request request = new Request(UNREG_SERVICE);		
+		return request;
+	}
+
+	public static Request recordService() {
+		Request request = new Request(RECORD_SERVICE);		
 		return request;
 	}
 
