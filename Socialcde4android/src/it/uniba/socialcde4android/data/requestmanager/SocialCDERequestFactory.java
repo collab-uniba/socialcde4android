@@ -24,7 +24,7 @@ public final class SocialCDERequestFactory {
     public static final int WEBSERVER_AVAILABLE = 1;
     public static final int USERNAME_AVAILABLE = 2;
     public static final int SUBSCRIBE_USER = 3;
-	public static final int CHANGE_INVITATION_WITH_PASSWORD = 4;
+	public static final int CHANGE_PASSWORD = 4;
 	public static final int GET_USER = 5;
 	public static final int GET_FRIENDS = 6;
 	public static final int GET_COLLEAGUE = 7;
@@ -35,7 +35,7 @@ public final class SocialCDERequestFactory {
 	public static final int SET_FEATURES = 12;
 	public static final int UNREG_SERVICE = 13;
 	public static final int RECORD_SERVICE = 14;
-
+	public static final int  SEND_TFSPOST = 15;
 
 
     // Response data
@@ -76,8 +76,8 @@ public final class SocialCDERequestFactory {
 		return request;
 	}
 
-	public static Request changeInvWithPass() {
-		Request request = new Request(CHANGE_INVITATION_WITH_PASSWORD);		
+	public static Request changePass() {
+		Request request = new Request(CHANGE_PASSWORD);		
 		return request;
 	}
 
@@ -130,6 +130,11 @@ public final class SocialCDERequestFactory {
 
 	public static Request recordService() {
 		Request request = new Request(RECORD_SERVICE);		
+		return request;
+	}
+
+	public static Request sendTFSpost() {
+		Request request = new Request(SEND_TFSPOST);		
 		return request;
 	}
 

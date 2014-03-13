@@ -67,8 +67,8 @@ public class SetServiceFeaturesDialog extends DialogFragment{
         ImageView imageviewService = (ImageView) v.findViewById(R.id.imageView1_logoFEATURE); 
 		imageviewService.setImageResource(getActivity().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+wservice.getImage().replace("/Images/", "").replace(".png", ""),null,null));
         TextView title = (TextView) v.findViewById(R.id.textView1_title_FEATURES);
-        title.setText(wservice.getName()+" registration");
-		listview = (ListView) v.findViewById(R.id.listViewCheckBoxFEATURES);
+        title.setText(wservice.getName()+" features");
+		listview = (ListView) v.findViewById(R.id.listViewCheckBoxFEATURES2);
         adapter = new FeaturesAdapter(getActivity(), android.R.layout.simple_list_item_1,  wfeature);
         listview.setAdapter(adapter);
         Button save_button = (Button) v.findViewById(R.id.button2_dialog_features_SAVE);

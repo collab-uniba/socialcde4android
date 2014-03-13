@@ -21,6 +21,7 @@ import it.uniba.socialcde4android.data.operation.IsUsernameAvailable_Operation;
 import it.uniba.socialcde4android.data.operation.IsWebServiceRunning_Operation;
 import it.uniba.socialcde4android.data.operation.RecordService_Operation;
 import it.uniba.socialcde4android.data.operation.RetrieveServices_Operation;
+import it.uniba.socialcde4android.data.operation.SendTFSpost_Operation;
 import it.uniba.socialcde4android.data.operation.SetActiveFeatures_Operation;
 import it.uniba.socialcde4android.data.operation.SetFollowed_Operation;
 import it.uniba.socialcde4android.data.operation.SubscribeUser_Operation;
@@ -54,7 +55,7 @@ public final class SocialCDERequestService extends RequestService {
 			return new IsUsernameAvailable_Operation();
 		case SocialCDERequestFactory.SUBSCRIBE_USER:
 			return new SubscribeUser_Operation();
-		case SocialCDERequestFactory.CHANGE_INVITATION_WITH_PASSWORD:
+		case SocialCDERequestFactory.CHANGE_PASSWORD:
 			return new ChangePasswordWithPassword_Operation();
 		case SocialCDERequestFactory.GET_USER:
 			return new GetUser_Operation();
@@ -76,6 +77,8 @@ public final class SocialCDERequestService extends RequestService {
 			return new UnregisterService_Operation();
 		case SocialCDERequestFactory.RECORD_SERVICE:
 			return new RecordService_Operation();
+		case SocialCDERequestFactory.SEND_TFSPOST:
+			return new SendTFSpost_Operation();
 		}
 		
 		

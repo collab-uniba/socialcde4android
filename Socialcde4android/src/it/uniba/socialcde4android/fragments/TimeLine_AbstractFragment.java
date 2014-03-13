@@ -63,7 +63,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected PullToRefreshListView pullListView;
 	ListView listView;
 	protected TimeLineAdapter mAdapter;
-	private Boolean loading = false;
+	protected Boolean loading = false;
 	protected ArrayList<WPost> mListWpostItems = null;
 	protected OnGenericTimeLineFragmentInteractionListener mListener;
 	public boolean noMoreMessages = false;
@@ -243,6 +243,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		
 		public void openUserProfileFromFragment(WUser wuser);
 
+		public void sendTFSPost(String post);
+
 		//public void removeThisFragment(Fragment fragment);
 	}
 
@@ -254,6 +256,13 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 
 	}
 
+	
+	public void refreshFragment(){
+		TimeLine_AbstractFragment.this.loading = true;
+		getDataTask = new GetDataTask();
+		getDataTask.execute(GET_DATA_TYPE);
+	}
+	
 
 
 	class GetDataTask extends AsyncTask<Integer, Void, WPost[]> {

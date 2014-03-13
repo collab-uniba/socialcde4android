@@ -189,12 +189,14 @@ public class RegistrationActivity extends Activity implements RequestListener {
 
 
 	private void changeInvitationCodeWithPassword(){
-		r = SocialCDERequestFactory.changeInvWithPass();
+		r = SocialCDERequestFactory.changePass();
 		r.put(Consts.MAIL, this.mail_string);
 		r.put(Preferences.PROXYSERVER, this.proxy_string);
 		r.put(Preferences.USERNAME, this.userName_String);
-		r.put(Consts.INVIT_CODE, this.invitationCode_string);
-		r.put(Preferences.PASSWORD, this.passw_string);
+		
+		r.put(Preferences.PASSWORD, this.invitationCode_string);
+		r.put(Consts.NEW_PASSWORD, this.passw_string);
+
 		r.setMemoryCacheEnabled(true);
 		StartProgressDialog();
 		mRequestManager.execute(r, this);	
@@ -281,7 +283,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 			break;
 
 
-			case(Consts.REQUESTTYPE_CHANGE_INVIT_WITH_PASSW):
+			case(Consts.REQUESTTYPE_CHANGE_PASSW):
 				if(resultData.getBoolean(Consts.PASSWORD_SETTED)){
 					//dialog
 					//TODO

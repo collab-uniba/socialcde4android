@@ -6,8 +6,10 @@
         android:showAsAction="always"
          android:icon="@drawable/ic_action_group"/>
      <item
-        android:id="@+id/drawer"
-        android:title="">
-    </item>
+        android:id="@+id/logout"
+        android:title="Log Out"/>
+ 	<item
+        android:id="@+id/password"
+        android:title="Change Password"/>
 
 </menu>

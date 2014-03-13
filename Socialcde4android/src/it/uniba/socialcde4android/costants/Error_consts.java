@@ -19,4 +19,5 @@ public class Error_consts {
 	public static final int SET_FEATURES_ERROR = 138;
 	public static final int UNREG_SERVICE_ERROR = 139;
 	public static final int RECORD_ERROR = 140;
+	public static final int POST_ERROR = 141;
 }

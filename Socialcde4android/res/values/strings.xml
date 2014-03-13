@@ -44,5 +44,10 @@
     <string name="name_dialog">Username</string>
     <string name="passworddialog">Password</string>
     <string name="domain">Domain</string>
+    <string name="hidesuggestion">Hide from Suggestions</string>
+    <string name="oldpassword">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="repeat_password">Repeat Password</string>
+    <string name="title_dialog_change_password">Change Password</string>
 
 </resources>

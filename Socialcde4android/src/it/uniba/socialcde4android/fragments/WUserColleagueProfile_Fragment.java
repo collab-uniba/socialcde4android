@@ -87,7 +87,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 				onFollowCheckBoxClicked(followCheckBox.isChecked());
 			}
 		});
-
+		
 		return view;
 	}
 

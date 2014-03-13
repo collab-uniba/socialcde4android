@@ -73,7 +73,7 @@ public class Consts {
 
 	public static final int REQUESTTYPE_SUBSCRIBEUSER = 3;
 	
-	public static final int REQUESTTYPE_CHANGE_INVIT_WITH_PASSW = 4;
+	public static final int REQUESTTYPE_CHANGE_PASSW = 4;
 
 	public static final int REQUESTTYPE_GETUSER = 5;
 	
@@ -136,6 +136,16 @@ public class Consts {
 	public static final String RECORDED = "recorded";
 
 	public static final int REQUESTTYPE_RECORD = 19;
+
+	public static final String POST_TFS = "post TFS";
+
+	public static final String SENT = "sent";
+
+	public static final int REQUESTTYPE_SENDTFSPOST = 20;
+
+	public static final String NEW_PASSWORD = "new password";
+
+	
 
 	
 

@@ -10,10 +10,12 @@
         android:id="@+id/LinearLayout_title_features"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp" >
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:gravity="center_horizontal" >
 
         <ImageView
-            android:id="@+id/imageView1_logoFEATURE"
+            android:id="@+id/imageView1_service_LOGO"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_margin="7dp"
@@ -23,7 +25,7 @@
             android:src="@drawable/facebook" />
 
         <TextView
-            android:id="@+id/textView1_title_FEATURES"
+            android:id="@+id/textView1_title_service_SERVICE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -39,37 +41,60 @@
         android:id="@+id/linearLayout1_buttons_features"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/listViewCheckBoxFEATURES2"
+        android:layout_below="@+id/linearlayout_edittexts"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:gravity="bottom|center|center_horizontal|center_vertical" >
 
         <Button
-            android:id="@+id/button1_dialog_features_UNSUBSCRIBE"
+            android:id="@+id/button1_dialog_service_CANCEL"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
             android:background="@drawable/rounded_little_button"
-            android:text="@string/button_unsubscribe" />
+            android:text="@string/buttoncancel" />
 
         <Button
-            android:id="@+id/button2_dialog_features_SAVE"
+            android:id="@+id/button2_dialog_service_OK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="5dp"
             android:background="@drawable/rounded_little_button"
-            android:text="@string/button_save" />
+            android:text="@string/buttonOK" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/listViewCheckBoxFEATURES2"
+    <LinearLayout
+        android:id="@+id/linearlayout_edittexts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/LinearLayout_title_features" >
+        android:layout_below="@+id/LinearLayout_title_features"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
 
-    </ListView>
+        <EditText
+            android:id="@+id/editTextdialogName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_vertical"
+            android:hint="@string/name_dialog"
+            android:inputType="textPersonName" />
+
+        <EditText
+            android:id="@+id/editTextDialogPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:ems="10"
+            android:gravity="center_vertical"
+            android:hint="@string/passworddialog"
+            android:inputType="textPassword" >
+
+            <requestFocus />
+        </EditText>
+    </LinearLayout>
 
 </RelativeLayout>

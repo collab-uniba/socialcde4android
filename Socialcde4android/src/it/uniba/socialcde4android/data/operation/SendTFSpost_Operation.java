@@ -1,5 +1,9 @@
 package it.uniba.socialcde4android.data.operation;
 
+import it.uniba.socialcde4android.config.Config;
+import it.uniba.socialcde4android.costants.Consts;
+import it.uniba.socialcde4android.costants.Error_consts;
+import it.uniba.socialcde4android.preferences.Preferences;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -11,11 +15,7 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
-
-import it.uniba.socialcde4android.config.Config;
-import it.uniba.socialcde4android.costants.Consts;
-import it.uniba.socialcde4android.costants.Error_consts;
-import it.uniba.socialcde4android.preferences.Preferences;
+import android.util.Log;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.CustomRequestException;
@@ -23,23 +23,18 @@ import com.foxykeep.datadroid.exception.DataException;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
 
-
-public class ChangePasswordWithPassword_Operation implements Operation {
-
-	//private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
-
+public class SendTFSpost_Operation implements Operation{
 	@Override
 	public Bundle execute(Context context, Request request)
 			throws ConnectionException, DataException, CustomRequestException {
-		String host = request.getString(Preferences.PROXYSERVER)+ "/SocialTFSProxy.svc";;
 		String username = request.getString(Preferences.USERNAME);
-		String old_password = request.getString(Preferences.PASSWORD);
-		String new_password = request.getString(Consts.NEW_PASSWORD);
-		int status = 0;
+		String password = request.getString(Preferences.PASSWORD);
+		String host = request.getString(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
+		String post = request.getString(Consts.POST_TFS);
+		
 		String result = "";
-		Boolean changed = false;
 		try {
-			URL url = new URL(host + "/ChangePassword");
+			URL url = new URL(host + "/Post");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
 			conn.setReadTimeout(Config.READ_TIMEOUT_MS);
@@ -53,13 +48,12 @@ public class ChangePasswordWithPassword_Operation implements Operation {
 			// Create the form content
 			OutputStream out = conn.getOutputStream();
 			Writer writer = new OutputStreamWriter(out, "UTF-8");
-			writer.write("{ \"username\":\"" + username
-					+ "\", \"oldPassword\":\"" + old_password
-					+ "\" , \"newPassword\":\"" + new_password + "\"}");
+			writer.write("{ \"username\":\"" + username + "\", \"password\":\""
+					+ password + "\" , \"message\":\"" + post + "\"}");
 
 			writer.close();
 			out.close();
-			status = conn.getResponseCode();
+			int status = conn.getResponseCode();
 
 			if (status >= 200 && status <= 299) {
 				InputStreamReader in = new InputStreamReader(
@@ -74,33 +68,27 @@ public class ChangePasswordWithPassword_Operation implements Operation {
 				br.close();
 
 			}else{
-				throw new ConnectionException("Error setting new password",Error_consts.ERROR_SETTINGPASSW);
+				throw new ConnectionException("Error ",Error_consts.POST_ERROR);
 
 			}
 
 			conn.disconnect();
-		}catch(java.net.SocketTimeoutException e) {
-			status = Consts.TIMEOUT_STATUS;
-			throw new ConnectionException("Error setting new password",Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR);
-		} catch (Exception e) {
-			throw new ConnectionException("Error setting new password",Error_consts.ERROR_SETTINGPASSW);
+		} catch(java.net.SocketTimeoutException e) {
+			
+			throw new ConnectionException("Error ",Error_consts.POST_ERROR * Error_consts.TIMEOUT_FACTOR);
+		}  catch (Exception e) {
+			throw new ConnectionException("Error ",Error_consts.POST_ERROR);
 		}
+		Bundle bundle = new Bundle();
 
 		if (result.equals("true")) {
-
-			changed = true;
-
+			bundle.putBoolean(Consts.SENT, true);
+			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SENDTFSPOST);
+			return bundle;	
 		} else {
-			changed = false;
+			throw new ConnectionException("Error ",Error_consts.POST_ERROR);
 		}
-				
-		
-		Bundle bundle = new Bundle();
-		bundle.putBoolean(Consts.PASSWORD_SETTED, changed);
-		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_CHANGE_PASSW);
-		bundle.putString(Consts.NEW_PASSWORD, new_password);
-		return bundle;
-
 	}
+
 
 }

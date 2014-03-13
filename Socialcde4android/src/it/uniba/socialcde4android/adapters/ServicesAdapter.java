@@ -17,12 +17,11 @@ import com.squareup.picasso.Picasso;
 public class ServicesAdapter extends ArrayAdapter<WService>{
 
 	private Context context;
- 	private int num_sevice;
-	private final int TYPE_MAX_COUNT = 4;
+ 	private int num_service;
+	private final int TYPE_MAX_COUNT = 3;
 	private final int TYPE_AVATAR = 0;
 	private final int TYPE_TITLE = 1;
 	private final int TYPE_SERVICE = 2;
-	private final int TYPE_LOGOUT = 3;
 
 	private LayoutInflater infalInflater;
 	private String name;
@@ -39,7 +38,7 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 		super(context, resource, wservice);
 
 		this.context = context;
-		num_sevice = wservice.length;
+		num_service = wservice.length;
 		name = wuser.getUsername();
 		avatar_address = wuser.getAvatar();
 		post = wuser.getStatuses();
@@ -50,7 +49,7 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 	}
 
 	public int getCount() {
-		return num_sevice+3;
+		return num_service+2;
 	}
 	
 	@Override
@@ -64,9 +63,8 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 	
 	@Override
 	public int getItemViewType(int position) {
-		if (position == 0) return TYPE_LOGOUT;
-		else if (position == 1) return TYPE_AVATAR;
-		else if (position == 2) return TYPE_TITLE;
+		if (position == 0) return TYPE_AVATAR;
+		else if (position == 1) return TYPE_TITLE;
 		else return TYPE_SERVICE;
 	}
 
@@ -96,9 +94,9 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 				textViewAvatarFollowers.setText("Followers: "+followers);
 				break;
 
-			case TYPE_LOGOUT:
-				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.logout_item, null);
-				break;
+//			case TYPE_LOGOUT:
+//				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.logout_item, null);
+//				break;
 				
 
 			case TYPE_TITLE:
@@ -106,7 +104,7 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 				break;
 
 			case TYPE_SERVICE:
-				WService wservice = (WService) ServicesAdapter.this.getItem(position-3);
+				WService wservice = (WService) ServicesAdapter.this.getItem(position-2);
 				if (rowView == null) 	rowView = infalInflater.inflate(R.layout.drawer_item, null);
 				TextView textViewService = (TextView) rowView.findViewById(R.id.textViewdrawer);
 				textViewService.setText(wservice.getName());

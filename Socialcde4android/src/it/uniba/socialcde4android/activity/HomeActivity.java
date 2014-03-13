@@ -10,6 +10,8 @@ import it.uniba.socialcde4android.adapters.ServicesAdapter;
 import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
+import it.uniba.socialcde4android.dialogs.ChangePasswordDialog;
+import it.uniba.socialcde4android.dialogs.ChangePasswordDialog.OnChangePasswordListener;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog.OnFeaturesDialogInteractionListener;
@@ -50,14 +52,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
 public class HomeActivity extends FragmentActivity   
 implements OnTimeLineFragmentInteractionListener,OnProfileFragmentInteractionListener, 
 OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener,
-OnTFSAuthInteractionListener{
+OnTFSAuthInteractionListener, OnChangePasswordListener{
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -83,6 +88,7 @@ OnTFSAuthInteractionListener{
 	private Request r;
 	private Request r2;
 	private Boolean isFragmentLoading;
+	private EditText postTFS;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -94,6 +100,7 @@ OnTFSAuthInteractionListener{
 		mDrawerList_left = (ListView) findViewById(R.id.drawer_services_left);
 		mDrawerList_right = (ListView) findViewById(R.id.drawer_users_right);
 		mRequestManager = SocialCDERequestManager.from(this);
+		
 		if (getIntent().hasExtra("bundle") && savedInstanceState==null){
 			Bundle bundle = getIntent().getExtras().getBundle("bundle");
 			if (bundle != null){
@@ -235,12 +242,11 @@ OnTFSAuthInteractionListener{
 	private class DrawerLeftItemClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id) {
-			if (position == 0)exitToLogin();
-			else if (position == 1){
+			if (position == 0){
 				openUserProfile(wuser);
 			}else{
 				if (mDrawerList_left.getAdapter().getItemViewType(position) == ((ServicesAdapter) mDrawerList_left.getAdapter()).getServiceTypeID()){
-					WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-3);
+					WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-2);
 					if (wservice.isRegistered()){
 						getFeatures(wservice.getId());
 					}else{
@@ -350,8 +356,15 @@ OnTFSAuthInteractionListener{
 
 		case R.id.action_drawer:
 			if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
-			else {if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
+			else { if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	 mDrawerLayout.closeDrawer(mDrawerList_left);
 			mDrawerLayout.openDrawer(mDrawerList_right);}
+			break;
+		case R.id.logout:
+			this.exitToLogin();
+			break;
+		case R.id.password:
+			ChangePasswordDialog changeP_dialog = ChangePasswordDialog.newInstance(passw_string);
+			changeP_dialog.show(getFragmentManager(), "Change Password");
 			break;
 		default:
 
@@ -472,6 +485,20 @@ OnTFSAuthInteractionListener{
 			StopProgressDialog();
 			break;
 
+			case(Consts.REQUESTTYPE_SENDTFSPOST):
+				if (resultData.getBoolean(Consts.SENT)){
+					//va fatto il refresh della view..
+					//Toast.makeText(this, "Updating Timeline", Toast.LENGTH_SHORT).show();
+					FragmentManager fragmentManager = getSupportFragmentManager();
+					TimeLine_Fragment fragment;
+					fragment=(TimeLine_Fragment)fragmentManager.findFragmentById(R.id.frag_ptr_list);
+					fragment.refreshFragment();
+				}else{
+					Toast.makeText(this, "An error occured."  , Toast.LENGTH_LONG).show();
+				}
+				StopProgressDialog();
+			break;
+			
 			case(Consts.REQUESTTYPE_RETRIEVEFEATURES):
 				StopProgressDialog();
 			if (resultData.getBoolean(Consts.FOUND_WFEATURES)){
@@ -545,9 +572,23 @@ OnTFSAuthInteractionListener{
 			
 			case(Consts.REQUESTTYPE_SET_FEATURES):
 				StopProgressDialog();
-			Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
+			if (resultData.getBoolean(Consts.SETTED_FEATURES)){
+				Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
+			}else{
+				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+			}
 			break;
 
+			case(Consts.REQUESTTYPE_CHANGE_PASSW):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.PASSWORD_SETTED)){
+				Toast.makeText(this, "Password changed."  , Toast.LENGTH_LONG).show();
+				passw_string = resultData.getString(Consts.NEW_PASSWORD);
+			}else{
+				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+			}
+			break;
+			
 			case(Consts.REQUESTTYPE_UNREG_SERVICE):
 				int service_id = resultData.getInt(Consts.SERVICE_ID);
 			for (int i=0; i<wservice.length;i++){
@@ -563,8 +604,9 @@ OnTFSAuthInteractionListener{
 			break;
 
 			case(Consts.REQUESTTYPE_SET_FOLLOWED):
+				//nel caso sia stato scelto di non seguirlo più allora ve chiesto se si vuole anche nascondere
+				//dalla lista dei suggeriti
 				loadFriends(); //valore settato, ricarica il drawer destro
-
 			break;
 
 			case(Consts.REQUESTTYPE_AUTHORIZE):
@@ -613,13 +655,21 @@ OnTFSAuthInteractionListener{
 			Toast.makeText(this, "Error retrieving users list. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
 			break;
+		case Error_consts.POST_ERROR:
+			Toast.makeText(this, "Error sending message. ", Toast.LENGTH_SHORT).show();
+			//exitToLogin();
+			break;
+		case Error_consts.POST_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error sending message. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			//exitToLogin();
+			break;
 		case Error_consts.RECORD_ERROR:
-			Toast.makeText(this, "Error recording the service. Exiting to login. ", Toast.LENGTH_SHORT).show();
-			exitToLogin();
+			Toast.makeText(this, "Error recording the service. ", Toast.LENGTH_SHORT).show();
+			//exitToLogin();
 			break;
 		case Error_consts.RECORD_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error recording the service. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
-			exitToLogin();
+			Toast.makeText(this, "Error recording the service. Connection Timeout.", Toast.LENGTH_SHORT).show();
+		//	exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES:
 			Toast.makeText(this, "Error retrieving services.  Exiting to login.", Toast.LENGTH_SHORT).show();
@@ -755,8 +805,7 @@ OnTFSAuthInteractionListener{
 	}
 
 	@Override
-	public void onProfileFragmentCheckBoxChanged(Boolean followChecked,
-			WUser wuser_profile) {
+	public void onProfileFragmentCheckBoxChanged(Boolean followChecked,	WUser wuser_profile) {
 		setFollow( followChecked,  wuser_profile);
 
 	}
@@ -893,4 +942,41 @@ OnTFSAuthInteractionListener{
 		}
 	}
 
+	
+	public void sendTFSPost(String postTFS){
+		if (isOnline()){
+			r = SocialCDERequestFactory.sendTFSpost();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.POST_TFS, postTFS);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
+
+
+	@Override
+	public void change_password(String new_password) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.changePass();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.NEW_PASSWORD, new_password);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+		
+	}
+	
+	
 } 
