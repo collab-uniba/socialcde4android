@@ -96,6 +96,7 @@ public class RecordService_Operation implements Operation {
 		if (result.equals("true")) {
 			bundle.putBoolean(Consts.RECORDED, true);
 			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_RECORD);
+			bundle.putInt(Consts.SERVICE_ID, Integer.valueOf(service));
 			return bundle;	
 		} else {
 			throw new ConnectionException("Error ",Error_consts.RECORD_ERROR);

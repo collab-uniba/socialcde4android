@@ -564,6 +564,16 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				}else{
 					Toast.makeText(this, "Error recording service. Check the inserted values and try again."  , Toast.LENGTH_LONG).show();
 				}
+				int service_id_rec = resultData.getInt(Consts.SERVICE_ID);
+				for (int i=0; i<wservice.length;i++){
+					if (wservice[i].getId() == service_id_rec){
+						wservice[i].setRegistered(true);
+						ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
+						mDrawerList_left.setAdapter(adapter);
+						break;
+					}
+				}
+				getFeatures(service_id_rec);
 			break;
 			
 			case(Consts.REQUESTTYPE_SET_FEATURES):
