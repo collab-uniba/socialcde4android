@@ -23,7 +23,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.Intent;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
@@ -212,15 +211,15 @@ public class LoginActivity extends Activity implements RequestListener {
 		}
 	}
 
-
-	private void verifyServer(){
-		//controllo che il server sia online
-		r = SocialCDERequestFactory.isWebServRunRequest();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r, this);	
-	}
+//
+//	private void verifyServer(){
+//		//controllo che il server sia online
+//		r = SocialCDERequestFactory.isWebServRunRequest();
+//		r.put(Preferences.PROXYSERVER, this.proxy_string);
+//		r.setMemoryCacheEnabled(true);
+//		StartProgressDialog();
+//		mRequestManager.execute(r, this);	
+//	}
 
 	private void login(){
 		r2 = SocialCDERequestFactory.getWUser();

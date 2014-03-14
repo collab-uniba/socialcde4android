@@ -11,13 +11,11 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
@@ -30,7 +28,7 @@ import com.google.gson.Gson;
 
 public class GetColleagueProfile_Operation implements Operation {
 
-	private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
+//	private static final String TAG = RetrieveServices_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)

@@ -52,10 +52,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -88,7 +85,6 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 	private Request r;
 	private Request r2;
 	private Boolean isFragmentLoading;
-	private EditText postTFS;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -231,7 +227,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			}
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle_left);
-		ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+		ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
 		mDrawerList_left.setAdapter(adapter);
 		mDrawerList_left.setOnItemClickListener(new DrawerLeftItemClickListener());
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -594,7 +590,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			for (int i=0; i<wservice.length;i++){
 				if (wservice[i].getId() == service_id){
 					wservice[i].setRegistered(false);
-					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
 					mDrawerList_left.setAdapter(adapter);
 					break;
 				}
@@ -614,7 +610,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			for (int i=0; i<wservice.length;i++){
 				if (wservice[i].getId() == service_id1){
 					wservice[i].setRegistered(true);
-					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
 					mDrawerList_left.setAdapter(adapter);
 					break;
 				}
@@ -635,7 +631,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 		{
 			Toast.makeText(this, "Error setting user's status", Toast.LENGTH_SHORT).show();
 			FragmentManager fragmentManager = getSupportFragmentManager();
-			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(HomeActivity.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 			fragment.changeCheckBoxState();
 		}
 		break;
@@ -643,7 +639,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 		{ 
 			Toast.makeText(this, "Error setting user's status. Connection Timeout.", Toast.LENGTH_SHORT).show();
 			FragmentManager fragmentManager = getSupportFragmentManager();
-			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(HomeActivity.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 			fragment.changeCheckBoxState();
 		}
 		break;
@@ -837,7 +833,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				String token = data.getStringExtra(Consts.ACCESS_TOKEN); 
 				String secret = data.getStringExtra(Consts.ACCESS_SECRET);
 				String pin = data.getStringExtra(Consts.VERIFIER_PIN);
-				int oaut_version = data.getIntExtra(Consts.OAUTH_VERSION, -1);
+			//	int oaut_version = data.getIntExtra(Consts.OAUTH_VERSION, -1);
 				Authorize(service_id, token, pin, secret);
 
 			}

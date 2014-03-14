@@ -29,12 +29,12 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 	private int post;
 	private int following;
 	private int followers;
-
+	private String proxy;
 	
 	
 
 
-	public ServicesAdapter(Context context, int resource, WService[] wservice, WUser wuser ) {
+	public ServicesAdapter(Context context, int resource, WService[] wservice, WUser wuser, String proxy_string ) {
 		super(context, resource, wservice);
 
 		this.context = context;
@@ -44,6 +44,7 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 		post = wuser.getStatuses();
 		following = wuser.getFollowings();
 		followers = wuser.getFollowers();
+		this.proxy = proxy_string;
 
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -115,7 +116,9 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 					imageviewStatusDot.setImageResource(getContext().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+"greydot",null,null));
 				}
 				ImageView imageviewService = (ImageView) rowView.findViewById(R.id.imageViewdrawer); 
-				imageviewService.setImageResource(getContext().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+wservice.getImage().replace("/Images/", "").replace(".png", ""),null,null));
+				//imageviewService.setImageResource(getContext().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+wservice.getImage().replace("/Images/", "").replace(".png", ""),null,null));
+				Picasso.with(context).load(proxy+wservice.getImage()).into(imageviewService);
+
 				break;
 
 			}

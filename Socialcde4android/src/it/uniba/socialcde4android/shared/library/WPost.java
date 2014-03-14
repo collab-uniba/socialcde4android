@@ -1,7 +1,6 @@
 package it.uniba.socialcde4android.shared.library;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import android.os.Parcel;
 import android.os.Parcelable;

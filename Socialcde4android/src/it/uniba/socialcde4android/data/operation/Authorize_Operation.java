@@ -15,7 +15,6 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.CustomRequestException;

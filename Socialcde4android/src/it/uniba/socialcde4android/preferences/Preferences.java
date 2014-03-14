@@ -1,7 +1,6 @@
 package it.uniba.socialcde4android.preferences;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import android.app.Activity;
@@ -62,6 +61,7 @@ public class Preferences {
 			return prefMap;
 		}else 	return null;
 	}
+	
 	
 	public static boolean isSavedPreferences(Activity activity){
 		SharedPreferences settings = activity.getSharedPreferences(USERINFO, Context.MODE_PRIVATE);

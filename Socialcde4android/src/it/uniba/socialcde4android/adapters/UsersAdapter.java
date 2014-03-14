@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.adapters.TimeLineAdapter.ViewHolder;
 import it.uniba.socialcde4android.shared.library.WUser;
 
 import com.squareup.picasso.Picasso;
@@ -32,7 +31,7 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 	private int length_followers = 0;
 	private int length_hidden = 0;
 	private ArrayList<Integer> type_list = null;
-	private int add_positions = 0;
+	//private int add_positions = 0;
 	private Boolean[] added = new Boolean[5];
 
 

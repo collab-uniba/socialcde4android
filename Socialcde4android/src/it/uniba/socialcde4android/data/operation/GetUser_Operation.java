@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 
 public class GetUser_Operation implements Operation {
 
-	private static final String TAG = GetUser_Operation.class.getSimpleName();
+	//private static final String TAG = GetUser_Operation.class.getSimpleName();
 
 	@Override
 	public Bundle execute(Context context, Request request)

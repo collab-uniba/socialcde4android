@@ -2,8 +2,11 @@ package it.uniba.socialcde4android.dialogs;
 
 import java.util.Arrays;
 
+import com.squareup.picasso.Picasso;
+
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.adapters.FeaturesAdapter;
+import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WService;
 import android.app.DialogFragment;
@@ -65,7 +68,7 @@ public class SetServiceFeaturesDialog extends DialogFragment{
         View v = inflater.inflate(R.layout.dialog_set_service_features, container, false);
         //getDialog().getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
         ImageView imageviewService = (ImageView) v.findViewById(R.id.imageView1_logoFEATURE); 
-		imageviewService.setImageResource(getActivity().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+wservice.getImage().replace("/Images/", "").replace(".png", ""),null,null));
+		Picasso.with(v.getContext()).load(Preferences.getSavedHost(getActivity())+wservice.getImage()).into(imageviewService);
         TextView title = (TextView) v.findViewById(R.id.textView1_title_FEATURES);
         title.setText(wservice.getName()+" features");
 		listview = (ListView) v.findViewById(R.id.listViewCheckBoxFEATURES2);

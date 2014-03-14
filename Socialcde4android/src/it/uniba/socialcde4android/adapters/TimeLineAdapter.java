@@ -11,7 +11,6 @@ import it.uniba.socialcde4android.shared.library.WUser;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
