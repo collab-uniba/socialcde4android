@@ -5,9 +5,12 @@ import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.shared.library.WOAuthData;
 import it.uniba.socialcde4android.utility.ScreenUtility;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -205,5 +208,6 @@ public class WebViewActivity extends Activity {
 		getMenuInflater().inflate(R.menu.web_view, menu);
 		return true;
 	}
+	
 
 }

@@ -36,7 +36,8 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 	public TimeLineAdapter(Context context, int resource, ArrayList<WPost> mListWpostItems, Boolean noMoreItems, Boolean clickable, Fragment fragment) {
 		super(context, resource, mListWpostItems);
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		num_post = mListWpostItems.size();
+		if (mListWpostItems == null) num_post=0;
+			else num_post = mListWpostItems.size();
 		frgmentListener = (OnTimeLineAdapterListener) fragment;
 		this.noMoreItems = noMoreItems;
 		this.clickable = clickable;
@@ -100,7 +101,7 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 					@Override
 					public void onClick(View v) {
 						frgmentListener.openUserProfileFromActivity(wpost.getUser());
-						}
+					}
 				});  
 			}
 			view.textViewAbout.setText(getTimeElpased(wpost.getCreateAt(), wpost.getService().getName()));

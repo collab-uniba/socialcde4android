@@ -176,8 +176,9 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 		String password = preferences.get(Preferences.PASSWORD);
 		long since = 0;
 		long to = 0 ;
-		if (datatype == super.GET_MOREDATA_TYPE)
+		if (datatype == super.GET_MOREDATA_TYPE){
 			to = (mListWpostItems.get(mListWpostItems.size()-1)).getId();
+		}
 
 		return "{ \"username\":\"" + username + "\", \"password\":\""
 		+ password + "\" , \"since\":\"" + since + "\" , \"to\":\""

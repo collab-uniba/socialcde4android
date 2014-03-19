@@ -163,9 +163,9 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			proxy_string = savedInstanceState.getString(Preferences.PROXYSERVER);
 			userName_string = savedInstanceState.getString(Preferences.USERNAME);
 			passw_string = savedInstanceState.getString(Preferences.PASSWORD);
-
 			populateDrawerLeft();
 			populateDrawerRight();
+			
 		}
 	}
 

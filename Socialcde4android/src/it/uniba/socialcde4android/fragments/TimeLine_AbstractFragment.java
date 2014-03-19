@@ -72,6 +72,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected Map<String,String> preferences; 
 	protected boolean loadAgainRequestedInASecond = false;
 
+	private boolean data_error = false;
+
 
 	public String getTAG(){
 		return TAG;
@@ -127,7 +129,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	private void checkLastItemInView(AbsListView   view){
 		int count = view.getCount(); // visible views count
 		int lastVisibleItemPosition = view.getLastVisiblePosition();
-		//Log.i("inside listview listener","lastitem: "+lastVisibleItemPosition+ "count-1: "+String.valueOf(count-1));
+		//Log.i("inside listview listener","lastitem: "+lastVisibleItemPosition+ "count: "+String.valueOf(count));
 
 		if (lastVisibleItemPosition >= count-2){
 			if(!TimeLine_AbstractFragment.this.loading && !noMoreMessages){
@@ -339,9 +341,11 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				conn.disconnect();
 			} catch(java.net.SocketTimeoutException e) {
 				e.printStackTrace();
+				data_error=true;
 				wpost = new WPost[0];
 			} catch (Exception e) {
 				e.printStackTrace();
+				data_error =true;
 				wpost = new WPost[0];
 			}
 			return wpost;
@@ -365,8 +369,19 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					pullListView.onRefreshComplete();
 					//}
 				}else{
-					Log.i("abstractfragment","error in get more data type");
-					showErrorAndExit();
+					if (data_error){
+						Log.i("abstractfragment","error in get data type");
+						showErrorAndExit();
+						data_error = false;
+					}else{
+						noMoreMessages=true;
+						mAdapter = new TimeLineAdapter(TimeLine_AbstractFragment.this.getActivity(), android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
+						listView.setAdapter(mAdapter);
+						setListViewListener();
+						// Call onRefreshComplete when the list has been refreshed.
+						pullListView.onRefreshComplete();
+
+					}
 				//	pullListView.onRefreshComplete();
 				}
 				TimeLine_AbstractFragment.this.loading = false;
@@ -394,8 +409,13 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 						listView.onRestoreInstanceState(listViewState);
 						pullListView.onRefreshComplete();
 					}else {
-						Log.i("abstractfragment","error in get more data type");
-						showErrorAndExit();
+						if (data_error){
+							Log.i("abstractfragment","error in get data type");
+							showErrorAndExit();
+							data_error = false;
+						}else{
+							
+						}
 					}
 
 				}

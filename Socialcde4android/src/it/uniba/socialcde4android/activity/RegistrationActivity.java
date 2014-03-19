@@ -23,6 +23,7 @@ import android.app.Activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 
 import android.view.Menu;
 
@@ -54,7 +55,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 	private Request r;
 	private static final String DIALOG_SHOWN = "DIALOG_SHOWN";
 	private static final String PARCELABLE_REQUEST = "PARCELABLE_REQUEST";
-	private static ProgressDialog progressDialog; 
+	private static ProgressDialog progressDialog;
 
 
 
@@ -75,7 +76,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 		regButton.setOnClickListener(new Button.OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				// 
+				//
 				initializeRegistration();
 			}
 		});
@@ -121,96 +122,105 @@ public class RegistrationActivity extends Activity implements RequestListener {
 
 
 	private void initializeRegistration() {
-		// 
+		//
 		proxy_string = proxyEdit.getText().toString().trim();
 		mail_string = mailEdit.getText().toString().trim();
-		invitationCode_string = invitationEdit.getText().toString().trim();
+		invitationCode_string = invitationEdit.getText().toString();
 		userName_String = userEdit.getText().toString().trim();
-		passw_string = passwEdit.getText().toString().trim();
-		passwConf_string = passwConfEdit.getText().toString().trim();
+		passw_string = passwEdit.getText().toString();
+		passwConf_string = passwConfEdit.getText().toString();
 		//controllo prima che tutti i campi siano stati riempiti
-		if (proxy_string.equals("") || mail_string.equals("") || invitationCode_string.equals("") || 
+
+		Pattern p = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+				+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+		Matcher m = p.matcher(mail_string);
+
+		if (proxy_string.equals("") || mail_string.equals("") || invitationCode_string.equals("") ||
 				userName_String.equals("") || passw_string.equals("") || passwConf_string.equals("")){
 
-			Toast.makeText(this, "Please compile all the fields.."  , Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Please compile all the fields.." , Toast.LENGTH_SHORT).show();
 
-		}else{
+		}else if (!passw_string.equals(passwConf_string)){
 			//controllo che le due password coincidano
-			if (!passw_string.equals(passwConf_string)){
-				//mostra la dialog in cui dice che le password non coincidono
-				Toast.makeText(this, "Please check your password; the confirmation entry does not match. "  , Toast.LENGTH_SHORT).show();
-				passwEdit.setText("");
-				passwConfEdit.setText("");
-				passwEdit.setHint("Password");
-				passwConfEdit.setHint("Confirm password");
-				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-				passwEdit.startAnimation(shake);
-				passwConfEdit.startAnimation(shake);
-			}else{
 
-				//poi che la mail sia in formato corretto
-				Pattern p = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-						+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
-				Matcher m = p.matcher(mail_string);
-				if (!m.matches()){
-					Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-					mailEdit.startAnimation(shake);
-					Toast.makeText(this, "You have entered an invalid email. Please check your email address and try again."  , Toast.LENGTH_SHORT).show();
+			//mostra la dialog in cui dice che le password non coincidono
+			Toast.makeText(this, "Please check your password; the confirmation entry does not match. " , Toast.LENGTH_SHORT).show();
+			passwEdit.setText("");
+			passwConfEdit.setText("");
+			Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+			passwEdit.startAnimation(shake);
+			passwConfEdit.startAnimation(shake);
+		}else if (!m.matches()){
 
-				}else{
-					//la lunghezza minima della password e i caratteri ammessi(?)
-					//in caso di campi tutti compilati correttamente
-					//TODO
+			//poi che la mail sia in formato corretto
+			Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+			mailEdit.startAnimation(shake);
+			Toast.makeText(this, "You have entered an invalid email. Please check your email address and try again." , Toast.LENGTH_SHORT).show();
 
-					//invio la richiesta di registrazione
-					if (isOnline()){
-						//posso chiamare il metodo per il login
-						sendRegistration();
-					}else{
-						new NoNetworkDialog().show(getFragmentManager(), "alert");
-					}
-				}
-			}
+		}else if (passwEdit.getText().toString().length()<6){
+			//la lunghezza minima della password
+			//in caso di campi tutti compilati correttamente
+			Toast.makeText(this, "Please enter a password of at least six characters" , Toast.LENGTH_SHORT).show();
+			passwEdit.setText("");
+			passwConfEdit.setText("");
+			Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+			passwEdit.startAnimation(shake);
+			passwConfEdit.startAnimation(shake);
+		}else if (isOnline()){
+			//posso chiamare il metodo per il login
+			sendRegistration();
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
 		}
 	}
 
 
 
+
+
 	private void sendRegistration(){
-		r = SocialCDERequestFactory.subscribeUser();
-		r.put(Consts.MAIL, this.mail_string);
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_String);
-		r.put(Preferences.PASSWORD, this.passw_string);
-		r.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r, this);		
+		if (isOnline()){
+			r = SocialCDERequestFactory.subscribeUser();
+			r.put(Consts.MAIL, this.mail_string);
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_String);
+			r.put(Consts.INVIT_CODE, this.invitationCode_string);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);	
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
 	}
 
 
 	private void changeInvitationCodeWithPassword(){
-		r = SocialCDERequestFactory.changePass();
-		r.put(Consts.MAIL, this.mail_string);
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.put(Preferences.USERNAME, this.userName_String);
-		
-		r.put(Preferences.PASSWORD, this.invitationCode_string);
-		r.put(Consts.NEW_PASSWORD, this.passw_string);
+		if (isOnline()){
+			r = SocialCDERequestFactory.changePass();
+			r.put(Consts.MAIL, this.mail_string);
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_String);
 
-		r.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r, this);	
+			r.put(Preferences.PASSWORD, this.invitationCode_string);
+			r.put(Consts.NEW_PASSWORD, this.passw_string);
 
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);	
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
 	}
 
-	public   void StartProgressDialog(){
+
+	public void StartProgressDialog(){
 		if (progressDialog == null || !progressDialog.isShowing()){
 			progressDialog = ProgressDialog.show(this, "Querying the server..", "Wait a moment please", true, false);
 		}
 	}
 
 
-	public  void StopProgressDialog(){
+	public void StopProgressDialog(){
 		if (progressDialog != null){
 			progressDialog.dismiss();
 		}
@@ -219,7 +229,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 
 
 	private boolean isOnline() {
-		ConnectivityManager cm =     (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo netInfo = cm.getActiveNetworkInfo();
 		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
 			return true;
@@ -236,8 +246,8 @@ public class RegistrationActivity extends Activity implements RequestListener {
 
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
-		// 
-		StopProgressDialog();
+		//
+
 		if (resultData != null){
 			switch(resultData.getInt(Consts.REQUEST_TYPE)){
 
@@ -245,16 +255,20 @@ public class RegistrationActivity extends Activity implements RequestListener {
 			case(Consts.REQUESTTYPE_SUBSCRIBEUSER):
 				int response = resultData.getInt(Consts.SUBSCRIPTION_RESPONSE);
 			switch(response){
-			case -3:
-				Toast.makeText(this, "Please compile all the fields correctly."  , Toast.LENGTH_SHORT).show();
-				break;
-			case -2:
-				Toast.makeText(this, "Please enter a valid proxy."  , Toast.LENGTH_SHORT).show();
-				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-				proxyEdit.startAnimation(shake);
-				break;
+			//			case -3:
+			//				StopProgressDialog();
+			//				Toast.makeText(this, "Please compile all the fields correctly." , Toast.LENGTH_SHORT).show();
+			//				
+			//				break;
+			//			case -2:
+			//				StopProgressDialog();
+			//				Toast.makeText(this, "Please enter a valid proxy." , Toast.LENGTH_SHORT).show();
+			//				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+			//				proxyEdit.startAnimation(shake);
+			//				break;
 			case -1:
-				Toast.makeText(this, "There's a problem. Check your connection and try again"  , Toast.LENGTH_SHORT).show();
+				StopProgressDialog();
+				Toast.makeText(this, "There's a problem. Check your connection and try again" , Toast.LENGTH_SHORT).show();
 				break;
 			case 0:
 				//TODO
@@ -262,42 +276,47 @@ public class RegistrationActivity extends Activity implements RequestListener {
 				changeInvitationCodeWithPassword();
 				break;
 			case 1: // if e-mail address does not exist in the database
-				Toast.makeText(this, "Please enter the email on which you recived the invite"  , Toast.LENGTH_SHORT).show();
+				StopProgressDialog();
+				Toast.makeText(this, "Please enter the email on which you recived the invite" , Toast.LENGTH_SHORT).show();
 				Animation shake1 = AnimationUtils.loadAnimation(this, R.anim.shake);
 				mailEdit.startAnimation(shake1);
 				break;
 			case 2:
-				Toast.makeText(this, "Please enter the invitation code that you recived in the invite"  , Toast.LENGTH_SHORT).show();
+				StopProgressDialog();
+				Toast.makeText(this, "Please enter the invitation code that you recived in the invite" , Toast.LENGTH_SHORT).show();
 				Animation shake2 = AnimationUtils.loadAnimation(this, R.anim.shake);
 				this.invitationEdit.startAnimation(shake2);
 				break;
 			case 3: // if username is already used by another user
-				Toast.makeText(this, "The Username chosen is not available"  , Toast.LENGTH_SHORT).show();
+				StopProgressDialog();
+				Toast.makeText(this, "The Username chosen is not available" , Toast.LENGTH_SHORT).show();
 				Animation shake3 = AnimationUtils.loadAnimation(this, R.anim.shake);
 				userEdit.startAnimation(shake3);
 				break;
 			default:
-				Toast.makeText(this, "Response not valid from the server"  , Toast.LENGTH_SHORT).show();
+				StopProgressDialog();
+				Toast.makeText(this, "Response not valid from the server" , Toast.LENGTH_SHORT).show();
 			}
 
 			break;
 
 
 			case(Consts.REQUESTTYPE_CHANGE_PASSW):
-				if(resultData.getBoolean(Consts.PASSWORD_SETTED)){
-					//dialog
-					//TODO
-					Toast.makeText(this, "Registration complete."  , Toast.LENGTH_SHORT).show();
-
-				}else{
-					Toast.makeText(this, "Registration failed; please contact the administrator"  , Toast.LENGTH_SHORT).show();
-				}
+				StopProgressDialog();
+			if(resultData.getBoolean(Consts.PASSWORD_SETTED)){
+				//dialog
+				//TODO
+				Toast.makeText(this, "Registration complete." , Toast.LENGTH_SHORT).show();
+				exitToLogin();
+			}else{
+				Toast.makeText(this, "Registration failed; please contact the administrator" , Toast.LENGTH_SHORT).show();
+			}
 			break;
 
 
-			}		
+			}	
 		}else{
-			Toast.makeText(this, "ERROR"  , Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "ERROR" , Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -333,7 +352,7 @@ public class RegistrationActivity extends Activity implements RequestListener {
 
 	@Override
 	public void onRequestCustomError(Request request, Bundle resultData) {
-		StopProgressDialog();		
+		StopProgressDialog();	
 		Toast.makeText(this, "Custom error", Toast.LENGTH_SHORT).show();
 	}
 
@@ -342,6 +361,12 @@ public class RegistrationActivity extends Activity implements RequestListener {
 	protected void onPause() {
 		super.onPause();
 		mRequestManager.removeRequestListener(this);
+	}
+
+	private void exitToLogin(){
+		Intent i = new Intent(RegistrationActivity.this, LoginActivity.class);
+		startActivity(i);
+		RegistrationActivity.this.finish();
 	}
 
 
