@@ -12,6 +12,10 @@ import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
 import it.uniba.socialcde4android.dialogs.ChangePasswordDialog;
 import it.uniba.socialcde4android.dialogs.ChangePasswordDialog.OnChangePasswordListener;
+import it.uniba.socialcde4android.dialogs.ChooseAvatarDialog;
+import it.uniba.socialcde4android.dialogs.ChooseAvatarDialog.OnChooseAvatarListener;
+import it.uniba.socialcde4android.dialogs.HideUnhideDialog;
+import it.uniba.socialcde4android.dialogs.HideUnhideDialog.OnHideHunideListener;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog.OnFeaturesDialogInteractionListener;
@@ -25,6 +29,7 @@ import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnPro
 import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WFeature;
+import it.uniba.socialcde4android.shared.library.WHidden;
 import it.uniba.socialcde4android.shared.library.WOAuthData;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
@@ -39,6 +44,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -59,7 +65,7 @@ import android.widget.Toast;
 public class HomeActivity extends FragmentActivity   
 implements OnTimeLineFragmentInteractionListener,OnProfileFragmentInteractionListener, 
 OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener,
-OnTFSAuthInteractionListener, OnChangePasswordListener{
+OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, OnChooseAvatarListener{
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -96,7 +102,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 		mDrawerList_left = (ListView) findViewById(R.id.drawer_services_left);
 		mDrawerList_right = (ListView) findViewById(R.id.drawer_users_right);
 		mRequestManager = SocialCDERequestManager.from(this);
-		
+
 		if (getIntent().hasExtra("bundle") && savedInstanceState==null){
 			Bundle bundle = getIntent().getExtras().getBundle("bundle");
 			if (bundle != null){
@@ -104,6 +110,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				proxy_string = (String)getIntent().getExtras().getString(Preferences.PROXYSERVER);
 				userName_string = (String)getIntent().getExtras().getString(Preferences.USERNAME);
 				passw_string = (String)getIntent().getExtras().getString(Preferences.PASSWORD);
+				unlockScreenOrientation();
 				loadServices();
 				this.loadFriends();
 			}	
@@ -116,6 +123,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
 			fragmentTransaction.commit();
 		}
+
 	}
 
 
@@ -156,16 +164,18 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				StartProgressDialog();
 
 			Parcelable[] parcelableArray =	savedInstanceState.getParcelableArray(Consts.WSERVICES);
-			if (parcelableArray != null) wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
-			wuser_all = savedInstanceState.getParcelableArrayList(Consts.WUSERS);
-			wUsersNumType_SuggFingFersHidd = savedInstanceState.getIntArray(Consts.WUSERS_NUMBERS);
-			wuser = savedInstanceState.getParcelable(Consts.WUSER);
-			proxy_string = savedInstanceState.getString(Preferences.PROXYSERVER);
-			userName_string = savedInstanceState.getString(Preferences.USERNAME);
-			passw_string = savedInstanceState.getString(Preferences.PASSWORD);
-			populateDrawerLeft();
-			populateDrawerRight();
-			
+			if (parcelableArray != null) {
+				wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
+
+				wuser_all = savedInstanceState.getParcelableArrayList(Consts.WUSERS);
+				wUsersNumType_SuggFingFersHidd = savedInstanceState.getIntArray(Consts.WUSERS_NUMBERS);
+				wuser = savedInstanceState.getParcelable(Consts.WUSER);
+				proxy_string = savedInstanceState.getString(Preferences.PROXYSERVER);
+				userName_string = savedInstanceState.getString(Preferences.USERNAME);
+				passw_string = savedInstanceState.getString(Preferences.PASSWORD);
+				populateDrawerLeft();
+				populateDrawerRight();
+			}
 		}
 	}
 
@@ -238,22 +248,43 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 	private class DrawerLeftItemClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id) {
-			if (position == 0){
+			// switch sul TYPE
+			int type = mDrawerList_left.getAdapter().getItemViewType(position);
+			switch(type){
+			case ServicesAdapter.TYPE_AVATAR:
 				openUserProfile(wuser);
-			}else{
-				if (mDrawerList_left.getAdapter().getItemViewType(position) == ((ServicesAdapter) mDrawerList_left.getAdapter()).getServiceTypeID()){
-					WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-2);
-					if (wservice.isRegistered()){
-						getFeatures(wservice.getId());
-					}else{
-						if (wservice.isRequireOAuth()){
-							loadOAuthData(wservice.getId(), wservice.getOAuthVersion());
-						}else {
-							TFSAuthDialog tfs_dialog = TFSAuthDialog.newInstance(wservice);
-							tfs_dialog.show(getFragmentManager(), "TFS Auth");
-						}
+				break;
+			case ServicesAdapter.TYPE_SERVICE:
+				WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-2);
+				if (wservice.isRegistered()){
+					getFeatures(wservice.getId());
+				}else{
+					if (wservice.isRequireOAuth()){
+						loadOAuthData(wservice.getId(), wservice.getOAuthVersion());
+					}else {
+						TFSAuthDialog tfs_dialog = TFSAuthDialog.newInstance(wservice);
+						//tfs_dialog.setCancelable(false);
+						tfs_dialog.show(getFragmentManager(), "TFS Auth");
 					}
 				}
+				break;
+			case ServicesAdapter.TYPE_SETTING:
+				int itemSetting = position - 3 - HomeActivity.this.wservice.length;
+				Log.i("setting position", String.valueOf(itemSetting));
+				switch(itemSetting){ //SETTINGS = { "Choose Avatar", "Change Password", "Exit"};
+				case 0: //choose avatar
+					loadAvailableAvatars();
+					break;
+				case 1://change password
+					ChangePasswordDialog changeP_dialog = ChangePasswordDialog.newInstance(passw_string);
+					changeP_dialog.show(getFragmentManager(), "Change Password");
+					break;
+				case 2: //exit
+					HomeActivity.this.exitToLogin();
+					break;
+
+				}
+				break;
 			}
 			mDrawerLayout.closeDrawer(mDrawerList_left);
 		}
@@ -355,13 +386,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			else { if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	 mDrawerLayout.closeDrawer(mDrawerList_left);
 			mDrawerLayout.openDrawer(mDrawerList_right);}
 			break;
-		case R.id.logout:
-			this.exitToLogin();
-			break;
-		case R.id.password:
-			ChangePasswordDialog changeP_dialog = ChangePasswordDialog.newInstance(passw_string);
-			changeP_dialog.show(getFragmentManager(), "Change Password");
-			break;
+
 		default:
 
 		}
@@ -481,6 +506,23 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			StopProgressDialog();
 			break;
 
+
+			case(Consts.REQUESTTYPE_RETRIEVEHIDESETTINGS):
+				if (resultData.getBoolean(Consts.FOUND_HIDDEN_SETTINGS)){
+					WHidden whidden = (WHidden) resultData.getParcelable(Consts.WHIDDEN);
+					int user_id = resultData.getInt(Consts.USERID);
+					StopProgressDialog();
+					HideUnhideDialog hideUnhide_dialog = HideUnhideDialog.newInstance(whidden, user_id);
+					//		hideUnhide_dialog.setCancelable(false);
+					hideUnhide_dialog.show(getFragmentManager(), "Change Hide Settings");
+				}else{
+					StopProgressDialog();
+					Toast.makeText(this, "Error retrieving settings. Try again."  , Toast.LENGTH_LONG).show();
+				}
+
+			break;
+
+
 			case(Consts.REQUESTTYPE_SENDTFSPOST):
 				if (resultData.getBoolean(Consts.SENT)){
 					//va fatto il refresh della view..
@@ -492,9 +534,26 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				}else{
 					Toast.makeText(this, "An error occured."  , Toast.LENGTH_LONG).show();
 				}
-				StopProgressDialog();
+			StopProgressDialog();
 			break;
-			
+
+			case(Consts.REQUESTTYPE_GET_AVAILABLE_AVATARS):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.FOUND_AVATAR_IMAGES)){
+				String[] uri = null;
+
+				uri = resultData.getStringArray(Consts.URI);
+
+				//apro la dialog 
+				ChooseAvatarDialog chooseAvatar_dialog = ChooseAvatarDialog.newInstance(uri);
+				chooseAvatar_dialog.show(getFragmentManager(), "choose avatar");
+			}else{
+				Toast.makeText(this, "Avatars Not Available."  , Toast.LENGTH_LONG).show();
+			}
+			break;
+
+
+
 			case(Consts.REQUESTTYPE_RETRIEVEFEATURES):
 				StopProgressDialog();
 			if (resultData.getBoolean(Consts.FOUND_WFEATURES)){
@@ -510,6 +569,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				for (int i=0; i<wservice.length;i++){
 					if (wservice[i].getId() == service_id){
 						SetServiceFeaturesDialog features_dialog = SetServiceFeaturesDialog.newInstance(wfeature, wservice[i]);
+						//		features_dialog.setCancelable(false);
 						features_dialog.show(getFragmentManager(), "set features");
 						break;
 					}
@@ -522,14 +582,14 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 
 			case(Consts.REQUESTTYPE_GETOAUTDATA):
 				WOAuthData woauthdata =	resultData.getParcelable(Consts.OAUTH_DATA);
-				final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
+			final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
 
-				intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-				intent.putExtra(Consts.OAUTH_DATA, woauthdata);
-				intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
-				intent.putExtra(Consts.OAUTH_VERSION, resultData.getInt(Consts.OAUTH_VERSION) );
-				StopProgressDialog();
-				startActivityForResult(intent, Consts.WEBVIEW_REQUEST);				
+			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+			intent.putExtra(Consts.OAUTH_DATA, woauthdata);
+			intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
+			intent.putExtra(Consts.OAUTH_VERSION, resultData.getInt(Consts.OAUTH_VERSION) );
+			StopProgressDialog();
+			startActivityForResult(intent, Consts.WEBVIEW_REQUEST);				
 
 			break;
 
@@ -559,23 +619,23 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 
 			case(Consts.REQUESTTYPE_RECORD):
 				StopProgressDialog();
-				if (resultData.getBoolean(Consts.RECORDED)){
-					Toast.makeText(this, "Service recorded."  , Toast.LENGTH_LONG).show();
-				}else{
-					Toast.makeText(this, "Error recording service. Check the inserted values and try again."  , Toast.LENGTH_LONG).show();
+			if (resultData.getBoolean(Consts.RECORDED)){
+				Toast.makeText(this, "Service recorded."  , Toast.LENGTH_LONG).show();
+			}else{
+				Toast.makeText(this, "Error recording service. Check the inserted values and try again."  , Toast.LENGTH_LONG).show();
+			}
+			int service_id_rec = resultData.getInt(Consts.SERVICE_ID);
+			for (int i=0; i<wservice.length;i++){
+				if (wservice[i].getId() == service_id_rec){
+					wservice[i].setRegistered(true);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
+					mDrawerList_left.setAdapter(adapter);
+					break;
 				}
-				int service_id_rec = resultData.getInt(Consts.SERVICE_ID);
-				for (int i=0; i<wservice.length;i++){
-					if (wservice[i].getId() == service_id_rec){
-						wservice[i].setRegistered(true);
-						ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
-						mDrawerList_left.setAdapter(adapter);
-						break;
-					}
-				}
-				getFeatures(service_id_rec);
+			}
+			getFeatures(service_id_rec);
 			break;
-			
+
 			case(Consts.REQUESTTYPE_SET_FEATURES):
 				StopProgressDialog();
 			if (resultData.getBoolean(Consts.SETTED_FEATURES)){
@@ -583,6 +643,18 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			}else{
 				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
 			}
+			break;
+
+
+			case(Consts.REQUESTTYPE_UPDATE_HIDDEN_SETTINGS):
+				if (resultData.getBoolean(Consts.HIDDEN_SETTINGS_UPDATED)){
+					Toast.makeText(this, "Hide settings updated."  , Toast.LENGTH_LONG).show();
+					//ricarica il drawer degli utenti
+					loadFriends();
+				}else{
+					StopProgressDialog();
+					Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				}
 			break;
 
 			case(Consts.REQUESTTYPE_CHANGE_PASSW):
@@ -594,7 +666,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
 			}
 			break;
-			
+
 			case(Consts.REQUESTTYPE_UNREG_SERVICE):
 				int service_id = resultData.getInt(Consts.SERVICE_ID);
 			for (int i=0; i<wservice.length;i++){
@@ -661,6 +733,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			Toast.makeText(this, "Error retrieving users list. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
 			break;
+		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS:
+			Toast.makeText(this, "Error retrieving Hide Settings. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving Hide Settings. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
 		case Error_consts.POST_ERROR:
 			Toast.makeText(this, "Error sending message. ", Toast.LENGTH_SHORT).show();
 			//exitToLogin();
@@ -675,7 +753,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			break;
 		case Error_consts.RECORD_ERROR * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error recording the service. Connection Timeout.", Toast.LENGTH_SHORT).show();
-		//	exitToLogin();
+			//	exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES:
 			Toast.makeText(this, "Error retrieving services.  Exiting to login.", Toast.LENGTH_SHORT).show();
@@ -698,6 +776,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
 			break;
+		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS:
+			Toast.makeText(this, "Error updating Hide Settings. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error updating Hide Settings. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			break;
 		case Error_consts.ERROR_USERNAME_AVAILABLE:
 			Toast.makeText(this, "Error retrieving username availability. ", Toast.LENGTH_SHORT).show();
 			break;
@@ -709,6 +793,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 			break;
 		case Error_consts.ERROR_GET_OAUTHDATA * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error retrieving OAuth Data. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_AVATARS:
+			Toast.makeText(this, "Error retrieving Available Avatars. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_AVATARS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving Available Avatars. Connection Timeout. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.AUTHORIZE_ERROR:
 			Toast.makeText(this, "Error in Authorize operation. ", Toast.LENGTH_SHORT).show();
@@ -843,7 +933,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 				String token = data.getStringExtra(Consts.ACCESS_TOKEN); 
 				String secret = data.getStringExtra(Consts.ACCESS_SECRET);
 				String pin = data.getStringExtra(Consts.VERIFIER_PIN);
-			//	int oaut_version = data.getIntExtra(Consts.OAUTH_VERSION, -1);
+				//	int oaut_version = data.getIntExtra(Consts.OAUTH_VERSION, -1);
 				Authorize(service_id, token, pin, secret);
 
 			}
@@ -948,7 +1038,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 		}
 	}
 
-	
+
 	public void sendTFSPost(String postTFS){
 		if (isOnline()){
 			r = SocialCDERequestFactory.sendTFSpost();
@@ -981,8 +1071,61 @@ OnTFSAuthInteractionListener, OnChangePasswordListener{
 		}else{
 			new NoNetworkDialog().show(getFragmentManager(), "alert");
 		}
-		
+
 	}
-	
-	
+
+
+
+
+	@Override
+	public void loadUserHideSettings(int userId) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.getHideSettings();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.USERID, userId);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
+
+
+	@Override
+	public void setHideSettings(WHidden whidden, int userId) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.setHideSettings();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.USERID, userId);
+			r.put(Consts.WHIDDEN, whidden);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+	public void loadAvailableAvatars(){
+		if (isOnline()){
+			r = SocialCDERequestFactory.getAvailableAvatars();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
 } 

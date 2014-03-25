@@ -1,40 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/RelativeLayoutPass"
+    android:id="@+id/RelativeLayoutHideUnide"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="bottom"
     android:orientation="vertical" >
 
     <FrameLayout
-        android:id="@+id/FrameLayout1AVATAR_IMAGE"
+        android:id="@+id/FrameLayoutBase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
         android:layout_marginTop="15dp" >
 
         <TextView
-            android:id="@+id/textView1_title_service_CHANGEPASS"
+            android:id="@+id/textView1_title_HIDE_FROM"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:text="@string/title_dialog_change_password"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="25dp"
+            android:text="@string/title_hide_from"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="20sp"
             android:textStyle="bold" />
+
     </FrameLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout1_buttons_CHANGEPASS"
+        android:id="@+id/linearLayout1_buttons_HIDEUNHIDE"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/linearlayout_edittexts_CHANGEPASS"
+        android:layout_below="@+id/linearlayout_checkBox_HIDEHUNIDE"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
         android:gravity="bottom|center|center_horizontal|center_vertical" >
 
         <Button
-            android:id="@+id/button1_dialog_CANCELCHANGEPASS"
+            android:id="@+id/button1_dialog_CANCELHIDEUNIDE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -43,7 +45,7 @@
             android:text="@string/buttoncancel" />
 
         <Button
-            android:id="@+id/button2_dialog_OKCHANGEPASS"
+            android:id="@+id/button2_dialog_OKHIDEUNHIDE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -53,45 +55,37 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearlayout_edittexts_CHANGEPASS"
+        android:id="@+id/linearlayout_checkBox_HIDEHUNIDE"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/FrameLayout1AVATAR_IMAGE"
-        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/FrameLayoutBase"
+        android:layout_marginLeft="25dp"
         android:gravity="center_vertical"
         android:orientation="vertical" >
 
-        <EditText
-            android:id="@+id/editTextdialogOLDPASSWORD"
+        <CheckBox
+            android:id="@+id/checkBox1SUGGESTIONS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-          
-            android:ems="10"
-            android:gravity="center_vertical"
-            android:hint="@string/oldpassword"
-            android:inputType="textPassword" />
+            android:text="@string/suggestion"
+            android:textSize="20sp" />
 
-        <EditText
-            android:id="@+id/editTextDialogNEWPassword"
+        <CheckBox
+            android:id="@+id/checkBox3ITERATION"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:ems="10"
-            android:gravity="center_vertical"
-            android:hint="@string/new_password"
-            android:inputType="textPassword" >
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:text="@string/iterationtimeline"
+            android:textSize="20sp" />
 
-            <requestFocus />
-        </EditText>
-
-        <EditText
-            android:id="@+id/editTextdialogRepeatPASSWORD"
-            android:layout_width="match_parent"
+        <CheckBox
+            android:id="@+id/checkBox2INTERACTIVE"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/repeat_password"
-            android:inputType="textPassword" />
+            android:text="@string/interactivetimeline"
+            android:textSize="20sp" />
+       
     </LinearLayout>
 
 </RelativeLayout>

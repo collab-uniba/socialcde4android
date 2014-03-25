@@ -145,6 +145,24 @@ public class Consts {
 
 	public static final String NEW_PASSWORD = "new password";
 
+	public static final String USERID = "user id";
+
+	public static final String WHIDDEN = "widden";
+	
+	public static final String  FOUND_HIDDEN_SETTINGS = "found hidden settings";
+
+	public static final int REQUESTTYPE_RETRIEVEHIDESETTINGS = 21;
+
+	public static final String HIDDEN_SETTINGS_UPDATED = "hidden settings updated";
+
+	public static final int REQUESTTYPE_UPDATE_HIDDEN_SETTINGS = 22;
+
+	public static final int REQUESTTYPE_GET_AVAILABLE_AVATARS = 23;
+
+	public static final String URI = "uri";
+
+	public static final String FOUND_AVATAR_IMAGES = "found avatar images";
+
 	
 
 	

@@ -11,6 +11,7 @@ import it.uniba.socialcde4android.shared.library.WUser;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,9 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (mListWpostItems == null) num_post=0;
 			else num_post = mListWpostItems.size();
+		if (context == null){
+			Log.i("inside adapter", "context null");
+		}
 		frgmentListener = (OnTimeLineAdapterListener) fragment;
 		this.noMoreItems = noMoreItems;
 		this.clickable = clickable;

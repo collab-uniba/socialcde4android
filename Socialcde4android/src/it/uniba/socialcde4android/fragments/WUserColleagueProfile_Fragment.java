@@ -3,7 +3,10 @@ package it.uniba.socialcde4android.fragments;
 import com.squareup.picasso.Picasso;
 
 import it.uniba.socialcde4android.R;
+import it.uniba.socialcde4android.dialogs.ChangePasswordDialog;
+import it.uniba.socialcde4android.dialogs.HideUnhideDialog;
 import it.uniba.socialcde4android.preferences.Preferences;
+import it.uniba.socialcde4android.shared.library.WHidden;
 import it.uniba.socialcde4android.shared.library.WUser;
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,6 +30,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	private TextView followersText;
 	private TextView followingText;
 	private CheckBox followCheckBox;
+	private Button hideButton;
 	private OnProfileFragmentInteractionListener mListenerWUser;
 
 	@Override
@@ -69,9 +74,19 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		followersText = (TextView) view.findViewById(R.id.textViewFollowersFragment);
 		followingText = (TextView) view.findViewById(R.id.textViewFollowingFragment);
 		followCheckBox = (CheckBox) view.findViewById(R.id.checkBoxFollowFragment);
+		hideButton = (Button) view.findViewById(R.id.buttonHideUnide);
 
 
 		String avatar_address = wuser.getAvatar();
+		
+		hideButton.setOnClickListener(new View.OnClickListener() {
+		    @Override
+		    public void onClick(View v) {
+		    	mListenerWUser.loadUserHideSettings(wuser.getId());
+		    }
+		});
+		
+		
 		if (avatar_address != null){
 			Picasso.with(this.getActivity()).load(avatar_address).into(userImage);
 		}
@@ -104,8 +119,15 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	public interface OnProfileFragmentInteractionListener {
 		// TODO: Update argument type and name
 		public void onProfileFragmentCheckBoxChanged(Boolean followChecked, WUser wuser_profile);
+		
+		public void loadUserHideSettings(int userId);
 	}
 
+//	public void loadDialogHideUnhide(WHidden widden){
+//		//richiamare la dialog impostando i checkbox con i valori di hidden
+//		HideUnhideDialog hideUnhide_dialog = HideUnhideDialog.newInstance(widden);
+//		hideUnhide_dialog.show(getFragmentManager(), "Change Hide Settings");
+//	}
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -139,8 +161,6 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 
 	@Override
 	public String getRequest(int datatype) {
-		String username = preferences.get(Preferences.USERNAME);
-		String password = preferences.get(Preferences.PASSWORD);
 		long since = 0;
 		long to = 0 ;
 		if (datatype == super.GET_MOREDATA_TYPE)

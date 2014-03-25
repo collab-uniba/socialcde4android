@@ -11,7 +11,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_gradient_wuser" >
 
         <ImageView
             android:id="@+id/imageViewFrament2"
@@ -23,6 +24,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
             android:orientation="vertical" >
 
             <TextView
@@ -66,7 +68,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/Gainsboro" />
+        android:background="@color/WuserProfile" />
 
     <com.handmark.pulltorefresh.library.PullToRefreshListView
         android:id="@+id/listViewCheckBoxFEATURES"

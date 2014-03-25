@@ -49,5 +49,12 @@
     <string name="new_password">New Password</string>
     <string name="repeat_password">Repeat Password</string>
     <string name="title_dialog_change_password">Change Password</string>
+    <string name="drawer_settings_title">Settings</string>
+    <string name="hideunide">Hide/Unhide</string>
+    <string name="title_hide_from">Hide user from:</string>
+    <string name="suggestion">Suggestions</string>
+    <string name="iterationtimeline">Iteration Timeline</string>
+    <string name="interactivetimeline">Interactive Timeline</string>
+    <string name="choose_avatar">Choose your avatar</string>
 
 </resources>

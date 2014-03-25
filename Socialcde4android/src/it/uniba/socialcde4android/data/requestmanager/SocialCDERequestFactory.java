@@ -36,6 +36,10 @@ public final class SocialCDERequestFactory {
 	public static final int UNREG_SERVICE = 13;
 	public static final int RECORD_SERVICE = 14;
 	public static final int  SEND_TFSPOST = 15;
+	public static final int  GET_HIDE_SETTINGS = 16;
+	public static final int  SET_HIDE_SETTINGS = 17;
+	public static final int GET_AVAILABLE_AVATARS = 18;
+
 
 
     // Response data
@@ -135,6 +139,21 @@ public final class SocialCDERequestFactory {
 
 	public static Request sendTFSpost() {
 		Request request = new Request(SEND_TFSPOST);		
+		return request;
+	}
+
+	public static Request getHideSettings() {
+		Request request = new Request(GET_HIDE_SETTINGS);		
+		return request;
+	}
+
+	public static Request setHideSettings() {
+		Request request = new Request(SET_HIDE_SETTINGS);		
+		return request;
+	}
+
+	public static Request getAvailableAvatars() {
+		Request request = new Request(GET_AVAILABLE_AVATARS);		
 		return request;
 	}
 

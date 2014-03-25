@@ -96,8 +96,7 @@ public class WUserProfile_Fragment extends TimeLine_AbstractFragment{
 
 	@Override
 	public String getRequest(int datatype) {
-		String username = preferences.get(Preferences.USERNAME);
-		String password = preferences.get(Preferences.PASSWORD);
+
 		long since = 0;
 		long to = 0 ;
 		if (datatype == super.GET_MOREDATA_TYPE)
