@@ -13,7 +13,7 @@ import android.widget.TextView;
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.shared.library.WUser;
 
-import com.squareup.picasso.Picasso;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class UsersAdapter extends ArrayAdapter<WUser>{
 
@@ -34,7 +34,7 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 	//private int add_positions = 0;
 	private Boolean[] added = new Boolean[5];
 
-
+	private ImageLoader imageloader;
 
 
 
@@ -84,6 +84,9 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 		}
 
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		imageloader = ConfiguratedImageLoader.getImageLoader(context);
+
+
 	}
 
 	public int getUserTypeID(){
@@ -167,7 +170,7 @@ public class UsersAdapter extends ArrayAdapter<WUser>{
 			view.textViewUser.setText(wuser.getUsername());
 			String avatar_address = wuser.getAvatar();
 			if (avatar_address != null){
-				Picasso.with(this.getContext()).load(avatar_address).into(view.imageviewUser);
+				imageloader.displayImage(avatar_address, view.imageviewUser);
 			}
 
 			break;

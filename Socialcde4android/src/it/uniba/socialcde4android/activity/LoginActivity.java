@@ -8,6 +8,7 @@ import com.foxykeep.datadroid.requestmanager.RequestManager;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 
 import it.uniba.socialcde4android.R;
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;

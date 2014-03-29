@@ -163,6 +163,10 @@ public class Consts {
 
 	public static final String FOUND_AVATAR_IMAGES = "found avatar images";
 
+	public static final String SETTED_AVATAR = "setted avatar";
+
+	public static final int REQUESTTYPE_SET_AVATAR = 24;
+
 	
 
 	

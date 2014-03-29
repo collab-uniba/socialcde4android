@@ -18,9 +18,12 @@
             android:id="@+id/imageViewFrament2"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:layout_gravity="center_vertical"
             android:layout_margin="10dp"
             android:src="@drawable/user_default" />
 
+        
+        
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -36,7 +39,9 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/SteelBlue"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:singleLine="true"
+            android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/textViewPostsFragment2"

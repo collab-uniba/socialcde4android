@@ -1,24 +1,17 @@
 package it.uniba.socialcde4android.fragments;
 
-import java.util.Map;
-
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.GetDataTask;
-import it.uniba.socialcde4android.preferences.Preferences;
+
 import it.uniba.socialcde4android.shared.library.WUser;
 
 
@@ -38,10 +31,13 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	private EditText editTextMessage;
 	private LinearLayout editTextLayout;
 	private Boolean isEditShowing = false;
+	private static final String ARG_PASSWORD = "password";
+
 
 	/**
 	 * Use this factory method to create a new instance of this fragment using
 	 * the provided parameters.
+	 * @param passw_string 
 	 * 
 	 * @param param1
 	 *            Parameter 1.
@@ -50,19 +46,29 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	 * @return A new instance of fragment BlankFragment.
 	 */
 	// TODO: Rename and change types and number of parameters
-	public static TimeLine_Fragment newInstance() {
+	public static TimeLine_Fragment newInstance(String passw_string) {
 		TimeLine_Fragment fragment = new TimeLine_Fragment();
-		//		Bundle args = new Bundle();
-		//		args.putString(ARG_PARAM1, param1);
+		Bundle args = new Bundle();
+		args.putString(ARG_PASSWORD, passw_string);
 		//		args.putString(ARG_PARAM2, param2);
 		//		fragment.setArguments(args);
 		//fragment.setRetainInstance(true);
+		fragment.setArguments(args);
 		return fragment;
 	}
 
 	public TimeLine_Fragment() {
-		//super();
+		super();
 		// Required empty public constructor
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (getArguments() != null) {
+			password = getArguments().getString(ARG_PASSWORD);
+
+		}
 	}
 
 	@Override
@@ -142,11 +148,11 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	}
 
 
-	public interface OnTimeLineFragmentInteractionListener extends OnGenericTimeLineFragmentInteractionListener{
-
-		public void onHomeTimeLineFragmentEvent();
-
-	}
+	//	public interface OnTimeLineFragmentInteractionListener extends OnGenericTimeLineFragmentInteractionListener{
+	//
+	//		public void onHomeTimeLineFragmentEvent();
+	//
+	//	}
 
 	//	@Override
 	//	public void onCreate(Bundle savedInstanceState) {
@@ -172,7 +178,7 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 
 	@Override
 	public String getRequest(int datatype) {
-		
+
 		long since = 0;
 		long to = 0 ;
 		if (datatype == super.GET_MOREDATA_TYPE){

@@ -23,4 +23,5 @@ public class Error_consts {
 	public static final int ERROR_RETRIEVING_HIDDEN_SETTINGS = 142;
 	public static final int ERROR_UPDATING_HIDDEN_SETTINGS = 143;
 	public static final int ERROR_RETRIEVING_AVATARS = 144;
+	public static final int SET_AVATAR_ERROR = 145;
 }

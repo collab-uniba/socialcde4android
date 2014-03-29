@@ -2,13 +2,16 @@ package it.uniba.socialcde4android.dialogs;
 
 import java.util.Arrays;
 
-import com.squareup.picasso.Picasso;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 
 import it.uniba.socialcde4android.R;
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.adapters.FeaturesAdapter;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WService;
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -29,7 +32,8 @@ public class SetServiceFeaturesDialog extends DialogFragment{
 	private ListView listview;
 	private FeaturesAdapter adapter;
 	private OnFeaturesDialogInteractionListener mListener;
-	
+	private ImageLoader imageloader;
+
 	
 	public static SetServiceFeaturesDialog newInstance(WFeature[] wfeature, WService wService) {
 		SetServiceFeaturesDialog dialog = new SetServiceFeaturesDialog();
@@ -65,10 +69,11 @@ public class SetServiceFeaturesDialog extends DialogFragment{
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
+		imageloader = ConfiguratedImageLoader.getImageLoader((Activity)mListener);
         View v = inflater.inflate(R.layout.dialog_set_service_features, container, false);
         //getDialog().getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
         ImageView imageviewService = (ImageView) v.findViewById(R.id.imageView1_logoFEATURE); 
-		Picasso.with(v.getContext()).load(Preferences.getSavedHost(getActivity())+wservice.getImage()).into(imageviewService);
+		imageloader.displayImage(Preferences.getSavedHost(getActivity())+wservice.getImage(), imageviewService);
         TextView title = (TextView) v.findViewById(R.id.textView1_title_FEATURES);
         title.setText(wservice.getName()+" features");
 		listview = (ListView) v.findViewById(R.id.listViewCheckBoxFEATURES2);

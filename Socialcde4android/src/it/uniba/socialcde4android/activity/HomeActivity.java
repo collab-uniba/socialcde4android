@@ -6,6 +6,7 @@ import java.util.Arrays;
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.costants.Error_consts;
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.adapters.ServicesAdapter;
 import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
@@ -23,7 +24,6 @@ import it.uniba.socialcde4android.dialogs.TFSAuthDialog;
 import it.uniba.socialcde4android.dialogs.TFSAuthDialog.OnTFSAuthInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnGenericTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
-import it.uniba.socialcde4android.fragments.TimeLine_Fragment.OnTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
@@ -63,7 +63,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class HomeActivity extends FragmentActivity   
-implements OnTimeLineFragmentInteractionListener,OnProfileFragmentInteractionListener, 
+implements OnProfileFragmentInteractionListener, 
 OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener,
 OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, OnChooseAvatarListener{
 
@@ -117,7 +117,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		}
 
 		if (savedInstanceState==null) {
-			Fragment fragment = TimeLine_Fragment.newInstance();
+			Fragment fragment = TimeLine_Fragment.newInstance(this.passw_string);
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 			fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
@@ -127,6 +127,9 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	}
 
 
+	public String getPassword(){
+		return this.passw_string;
+	}
 
 
 	@Override
@@ -154,6 +157,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
+
 
 		if (savedInstanceState != null) {
 			r = savedInstanceState.getParcelable(PARCELABLE_REQUEST);
@@ -398,10 +402,10 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		// create a new fragment and specify the planet to show based on position
 		Fragment fragment = null;
 		if (wuserToOpen.getId() == wuser.getId())	{
-			fragment = WUserProfile_Fragment.newInstance(wuser);
+			fragment = WUserProfile_Fragment.newInstance(wuser, this.passw_string);
 		}
 		else	{
-			fragment = WUserColleagueProfile_Fragment.newInstance(wuserToOpen);
+			fragment = WUserColleagueProfile_Fragment.newInstance(wuserToOpen, this.passw_string);
 		}
 		// Insert the fragment by replacing any existing fragment
 		FragmentManager fragmentManager = getSupportFragmentManager();
@@ -415,7 +419,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		fragmentTransaction.addToBackStack(null);
 		fragmentTransaction.commit();
 		// Highlight the selected item, update the title, and close the drawer
-		getActionBar().setTitle("User Profile");
+		//getActionBar().setTitle("User Profile");
 		mDrawerLayout.closeDrawer(mDrawerList_right);
 	}
 
@@ -540,13 +544,14 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			case(Consts.REQUESTTYPE_GET_AVAILABLE_AVATARS):
 				StopProgressDialog();
 			if (resultData.getBoolean(Consts.FOUND_AVATAR_IMAGES)){
+				
 				String[] uri = null;
-
 				uri = resultData.getStringArray(Consts.URI);
-
+				
 				//apro la dialog 
-				ChooseAvatarDialog chooseAvatar_dialog = ChooseAvatarDialog.newInstance(uri);
+				ChooseAvatarDialog chooseAvatar_dialog = ChooseAvatarDialog.newInstance(uri, wuser.getAvatar());
 				chooseAvatar_dialog.show(getFragmentManager(), "choose avatar");
+				
 			}else{
 				Toast.makeText(this, "Avatars Not Available."  , Toast.LENGTH_LONG).show();
 			}
@@ -645,6 +650,18 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			}
 			break;
 
+			case(Consts.REQUESTTYPE_SET_AVATAR):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.SETTED_AVATAR)){
+				Toast.makeText(this, "Avatar updated."  , Toast.LENGTH_LONG).show();
+				//è necessario aggiornare wuser e ricaricare il drawerleft
+				wuser.setAvatar(resultData.getString(Consts.URI));
+				populateDrawerLeft();
+				//TODO da controllare che funzioni anche con la cache dell'imageloader attiva
+			}else{
+				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+			}
+			break;
 
 			case(Consts.REQUESTTYPE_UPDATE_HIDDEN_SETTINGS):
 				if (resultData.getBoolean(Consts.HIDDEN_SETTINGS_UPDATED)){
@@ -818,6 +835,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		case Error_consts.SET_FEATURES_ERROR * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error updating features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
 			break;
+		case Error_consts.SET_AVATAR_ERROR:
+			Toast.makeText(this, "Error setting new Avatar. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.SET_AVATAR_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error setting new Avatar. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
 		case Error_consts.UNREG_SERVICE_ERROR:
 			Toast.makeText(this, "Error unsubscribing service. ", Toast.LENGTH_SHORT).show();
 			break;
@@ -829,9 +852,10 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 	public void exitToLogin(){
 		StopProgressDialog();
-		//se ci sono fragment eliminali.. TODO
+		//se ci sono fragment eliminali.. 
 		if (mRequestManager.isRequestInProgress(r)) mRequestManager.removeRequestListener(this, r);
 		if (mRequestManager.isRequestInProgress(r2)) mRequestManager.removeRequestListener(this, r2);
+		ConfiguratedImageLoader.destroyIfImageLoader();
 		Preferences.setFalseAutolog(this);
 		Intent i = new Intent(HomeActivity.this, LoginActivity.class);
 		startActivity(i);
@@ -906,11 +930,6 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 	}
 
-	@Override
-	public void onHomeTimeLineFragmentEvent() {
-		// TODO Auto-generated method stub
-
-	}
 
 
 	@Override
@@ -1119,6 +1138,25 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			r.put(Preferences.PROXYSERVER, this.proxy_string);
 			r.put(Preferences.USERNAME, this.userName_string);
 			r.put(Preferences.PASSWORD, this.passw_string);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
+
+
+	@Override
+	public void setAvatar(String uri) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.setAvatar();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.URI, uri);
 			r.setMemoryCacheEnabled(true);
 			StartProgressDialog();
 			mRequestManager.execute(r, this);

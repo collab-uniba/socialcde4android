@@ -2,6 +2,8 @@ package it.uniba.socialcde4android.adapters;
 
 import java.util.Locale;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,7 +17,6 @@ import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 
-import com.squareup.picasso.Picasso;
 
 public class ServicesAdapter extends ArrayAdapter<WService>{
 
@@ -37,7 +38,8 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 	private String proxy;
 	private static final String[] SETTINGS = { "Choose Avatar", "Change Password", "Exit"};
 	//save an image without spaces in the name and all lowercase
-	
+	private ImageLoader imageloader;
+
 
 
 	public ServicesAdapter(Context context, int resource, WService[] wservice, WUser wuser, String proxy_string ) {
@@ -53,6 +55,8 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 		this.proxy = proxy_string;
 
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		imageloader = ConfiguratedImageLoader.getImageLoader(context);
+
 	}
 
 	public int getCount() {
@@ -97,7 +101,8 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 				textViewAvatar.setText(name);
 				ImageView imageviewAvatar = (ImageView) rowView.findViewById(R.id.imageViewdrawerAVATAR); 
 				if (avatar_address != null){
-					Picasso.with(this.getContext()).load(avatar_address).into(imageviewAvatar);
+					imageloader.displayImage(avatar_address, imageviewAvatar);
+
 				}
 				TextView textViewAvatarPost = (TextView) rowView.findViewById(R.id.textViewAvatarPost);
 				textViewAvatarPost.setText("Posts: "+post);
@@ -128,7 +133,8 @@ public class ServicesAdapter extends ArrayAdapter<WService>{
 					imageviewStatusDot.setImageResource(getContext().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+"greydot",null,null));
 				}
 				ImageView imageviewService = (ImageView) rowView.findViewById(R.id.imageViewdrawer); 
-				Picasso.with(context).load(proxy+wservice.getImage()).into(imageviewService);
+				imageloader.displayImage(proxy+wservice.getImage(), imageviewService);
+
 
 				break;
 			case TYPE_TITLE:

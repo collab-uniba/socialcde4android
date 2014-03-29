@@ -1,12 +1,8 @@
 package it.uniba.socialcde4android.fragments;
 
-import com.squareup.picasso.Picasso;
 
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.dialogs.ChangePasswordDialog;
-import it.uniba.socialcde4android.dialogs.HideUnhideDialog;
-import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.WHidden;
+
 import it.uniba.socialcde4android.shared.library.WUser;
 import android.app.Activity;
 import android.os.Bundle;
@@ -32,23 +28,27 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	private CheckBox followCheckBox;
 	private Button hideButton;
 	private OnProfileFragmentInteractionListener mListenerWUser;
+	private static final String ARG_PASSWORD = "password";
+
 
 	@Override
 	public int getFragmentViewId() {
 		return R.layout.fragment_wusercolleague_profile;
 	}
 
-	public static WUserColleagueProfile_Fragment newInstance(WUser wuser) {
+	public static WUserColleagueProfile_Fragment newInstance(WUser wuser, String passw_string) {
 		WUserColleagueProfile_Fragment fragment = new WUserColleagueProfile_Fragment();
 		Bundle args = new Bundle();
 		args.putParcelable(ARG_WUSER, wuser);
+		args.putString(ARG_PASSWORD, passw_string);
+
 		//	args.putString(ARG_PARAM2, param2);
 		fragment.setArguments(args);
 		return fragment;
 	}
 
 	public WUserColleagueProfile_Fragment() {
-		//super();
+		super();
 		// Required empty public constructor
 	}
 
@@ -58,6 +58,8 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		super.onCreate(savedInstanceState);
 		if (getArguments() != null) {
 			wuser = getArguments().getParcelable(ARG_WUSER);
+			password = getArguments().getString(ARG_PASSWORD);
+
 		}
 	}
 
@@ -88,7 +90,8 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		
 		
 		if (avatar_address != null){
-			Picasso.with(this.getActivity()).load(avatar_address).into(userImage);
+			imageloader.displayImage(avatar_address, userImage);
+
 		}
 		userNameText.setText(wuser.getUsername());
 		postsText.setText("Posts: "+wuser.getStatuses());

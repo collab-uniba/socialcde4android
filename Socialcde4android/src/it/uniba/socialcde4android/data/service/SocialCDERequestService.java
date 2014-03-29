@@ -70,6 +70,8 @@ public final class SocialCDERequestService extends RequestService {
 			return new SetHideSettings_Operation();
 		case SocialCDERequestFactory.GET_AVAILABLE_AVATARS:
 			return new GetAvailableAvatars_Operation();
+		case SocialCDERequestFactory.SET_AVATAR:
+			return new SetAvatar_Operation();
 		}
 		
 		

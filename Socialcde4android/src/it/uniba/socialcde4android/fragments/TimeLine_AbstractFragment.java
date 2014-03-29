@@ -18,8 +18,10 @@ import com.google.gson.GsonBuilder;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import it.uniba.socialcde4android.R;
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.adapters.TimeLineAdapter;
 import it.uniba.socialcde4android.adapters.TimeLineAdapter.OnTimeLineAdapterListener;
 import it.uniba.socialcde4android.config.Config;
@@ -30,7 +32,6 @@ import it.uniba.socialcde4android.shared.library.WUser;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -68,7 +69,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected Boolean loading_more = false;
 	protected ArrayList<WPost> mListWpostItems = null;
 	protected OnGenericTimeLineFragmentInteractionListener mListener;
-	public boolean noMoreMessages = false;
+	public volatile boolean noMoreMessages = false;
 	private static final String NO_MORE_MESSAGES = "no more messages";
 	private static final String LOADING_MORE = "loading more";
 	protected GetDataTask getDataTask ;
@@ -76,8 +77,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected String password = "";
 	protected String host = "";
 	//protected boolean loadAgainRequestedInASecond = false;
-
-	private boolean data_error = false;
+	private volatile boolean data_error = false;
+	protected ImageLoader imageloader;
 
 
 	public String getTAG(){
@@ -99,6 +100,8 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
+		imageloader = ConfiguratedImageLoader.getImageLoader((Activity)mListener);
+
 		Log.i("onCreateView","onCreateView");
 
 		View view = inflater.inflate(getFragmentViewId(), container,	false);
@@ -171,7 +174,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		if (username.equals("")){
 			Map<String,String> preferences = Preferences.loadPreferences((Activity)mListener);
 			username = preferences.get(Preferences.USERNAME);
-			password = preferences.get(Preferences.PASSWORD);
+//			password = mListener.getPassword();
 			host = preferences.get(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
 		}
 		if (mListWpostItems!=null ){
@@ -194,6 +197,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				noMoreMessages = savedInstanceState.getBoolean(NO_MORE_MESSAGES);
 				mListWpostItems = savedInstanceState.getParcelableArrayList(WPOST_ARRAY);
 				loading_more = savedInstanceState.getBoolean(LOADING_MORE);
+				password = savedInstanceState.getString(Preferences.PASSWORD);
 				if (mListWpostItems!=null ){
 					Context context = (Activity)mListener;
 					mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
@@ -223,6 +227,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		savedInstanceState.putParcelableArrayList(WPOST_ARRAY, mListWpostItems);
 		savedInstanceState.putBoolean(NO_MORE_MESSAGES, noMoreMessages);
 		savedInstanceState.putBoolean(LOADING_MORE, loading_more);
+		savedInstanceState.putString(Preferences.PASSWORD, password);
 		if (getDataTask != null ) {
 
 			getDataTask.cancel(true);
@@ -287,6 +292,9 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		public void openUserProfileFromFragment(WUser wuser);
 
 		public void sendTFSPost(String post);
+		
+		public String getPassword();
+
 
 	//	public void loadUserHideSettings(int id);
 
@@ -338,7 +346,6 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 				OutputStream out = conn.getOutputStream();
 				Writer writer = new OutputStreamWriter(out, "UTF-8");
 				writer.write(getRequest(type_request));
-
 				writer.close();
 				out.close();
 				int status = conn.getResponseCode();
@@ -400,7 +407,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			case GET_DATA_TYPE:
 				if (wposts.length>0){
 					mListWpostItems = new ArrayList<WPost>( Arrays.asList(wposts));
-					if (wposts.length<5)
+					if (wposts.length<15)
 						noMoreMessages = true;
 					else
 						noMoreMessages = false;

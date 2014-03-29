@@ -37,7 +37,9 @@
                 android:text="Medium Text"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/White"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:singleLine="true"
+            android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/textViewAvatarPost"

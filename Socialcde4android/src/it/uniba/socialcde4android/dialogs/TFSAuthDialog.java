@@ -1,12 +1,14 @@
 package it.uniba.socialcde4android.dialogs;
 
 
-import com.squareup.picasso.Picasso;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import it.uniba.socialcde4android.R;
 
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WService;
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,6 +27,8 @@ public class TFSAuthDialog extends DialogFragment{
 	private EditText username;
 	private EditText password;
 	private EditText domain = null;
+	private ImageLoader imageloader;
+
 	
 	public static TFSAuthDialog newInstance( WService wService) {
 		TFSAuthDialog dialog = new TFSAuthDialog();
@@ -55,6 +59,7 @@ public class TFSAuthDialog extends DialogFragment{
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
+		imageloader = ConfiguratedImageLoader.getImageLoader((Activity)mListener);
 		View v = null;
 		if (wservice.isRequireTFSDomain()){
 			v = inflater.inflate(R.layout.dialog_service_domain, container, false);
@@ -64,7 +69,7 @@ public class TFSAuthDialog extends DialogFragment{
 		}
         //getDialog().getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
         ImageView imageviewService = (ImageView) v.findViewById(R.id.imageView1_service_LOGO); 
-		Picasso.with(v.getContext()).load(Preferences.getSavedHost(getActivity())+wservice.getImage()).into(imageviewService);
+		imageloader.displayImage(Preferences.getSavedHost(getActivity())+wservice.getImage(), imageviewService);
 
 		//imageviewService.setImageResource(getActivity().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+wservice.getImage().replace("/Images/", "").replace(".png", ""),null,null));
         TextView title = (TextView) v.findViewById(R.id.textView1_title_service_SERVICE);

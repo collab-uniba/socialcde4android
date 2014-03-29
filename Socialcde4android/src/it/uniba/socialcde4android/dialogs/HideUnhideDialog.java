@@ -2,7 +2,6 @@ package it.uniba.socialcde4android.dialogs;
 
 import java.util.Arrays;
 
-import com.squareup.picasso.Picasso;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.adapters.FeaturesAdapter;
