@@ -8,6 +8,7 @@ import com.foxykeep.datadroid.requestmanager.RequestManager;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 
 import it.uniba.socialcde4android.R;
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.costants.Error_consts;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
@@ -23,7 +24,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.Intent;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
@@ -123,6 +123,7 @@ public class LoginActivity extends Activity implements RequestListener {
 		if (progressDialog != null && progressDialog.isShowing()) {
 			// Dismiss the dialog, in order to avoid a memory leak
 			StopProgressDialog();
+			unlockScreenOrientation();
 			// Adds the status to the outState Bundle
 			outState.putBoolean(DIALOG_SHOWN, true);
 			outState.putParcelable(PARCELABLE_REQUEST, r);
@@ -212,15 +213,15 @@ public class LoginActivity extends Activity implements RequestListener {
 		}
 	}
 
-
-	private void verifyServer(){
-		//controllo che il server sia online
-		r = SocialCDERequestFactory.isWebServRunRequest();
-		r.put(Preferences.PROXYSERVER, this.proxy_string);
-		r.setMemoryCacheEnabled(true);
-		StartProgressDialog();
-		mRequestManager.execute(r, this);	
-	}
+//
+//	private void verifyServer(){
+//		//controllo che il server sia online
+//		r = SocialCDERequestFactory.isWebServRunRequest();
+//		r.put(Preferences.PROXYSERVER, this.proxy_string);
+//		r.setMemoryCacheEnabled(true);
+//		StartProgressDialog();
+//		mRequestManager.execute(r, this);	
+//	}
 
 	private void login(){
 		r2 = SocialCDERequestFactory.getWUser();
@@ -283,9 +284,14 @@ public class LoginActivity extends Activity implements RequestListener {
 
 	public  void StopProgressDialog(){
 		if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r2 == null || !mRequestManager.isRequestInProgress(r2)))){
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 			progressDialog.dismiss();
 		}
+	}
+	
+	public void unlockScreenOrientation(){
+
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
 	}
 
 	@Override
@@ -326,8 +332,10 @@ public class LoginActivity extends Activity implements RequestListener {
 					StopProgressDialog();
 					startActivity(i);
 					LoginActivity.this.finish();
+					//unlockScreenOrientation();
 				}else{
 					StopProgressDialog();
+					unlockScreenOrientation();
 					Toast.makeText(this, "Please check username and password."  , Toast.LENGTH_SHORT).show();
 					Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 					this.userNameEdit.startAnimation(shake);
@@ -348,6 +356,7 @@ public class LoginActivity extends Activity implements RequestListener {
 				Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 				this.proxyEdit.startAnimation(shake);
 				StopProgressDialog();
+				//unlockScreenOrientation();
 			}
 			break;
 			}
@@ -359,16 +368,8 @@ public class LoginActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		StopProgressDialog();
-		//		if (request.getString(Preferences.USERNAME) == null){//allora la richiesta è quella del server
-		//			Toast.makeText(this, "Please check the proxy address entered. The web service seems unavailable"  , Toast.LENGTH_SHORT).show();
-		//			Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-		//			this.proxyEdit.startAnimation(shake);
-		//			StopProgressDialog();
-		//		}
+		unlockScreenOrientation();
 		
-		//		if (statusCode == Consts.TIMEOUT_STATUS)
-		//			Toast.makeText(this, "Connection timeout", Toast.LENGTH_SHORT).show();
-		//		else 		Toast.makeText(this, "Connection error, status code: "+ statusCode, Toast.LENGTH_SHORT).show();
 		switch(statusCode){
 		case Error_consts.ERROR_GETTING_USER:
 			Toast.makeText(this, "Error retrieving user profile. ", Toast.LENGTH_SHORT).show();
@@ -391,6 +392,7 @@ public class LoginActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestDataError(Request request) {
 		StopProgressDialog();
+		unlockScreenOrientation();
 		Toast.makeText(this, "Data error", Toast.LENGTH_SHORT).show();
 	}
 
@@ -398,6 +400,7 @@ public class LoginActivity extends Activity implements RequestListener {
 	@Override
 	public void onRequestCustomError(Request request, Bundle resultData) {
 		StopProgressDialog();		
+		unlockScreenOrientation();
 		Toast.makeText(this, "Custom error", Toast.LENGTH_SHORT).show();
 	}
 

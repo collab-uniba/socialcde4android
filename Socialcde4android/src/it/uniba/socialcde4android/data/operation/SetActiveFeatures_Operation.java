@@ -92,13 +92,13 @@ public class SetActiveFeatures_Operation implements Operation {
 		
 		if (result.equals("true")) {
 			bundle.putBoolean(Consts.SETTED_FEATURES, true);
-			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SET_FEATURES);
-			return bundle;		
+					
 		} else {
-			throw new ConnectionException("Error ",Error_consts.SET_FEATURES_ERROR);	
+			bundle.putBoolean(Consts.SETTED_FEATURES, false);
 
 		}
-		
+		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SET_FEATURES);
+		return bundle;
 	
 	}
 

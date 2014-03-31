@@ -8,6 +8,8 @@
 
 package it.uniba.socialcde4android.data.requestmanager;
 
+import android.os.Parcel;
+
 import com.foxykeep.datadroid.requestmanager.Request;
 
 /**
@@ -22,7 +24,7 @@ public final class SocialCDERequestFactory {
     public static final int WEBSERVER_AVAILABLE = 1;
     public static final int USERNAME_AVAILABLE = 2;
     public static final int SUBSCRIBE_USER = 3;
-	public static final int CHANGE_INVITATION_WITH_PASSWORD = 4;
+	public static final int CHANGE_PASSWORD = 4;
 	public static final int GET_USER = 5;
 	public static final int GET_FRIENDS = 6;
 	public static final int GET_COLLEAGUE = 7;
@@ -32,17 +34,19 @@ public final class SocialCDERequestFactory {
 	public static final int GET_FEATURES = 11;
 	public static final int SET_FEATURES = 12;
 	public static final int UNREG_SERVICE = 13;
-
-
-
-
-
+	public static final int RECORD_SERVICE = 14;
+	public static final int SEND_TFSPOST = 15;
+	public static final int GET_HIDE_SETTINGS = 16;
+	public static final int SET_HIDE_SETTINGS = 17;
+	public static final int GET_AVAILABLE_AVATARS = 18;
+	public static final int SET_AVATAR = 19;
 
 
 
     // Response data
     public static final String BUNDLE_USER = "it.uniba.socialcde4android.extra.USER";
     public static final String BUNDLE_DESC = "it.uniba.socialcde4android.extra.DESC";
+	
 	
 
     private SocialCDERequestFactory() {
@@ -77,8 +81,8 @@ public final class SocialCDERequestFactory {
 		return request;
 	}
 
-	public static Request changeInvWithPass() {
-		Request request = new Request(CHANGE_INVITATION_WITH_PASSWORD);		
+	public static Request changePass() {
+		Request request = new Request(CHANGE_PASSWORD);		
 		return request;
 	}
 
@@ -126,6 +130,36 @@ public final class SocialCDERequestFactory {
 
 	public static Request unregisterService() {
 		Request request = new Request(UNREG_SERVICE);		
+		return request;
+	}
+
+	public static Request recordService() {
+		Request request = new Request(RECORD_SERVICE);		
+		return request;
+	}
+
+	public static Request sendTFSpost() {
+		Request request = new Request(SEND_TFSPOST);		
+		return request;
+	}
+
+	public static Request getHideSettings() {
+		Request request = new Request(GET_HIDE_SETTINGS);		
+		return request;
+	}
+
+	public static Request setHideSettings() {
+		Request request = new Request(SET_HIDE_SETTINGS);		
+		return request;
+	}
+
+	public static Request getAvailableAvatars() {
+		Request request = new Request(GET_AVAILABLE_AVATARS);		
+		return request;
+	}
+
+	public static Request setAvatar() {
+		Request request = new Request(SET_AVATAR);		
 		return request;
 	}
 

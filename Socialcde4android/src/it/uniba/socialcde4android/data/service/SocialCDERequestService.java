@@ -10,20 +10,7 @@ package it.uniba.socialcde4android.data.service;
 
 
 
-import it.uniba.socialcde4android.data.operation.Authorize_Operation;
-import it.uniba.socialcde4android.data.operation.ChangePasswordWithPassword_Operation;
-import it.uniba.socialcde4android.data.operation.GetColleagueProfile_Operation;
-import it.uniba.socialcde4android.data.operation.GetFeatures_Operation;
-import it.uniba.socialcde4android.data.operation.GetFriends_Operation;
-import it.uniba.socialcde4android.data.operation.GetOAuthData_Operation;
-import it.uniba.socialcde4android.data.operation.GetUser_Operation;
-import it.uniba.socialcde4android.data.operation.IsUsernameAvailable_Operation;
-import it.uniba.socialcde4android.data.operation.IsWebServiceRunning_Operation;
-import it.uniba.socialcde4android.data.operation.RetrieveServices_Operation;
-import it.uniba.socialcde4android.data.operation.SetActiveFeatures_Operation;
-import it.uniba.socialcde4android.data.operation.SetFollowed_Operation;
-import it.uniba.socialcde4android.data.operation.SubscribeUser_Operation;
-import it.uniba.socialcde4android.data.operation.UnregisterService_Operation;
+import it.uniba.socialcde4android.data.operation.*;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 
 import com.foxykeep.datadroid.service.RequestService;
@@ -53,7 +40,7 @@ public final class SocialCDERequestService extends RequestService {
 			return new IsUsernameAvailable_Operation();
 		case SocialCDERequestFactory.SUBSCRIBE_USER:
 			return new SubscribeUser_Operation();
-		case SocialCDERequestFactory.CHANGE_INVITATION_WITH_PASSWORD:
+		case SocialCDERequestFactory.CHANGE_PASSWORD:
 			return new ChangePasswordWithPassword_Operation();
 		case SocialCDERequestFactory.GET_USER:
 			return new GetUser_Operation();
@@ -73,6 +60,18 @@ public final class SocialCDERequestService extends RequestService {
 			return new SetActiveFeatures_Operation();
 		case SocialCDERequestFactory.UNREG_SERVICE:
 			return new UnregisterService_Operation();
+		case SocialCDERequestFactory.RECORD_SERVICE:
+			return new RecordService_Operation();
+		case SocialCDERequestFactory.SEND_TFSPOST:
+			return new SendTFSpost_Operation();
+		case SocialCDERequestFactory.GET_HIDE_SETTINGS:
+			return new GetHideSettings_Operation();
+		case SocialCDERequestFactory.SET_HIDE_SETTINGS:
+			return new SetHideSettings_Operation();
+		case SocialCDERequestFactory.GET_AVAILABLE_AVATARS:
+			return new GetAvailableAvatars_Operation();
+		case SocialCDERequestFactory.SET_AVATAR:
+			return new SetAvatar_Operation();
 		}
 		
 		

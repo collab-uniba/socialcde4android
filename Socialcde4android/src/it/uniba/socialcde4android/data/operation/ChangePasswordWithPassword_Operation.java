@@ -33,8 +33,8 @@ public class ChangePasswordWithPassword_Operation implements Operation {
 			throws ConnectionException, DataException, CustomRequestException {
 		String host = request.getString(Preferences.PROXYSERVER)+ "/SocialTFSProxy.svc";;
 		String username = request.getString(Preferences.USERNAME);
-		String invitCode = request.getString(Consts.INVIT_CODE);
-		String password = request.getString(Preferences.PASSWORD);
+		String old_password = request.getString(Preferences.PASSWORD);
+		String new_password = request.getString(Consts.NEW_PASSWORD);
 		int status = 0;
 		String result = "";
 		Boolean changed = false;
@@ -54,8 +54,8 @@ public class ChangePasswordWithPassword_Operation implements Operation {
 			OutputStream out = conn.getOutputStream();
 			Writer writer = new OutputStreamWriter(out, "UTF-8");
 			writer.write("{ \"username\":\"" + username
-					+ "\", \"oldPassword\":\"" + invitCode
-					+ "\" , \"newPassword\":\"" + password + "\"}");
+					+ "\", \"oldPassword\":\"" + old_password
+					+ "\" , \"newPassword\":\"" + new_password + "\"}");
 
 			writer.close();
 			out.close();
@@ -97,7 +97,8 @@ public class ChangePasswordWithPassword_Operation implements Operation {
 		
 		Bundle bundle = new Bundle();
 		bundle.putBoolean(Consts.PASSWORD_SETTED, changed);
-		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_CHANGE_INVIT_WITH_PASSW);
+		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_CHANGE_PASSW);
+		bundle.putString(Consts.NEW_PASSWORD, new_password);
 		return bundle;
 
 	}

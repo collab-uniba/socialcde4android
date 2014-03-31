@@ -100,13 +100,13 @@ public class SetFollowed_Operation implements Operation {
 
 		if (result.equals("true")) {
 			bundle.putBoolean(Consts.SETTED_FOLLOWED, true);
-			bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SET_FOLLOWED);
-			return bundle;		
+				
 		} else {
-			throw new ConnectionException("Error ",Error_consts.SETFOLLOWED_ERROR);	
+			bundle.putBoolean(Consts.SETTED_FOLLOWED, false);
 
 		}
-
+		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SET_FOLLOWED);
+		return bundle;	
 	}
 
 }

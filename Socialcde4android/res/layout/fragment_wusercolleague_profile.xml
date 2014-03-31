@@ -3,7 +3,7 @@
     android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/White"
+    android:background="@drawable/semitrasparent_imagebutton"
     android:orientation="vertical"
     tools:context=".WUserColleagueProfile_Fragment" >
 
@@ -11,70 +11,118 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <ImageView
-            android:id="@+id/imageViewFrament"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_margin="10dp"
-            android:src="@drawable/user_default" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_gradient_wuser"
+        android:orientation="vertical" >
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
 
-            <TextView
-                android:id="@+id/textViewUsernameFragment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Medium Text"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/SteelBlue"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/imageViewFrament"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/user_default" />
 
-            <TextView
-                android:id="@+id/textViewPostsFragment"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:text="Small Text"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textSize="15sp" />
+                android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/textViewFollowingFragment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Small Text"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textSize="15sp" />
+                <TextView
+                    android:id="@+id/textViewUsernameFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Medium Text"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/SteelBlue"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textViewFollowersFragment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Small Text"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textSize="15sp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:gravity="right" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textViewPostsFragment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="Small Text"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/textViewFollowingFragment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Small Text"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/textViewFollowersFragment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Small Text"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:orientation="vertical" >
+
+                        <CheckBox
+                            android:id="@+id/checkBoxFollowFragment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center_vertical"
+                            android:text="@string/follow" />
+
+                        <Button
+                            android:id="@+id/buttonHideUnide"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="@drawable/hide_button"
+                            android:minHeight="44dip"
+                            android:text="@string/hideunide"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical" >
         </LinearLayout>
     </LinearLayout>
-
-    <CheckBox
-        android:id="@+id/checkBoxFollowFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="10dp"
-        android:text="@string/follow" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/Gainsboro" />
+        android:background="@color/WuserProfile" />
 
     <com.handmark.pulltorefresh.library.PullToRefreshListView
         android:id="@+id/listViewCheckBoxFEATURES"

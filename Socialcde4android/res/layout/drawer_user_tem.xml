@@ -28,7 +28,10 @@
             android:text="text"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/White"
-            android:textSize="17sp" />
+            android:textSize="17sp"
+            android:singleLine="true"
+            android:ellipsize="end"
+             />
 
     </LinearLayout>
 

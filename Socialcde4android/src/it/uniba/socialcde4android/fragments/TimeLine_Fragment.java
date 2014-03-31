@@ -1,7 +1,5 @@
 package it.uniba.socialcde4android.fragments;
 
-import java.util.Map;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,7 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.preferences.Preferences;
+
 import it.uniba.socialcde4android.shared.library.WUser;
 
 
@@ -29,13 +27,17 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 
 	private ImageButton buttonWriteMessage;
 	private ImageButton buttonCancelEditText;
+	private ImageButton sendTFSPost;
 	private EditText editTextMessage;
 	private LinearLayout editTextLayout;
 	private Boolean isEditShowing = false;
+	private static final String ARG_PASSWORD = "password";
+
 
 	/**
 	 * Use this factory method to create a new instance of this fragment using
 	 * the provided parameters.
+	 * @param passw_string 
 	 * 
 	 * @param param1
 	 *            Parameter 1.
@@ -44,19 +46,26 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	 * @return A new instance of fragment BlankFragment.
 	 */
 	// TODO: Rename and change types and number of parameters
-	public static TimeLine_Fragment newInstance() {
+	public static TimeLine_Fragment newInstance(String passw_string) {
 		TimeLine_Fragment fragment = new TimeLine_Fragment();
-		//		Bundle args = new Bundle();
-		//		args.putString(ARG_PARAM1, param1);
-		//		args.putString(ARG_PARAM2, param2);
-		//		fragment.setArguments(args);
-		//fragment.setRetainInstance(true);
+		Bundle args = new Bundle();
+		args.putString(ARG_PASSWORD, passw_string);
+		fragment.setArguments(args);
 		return fragment;
 	}
 
 	public TimeLine_Fragment() {
-		//super();
+		super();
 		// Required empty public constructor
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (getArguments() != null) {
+			password = getArguments().getString(ARG_PASSWORD);
+
+		}
 	}
 
 	@Override
@@ -70,6 +79,7 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 		View view = super.onCreateView( inflater,  container, savedInstanceState);
 		buttonWriteMessage = (ImageButton)view.findViewById(R.id.buttonEditTextHOMETIMELINE);
 		buttonCancelEditText = (ImageButton)view.findViewById(R.id.imageButtonCancelEditTextTIMELINE);
+		sendTFSPost = (ImageButton) view.findViewById(R.id.imageButton2);
 		editTextMessage = (EditText) view.findViewById(R.id.editTextMessageHOMETIMELINE);
 		editTextLayout = (LinearLayout) view.findViewById(R.id.layout_edittext_TIMELINE);
 		editTextLayout.setVisibility(View.GONE);
@@ -89,7 +99,6 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 		buttonCancelEditText.setOnClickListener(new ImageButton.OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				//nascondi il tasto e visualizza l'edittext
 				editTextLayout.setVisibility(View.GONE);
 				isEditShowing = false;
 				buttonWriteMessage.setVisibility(View.VISIBLE);
@@ -97,6 +106,16 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 				editTextLayout.setVisibility(View.GONE);
 				InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(editTextMessage.getWindowToken(), 0);		
+			}
+		});
+		sendTFSPost.setOnClickListener(new ImageButton.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (!editTextMessage.getText().toString().equals("")){
+					mListener.sendTFSPost(editTextMessage.getText().toString());
+					editTextMessage.setText("");
+				}
 			}
 		});
 		return view;
@@ -120,18 +139,18 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 		savedInstanceState.putBoolean(EDIT_SHOWING, isEditShowing);
-	//	((OnTimeLineFragmentInteractionListener)this.mListener).onHomeTimeLineFragmentEvent();
+		//	((OnTimeLineFragmentInteractionListener)this.mListener).onHomeTimeLineFragmentEvent();
 
 
 	}
-	
 
-	public interface OnTimeLineFragmentInteractionListener extends OnGenericTimeLineFragmentInteractionListener{
 
-		public void onHomeTimeLineFragmentEvent();
+	//	public interface OnTimeLineFragmentInteractionListener extends OnGenericTimeLineFragmentInteractionListener{
+	//
+	//		public void onHomeTimeLineFragmentEvent();
+	//
+	//	}
 
-	}
-	
 	//	@Override
 	//	public void onCreate(Bundle savedInstanceState) {
 	//		super.onCreate(savedInstanceState);
@@ -156,12 +175,12 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 
 	@Override
 	public String getRequest(int datatype) {
-		String username = preferences.get(Preferences.USERNAME);
-		String password = preferences.get(Preferences.PASSWORD);
+
 		long since = 0;
 		long to = 0 ;
-		if (datatype == super.GET_MOREDATA_TYPE)
+		if (datatype == super.GET_MOREDATA_TYPE){
 			to = (mListWpostItems.get(mListWpostItems.size()-1)).getId();
+		}
 
 		return "{ \"username\":\"" + username + "\", \"password\":\""
 		+ password + "\" , \"since\":\"" + since + "\" , \"to\":\""
@@ -170,7 +189,7 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 
 	@Override
 	protected Boolean getClickable() {
-		
+
 		return true;
 	}
 

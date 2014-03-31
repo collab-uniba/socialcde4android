@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Social TFS</string>
+    <string name="app_name">SocialCDE</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_login">LoginActivity</string>
@@ -21,10 +21,10 @@
     <string name="email">Email</string>
     <string name="invitationcode">Invitation code</string>
     <string name="confirmpassw">Confirm password</string>
-    <string name="app_title">Social CDE</string>
+    <string name="app_title">SocialCDE</string>
     <string name="for_android">for Android</string>
-    <string name="socialtfs">Social for TFS</string>
-    <string name="signup">Sign up for SocialTFS</string>
+    <string name="socialtfs">Social for CDE</string>
+    <string name="signup">Sign up for SocialCDE</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="drawer_services_title">Services</string>
     <string name="no_users_found">No users found</string>
@@ -39,5 +39,22 @@
     <string name="insertPIN">Eventually enter the Pin..</string>
     <string name="button_unsubscribe">Unsubscribe</string>
     <string name="button_save">Save</string>
+    <string name="buttonOK">OK</string>
+    <string name="buttoncancel">Cancel</string>
+    <string name="name_dialog">Username</string>
+    <string name="passworddialog">Password</string>
+    <string name="domain">Domain</string>
+    <string name="hidesuggestion">Hide from Suggestions</string>
+    <string name="oldpassword">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="repeat_password">Repeat Password</string>
+    <string name="title_dialog_change_password">Change Password</string>
+    <string name="drawer_settings_title">Settings</string>
+    <string name="hideunide">Hide/Unhide</string>
+    <string name="title_hide_from">Hide user from:</string>
+    <string name="suggestion">Suggestions</string>
+    <string name="iterationtimeline">Iteration Timeline</string>
+    <string name="interactivetimeline">Interactive Timeline</string>
+    <string name="choose_avatar">Choose your avatar</string>
 
 </resources>

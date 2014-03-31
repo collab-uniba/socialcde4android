@@ -2,25 +2,19 @@ package it.uniba.socialcde4android.dialogs;
 
 import java.util.Arrays;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
+
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.activity.LoginActivity;
-import it.uniba.socialcde4android.activity.RegistrationActivity;
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.adapters.FeaturesAdapter;
-import it.uniba.socialcde4android.costants.Consts;
-import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
+import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WService;
-import it.uniba.socialcde4android.shared.library.WUser;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.Activity;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,11 +30,10 @@ public class SetServiceFeaturesDialog extends DialogFragment{
 	private WFeature[] wfeature;
 	private WService wservice;
 	private ListView listview;
-	private Button save_button;
-	private Button unsub_button;
 	private FeaturesAdapter adapter;
 	private OnFeaturesDialogInteractionListener mListener;
-	
+	private ImageLoader imageloader;
+
 	
 	public static SetServiceFeaturesDialog newInstance(WFeature[] wfeature, WService wService) {
 		SetServiceFeaturesDialog dialog = new SetServiceFeaturesDialog();
@@ -76,13 +69,14 @@ public class SetServiceFeaturesDialog extends DialogFragment{
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
+		imageloader = ConfiguratedImageLoader.getImageLoader((Activity)mListener);
         View v = inflater.inflate(R.layout.dialog_set_service_features, container, false);
         //getDialog().getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
         ImageView imageviewService = (ImageView) v.findViewById(R.id.imageView1_logoFEATURE); 
-		imageviewService.setImageResource(getActivity().getResources().getIdentifier("it.uniba.socialcde4android:drawable/"+wservice.getImage().replace("/Images/", "").replace(".png", ""),null,null));
+		imageloader.displayImage(Preferences.getSavedHost(getActivity())+wservice.getImage(), imageviewService);
         TextView title = (TextView) v.findViewById(R.id.textView1_title_FEATURES);
-        title.setText(wservice.getName()+" registration");
-		listview = (ListView) v.findViewById(R.id.listViewCheckBoxFEATURES);
+        title.setText(wservice.getName()+" features");
+		listview = (ListView) v.findViewById(R.id.listViewCheckBoxFEATURES2);
         adapter = new FeaturesAdapter(getActivity(), android.R.layout.simple_list_item_1,  wfeature);
         listview.setAdapter(adapter);
         Button save_button = (Button) v.findViewById(R.id.button2_dialog_features_SAVE);

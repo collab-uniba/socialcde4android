@@ -18,4 +18,10 @@ public class Error_consts {
 	public static final int ERROR_RETRIEVING_FEATURES = 137;
 	public static final int SET_FEATURES_ERROR = 138;
 	public static final int UNREG_SERVICE_ERROR = 139;
+	public static final int RECORD_ERROR = 140;
+	public static final int POST_ERROR = 141;
+	public static final int ERROR_RETRIEVING_HIDDEN_SETTINGS = 142;
+	public static final int ERROR_UPDATING_HIDDEN_SETTINGS = 143;
+	public static final int ERROR_RETRIEVING_AVATARS = 144;
+	public static final int SET_AVATAR_ERROR = 145;
 }

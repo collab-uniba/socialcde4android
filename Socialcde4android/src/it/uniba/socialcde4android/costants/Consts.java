@@ -73,7 +73,7 @@ public class Consts {
 
 	public static final int REQUESTTYPE_SUBSCRIBEUSER = 3;
 	
-	public static final int REQUESTTYPE_CHANGE_INVIT_WITH_PASSW = 4;
+	public static final int REQUESTTYPE_CHANGE_PASSW = 4;
 
 	public static final int REQUESTTYPE_GETUSER = 5;
 	
@@ -126,6 +126,48 @@ public class Consts {
 	public static final String UNREGISTERED_SERVICE = "unregistered service";
 
 	public static final int REQUESTTYPE_UNREG_SERVICE = 18;
+
+	public static final String TFSUSERNAME = "TFS username";
+
+	public static final String TFSPASSWORD = "TFS password";
+
+	public static final String TFSDOMAIN = "TFS domain";
+
+	public static final String RECORDED = "recorded";
+
+	public static final int REQUESTTYPE_RECORD = 19;
+
+	public static final String POST_TFS = "post TFS";
+
+	public static final String SENT = "sent";
+
+	public static final int REQUESTTYPE_SENDTFSPOST = 20;
+
+	public static final String NEW_PASSWORD = "new password";
+
+	public static final String USERID = "user id";
+
+	public static final String WHIDDEN = "widden";
+	
+	public static final String  FOUND_HIDDEN_SETTINGS = "found hidden settings";
+
+	public static final int REQUESTTYPE_RETRIEVEHIDESETTINGS = 21;
+
+	public static final String HIDDEN_SETTINGS_UPDATED = "hidden settings updated";
+
+	public static final int REQUESTTYPE_UPDATE_HIDDEN_SETTINGS = 22;
+
+	public static final int REQUESTTYPE_GET_AVAILABLE_AVATARS = 23;
+
+	public static final String URI = "uri";
+
+	public static final String FOUND_AVATAR_IMAGES = "found avatar images";
+
+	public static final String SETTED_AVATAR = "setted avatar";
+
+	public static final int REQUESTTYPE_SET_AVATAR = 24;
+
+	
 
 	
 

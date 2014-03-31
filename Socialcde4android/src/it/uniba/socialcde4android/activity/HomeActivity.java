@@ -6,21 +6,30 @@ import java.util.Arrays;
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.costants.Error_consts;
+import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.adapters.ServicesAdapter;
 import it.uniba.socialcde4android.adapters.UsersAdapter;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestFactory;
 import it.uniba.socialcde4android.data.requestmanager.SocialCDERequestManager;
+import it.uniba.socialcde4android.dialogs.ChangePasswordDialog;
+import it.uniba.socialcde4android.dialogs.ChangePasswordDialog.OnChangePasswordListener;
+import it.uniba.socialcde4android.dialogs.ChooseAvatarDialog;
+import it.uniba.socialcde4android.dialogs.ChooseAvatarDialog.OnChooseAvatarListener;
+import it.uniba.socialcde4android.dialogs.HideUnhideDialog;
+import it.uniba.socialcde4android.dialogs.HideUnhideDialog.OnHideHunideListener;
 import it.uniba.socialcde4android.dialogs.NoNetworkDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog;
 import it.uniba.socialcde4android.dialogs.SetServiceFeaturesDialog.OnFeaturesDialogInteractionListener;
+import it.uniba.socialcde4android.dialogs.TFSAuthDialog;
+import it.uniba.socialcde4android.dialogs.TFSAuthDialog.OnTFSAuthInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_AbstractFragment.OnGenericTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.TimeLine_Fragment;
-import it.uniba.socialcde4android.fragments.TimeLine_Fragment.OnTimeLineFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment;
 import it.uniba.socialcde4android.fragments.WUserColleagueProfile_Fragment.OnProfileFragmentInteractionListener;
 import it.uniba.socialcde4android.fragments.WUserProfile_Fragment;
 import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WFeature;
+import it.uniba.socialcde4android.shared.library.WHidden;
 import it.uniba.socialcde4android.shared.library.WOAuthData;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
@@ -35,6 +44,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -53,8 +63,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class HomeActivity extends FragmentActivity   
-implements OnTimeLineFragmentInteractionListener,OnProfileFragmentInteractionListener, 
-OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener {
+implements OnProfileFragmentInteractionListener, 
+OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogInteractionListener,
+OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, OnChooseAvatarListener{
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList_left;
@@ -91,6 +102,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		mDrawerList_left = (ListView) findViewById(R.id.drawer_services_left);
 		mDrawerList_right = (ListView) findViewById(R.id.drawer_users_right);
 		mRequestManager = SocialCDERequestManager.from(this);
+
 		if (getIntent().hasExtra("bundle") && savedInstanceState==null){
 			Bundle bundle = getIntent().getExtras().getBundle("bundle");
 			if (bundle != null){
@@ -98,13 +110,14 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 				proxy_string = (String)getIntent().getExtras().getString(Preferences.PROXYSERVER);
 				userName_string = (String)getIntent().getExtras().getString(Preferences.USERNAME);
 				passw_string = (String)getIntent().getExtras().getString(Preferences.PASSWORD);
+				unlockScreenOrientation();
 				loadServices();
 				this.loadFriends();
 			}	
 		}
 
 		if (savedInstanceState==null) {
-			Fragment fragment = TimeLine_Fragment.newInstance();
+			Fragment fragment = TimeLine_Fragment.newInstance(this.passw_string);
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 			fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
@@ -113,6 +126,9 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 	}
 
 
+	public String getPassword(){
+		return this.passw_string;
+	}
 
 
 	@Override
@@ -134,12 +150,15 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			outState.putParcelable(PARCELABLE_REQUEST2, r2);
 		} else
 			outState.putBoolean(DIALOG_SHOWN, false);	
+		outState.putParcelable(PARCELABLE_REQUEST, null);
+		outState.putParcelable(PARCELABLE_REQUEST2, null);
 	}
 
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
+
 
 		if (savedInstanceState != null) {
 			r = savedInstanceState.getParcelable(PARCELABLE_REQUEST);
@@ -150,16 +169,18 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 				StartProgressDialog();
 
 			Parcelable[] parcelableArray =	savedInstanceState.getParcelableArray(Consts.WSERVICES);
-			if (parcelableArray != null) wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
-			wuser_all = savedInstanceState.getParcelableArrayList(Consts.WUSERS);
-			wUsersNumType_SuggFingFersHidd = savedInstanceState.getIntArray(Consts.WUSERS_NUMBERS);
-			wuser = savedInstanceState.getParcelable(Consts.WUSER);
-			proxy_string = savedInstanceState.getString(Preferences.PROXYSERVER);
-			userName_string = savedInstanceState.getString(Preferences.USERNAME);
-			passw_string = savedInstanceState.getString(Preferences.PASSWORD);
+			if (parcelableArray != null) {
+				wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
 
-			populateDrawerLeft();
-			populateDrawerRight();
+				wuser_all = savedInstanceState.getParcelableArrayList(Consts.WUSERS);
+				wUsersNumType_SuggFingFersHidd = savedInstanceState.getIntArray(Consts.WUSERS_NUMBERS);
+				wuser = savedInstanceState.getParcelable(Consts.WUSER);
+				proxy_string = savedInstanceState.getString(Preferences.PROXYSERVER);
+				userName_string = savedInstanceState.getString(Preferences.USERNAME);
+				passw_string = savedInstanceState.getString(Preferences.PASSWORD);
+				populateDrawerLeft();
+				populateDrawerRight();
+			}
 		}
 	}
 
@@ -195,10 +216,15 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		if (r != null && mRequestManager.isRequestInProgress(r)){
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r);
+		}else if (r != null) {
+			mRequestManager.callListenerWithCachedData(this, r);
 		}
 		if (r2 != null && mRequestManager.isRequestInProgress(r2)){
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r2);
+		}
+		else if (r2 != null) {
+			mRequestManager.callListenerWithCachedData(this, r2);
 		}
 	}
 
@@ -221,7 +247,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			}
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle_left);
-		ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+		ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
 		mDrawerList_left.setAdapter(adapter);
 		mDrawerList_left.setOnItemClickListener(new DrawerLeftItemClickListener());
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -232,30 +258,56 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 	private class DrawerLeftItemClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position, long id) {
-			if (position == 0)exitToLogin();
-			else if (position == 1){
+			// switch sul TYPE
+			int type = mDrawerList_left.getAdapter().getItemViewType(position);
+			switch(type){
+			case ServicesAdapter.TYPE_AVATAR:
 				openUserProfile(wuser);
-			}else{
-				if (mDrawerList_left.getAdapter().getItemViewType(position) == ((ServicesAdapter) mDrawerList_left.getAdapter()).getServiceTypeID()){
-					WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-3);
-					if (wservice.isRegistered()){
-						getFeatures(wservice.getId());
-					}else{
-						loadOAuthData(wservice.getId());
+				break;
+			case ServicesAdapter.TYPE_SERVICE:
+				WService wservice = (WService) mDrawerList_left.getAdapter().getItem(position-2);
+				if (wservice.isRegistered()){
+					getFeatures(wservice.getId());
+				}else{
+					if (wservice.isRequireOAuth()){
+						loadOAuthData(wservice.getId(), wservice.getOAuthVersion());
+					}else {
+						TFSAuthDialog tfs_dialog = TFSAuthDialog.newInstance(wservice);
+						//tfs_dialog.setCancelable(false);
+						tfs_dialog.show(getFragmentManager(), "TFS Auth");
 					}
 				}
+				break;
+			case ServicesAdapter.TYPE_SETTING:
+				int itemSetting = position - 3 - HomeActivity.this.wservice.length;
+				Log.i("setting position", String.valueOf(itemSetting));
+				switch(itemSetting){ //SETTINGS = { "Choose Avatar", "Change Password", "Exit"};
+				case 0: //choose avatar
+					loadAvailableAvatars();
+					break;
+				case 1://change password
+					ChangePasswordDialog changeP_dialog = ChangePasswordDialog.newInstance(passw_string);
+					changeP_dialog.show(getFragmentManager(), "Change Password");
+					break;
+				case 2: //exit
+					HomeActivity.this.exitToLogin();
+					break;
+
+				}
+				break;
 			}
 			mDrawerLayout.closeDrawer(mDrawerList_left);
 		}
 	}
 
-	private void loadOAuthData(int serviceID){
+	private void loadOAuthData(int serviceID, int oAuthVersion){
 		if (isOnline()){
 			r = SocialCDERequestFactory.getOAuthDataRequest();
 			r.put(Preferences.PROXYSERVER, this.proxy_string);
 			r.put(Preferences.USERNAME, this.userName_string);
 			r.put(Preferences.PASSWORD, this.passw_string);
 			r.put(Consts.SERVICE_ID, String.valueOf(serviceID));
+			r.put(Consts.OAUTH_VERSION, String.valueOf(oAuthVersion));
 			r.setMemoryCacheEnabled(true);
 			StartProgressDialog();
 			mRequestManager.execute(r, this);
@@ -341,9 +393,10 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 
 		case R.id.action_drawer:
 			if (mDrawerLayout.isDrawerOpen(mDrawerList_right))	mDrawerLayout.closeDrawer(mDrawerList_right);
-			else {if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	mDrawerLayout.closeDrawer(mDrawerList_left);
+			else { if (mDrawerLayout.isDrawerOpen(mDrawerList_left))	 mDrawerLayout.closeDrawer(mDrawerList_left);
 			mDrawerLayout.openDrawer(mDrawerList_right);}
 			break;
+
 		default:
 
 		}
@@ -355,10 +408,10 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		// create a new fragment and specify the planet to show based on position
 		Fragment fragment = null;
 		if (wuserToOpen.getId() == wuser.getId())	{
-			fragment = WUserProfile_Fragment.newInstance(wuser);
+			fragment = WUserProfile_Fragment.newInstance(wuser, this.passw_string);
 		}
 		else	{
-			fragment = WUserColleagueProfile_Fragment.newInstance(wuserToOpen);
+			fragment = WUserColleagueProfile_Fragment.newInstance(wuserToOpen, this.passw_string);
 		}
 		// Insert the fragment by replacing any existing fragment
 		FragmentManager fragmentManager = getSupportFragmentManager();
@@ -372,7 +425,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		fragmentTransaction.addToBackStack(null);
 		fragmentTransaction.commit();
 		// Highlight the selected item, update the title, and close the drawer
-		getActionBar().setTitle("User Profile");
+		//getActionBar().setTitle("User Profile");
 		mDrawerLayout.closeDrawer(mDrawerList_right);
 	}
 
@@ -463,6 +516,55 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			StopProgressDialog();
 			break;
 
+
+			case(Consts.REQUESTTYPE_RETRIEVEHIDESETTINGS):
+				if (resultData.getBoolean(Consts.FOUND_HIDDEN_SETTINGS)){
+					WHidden whidden = (WHidden) resultData.getParcelable(Consts.WHIDDEN);
+					int user_id = resultData.getInt(Consts.USERID);
+					StopProgressDialog();
+					HideUnhideDialog hideUnhide_dialog = HideUnhideDialog.newInstance(whidden, user_id);
+					//		hideUnhide_dialog.setCancelable(false);
+					hideUnhide_dialog.show(getFragmentManager(), "Change Hide Settings");
+				}else{
+					StopProgressDialog();
+					Toast.makeText(this, "Error retrieving settings. Try again."  , Toast.LENGTH_LONG).show();
+				}
+
+			break;
+
+
+			case(Consts.REQUESTTYPE_SENDTFSPOST):
+				if (resultData.getBoolean(Consts.SENT)){
+					//va fatto il refresh della view..
+					//Toast.makeText(this, "Updating Timeline", Toast.LENGTH_SHORT).show();
+					FragmentManager fragmentManager = getSupportFragmentManager();
+					TimeLine_Fragment fragment;
+					fragment=(TimeLine_Fragment)fragmentManager.findFragmentById(R.id.frag_ptr_list);
+					fragment.refreshFragment();
+				}else{
+					Toast.makeText(this, "An error occured."  , Toast.LENGTH_LONG).show();
+				}
+			StopProgressDialog();
+			break;
+
+			case(Consts.REQUESTTYPE_GET_AVAILABLE_AVATARS):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.FOUND_AVATAR_IMAGES)){
+
+				String[] uri = null;
+				uri = resultData.getStringArray(Consts.URI);
+
+				//apro la dialog 
+				ChooseAvatarDialog chooseAvatar_dialog = ChooseAvatarDialog.newInstance(uri, wuser.getAvatar());
+				chooseAvatar_dialog.show(getFragmentManager(), "choose avatar");
+
+			}else{
+				Toast.makeText(this, "Avatars Not Available."  , Toast.LENGTH_LONG).show();
+			}
+			break;
+
+
+
 			case(Consts.REQUESTTYPE_RETRIEVEFEATURES):
 				StopProgressDialog();
 			if (resultData.getBoolean(Consts.FOUND_WFEATURES)){
@@ -478,6 +580,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 				for (int i=0; i<wservice.length;i++){
 					if (wservice[i].getId() == service_id){
 						SetServiceFeaturesDialog features_dialog = SetServiceFeaturesDialog.newInstance(wfeature, wservice[i]);
+						//		features_dialog.setCancelable(false);
 						features_dialog.show(getFragmentManager(), "set features");
 						break;
 					}
@@ -491,13 +594,13 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			case(Consts.REQUESTTYPE_GETOAUTDATA):
 				WOAuthData woauthdata =	resultData.getParcelable(Consts.OAUTH_DATA);
 			final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
+
 			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 			intent.putExtra(Consts.OAUTH_DATA, woauthdata);
 			intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
-			//startActivity(intent);
+			intent.putExtra(Consts.OAUTH_VERSION, resultData.getInt(Consts.OAUTH_VERSION) );
 			StopProgressDialog();
-
-			startActivityForResult(intent, Consts.WEBVIEW_REQUEST);
+			startActivityForResult(intent, Consts.WEBVIEW_REQUEST);				
 
 			break;
 
@@ -505,6 +608,9 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 				if (resultData.getBoolean(Consts.FOUND_WUSERS)){
 					wuser_all = resultData.getParcelableArrayList(Consts.WUSERS);
 					wUsersNumType_SuggFingFersHidd = resultData.getIntArray(Consts.WUSERS_NUMBERS);
+				}
+				else{
+					wUsersNumType_SuggFingFersHidd = new int[0];
 				}
 			populateDrawerRight();
 			StopProgressDialog();
@@ -522,28 +628,86 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			break;
 
 
-			case(Consts.REQUESTTYPE_SET_FEATURES):
+			case(Consts.REQUESTTYPE_RECORD):
 				StopProgressDialog();
-				Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
-			break;
-			
-			case(Consts.REQUESTTYPE_UNREG_SERVICE):
-				int service_id = resultData.getInt(Consts.SERVICE_ID);
-				for (int i=0; i<wservice.length;i++){
-				if (wservice[i].getId() == service_id){
-					wservice[i].setRegistered(false);
-					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+			if (resultData.getBoolean(Consts.RECORDED)){
+				Toast.makeText(this, "Service recorded."  , Toast.LENGTH_LONG).show();
+			}else{
+				Toast.makeText(this, "Error recording service. Check the inserted values and try again."  , Toast.LENGTH_LONG).show();
+			}
+			int service_id_rec = resultData.getInt(Consts.SERVICE_ID);
+			for (int i=0; i<wservice.length;i++){
+				if (wservice[i].getId() == service_id_rec){
+					wservice[i].setRegistered(true);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
 					mDrawerList_left.setAdapter(adapter);
 					break;
 				}
 			}
-				StopProgressDialog();
-				Toast.makeText(this, "Service unsubscribed."  , Toast.LENGTH_LONG).show();
+			getFeatures(service_id_rec);
 			break;
-			
-			case(Consts.REQUESTTYPE_SET_FOLLOWED):
-				loadFriends(); //valore settato, ricarica il drawer destro
 
+			case(Consts.REQUESTTYPE_SET_FEATURES):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.SETTED_FEATURES)){
+				Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
+			}else{
+				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+			}
+			break;
+
+			case(Consts.REQUESTTYPE_SET_AVATAR):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.SETTED_AVATAR)){
+				Toast.makeText(this, "Avatar updated."  , Toast.LENGTH_LONG).show();
+				//è necessario aggiornare wuser e ricaricare il drawerleft
+				wuser.setAvatar(resultData.getString(Consts.URI));
+				populateDrawerLeft();
+				//TODO da controllare che funzioni anche con la cache dell'imageloader attiva
+			}else{
+				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+			}
+			break;
+
+			case(Consts.REQUESTTYPE_UPDATE_HIDDEN_SETTINGS):
+				if (resultData.getBoolean(Consts.HIDDEN_SETTINGS_UPDATED)){
+					Toast.makeText(this, "Hide settings updated."  , Toast.LENGTH_LONG).show();
+					//ricarica il drawer degli utenti
+					loadFriends();
+				}else{
+					StopProgressDialog();
+					Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				}
+			break;
+
+			case(Consts.REQUESTTYPE_CHANGE_PASSW):
+				StopProgressDialog();
+			if (resultData.getBoolean(Consts.PASSWORD_SETTED)){
+				Toast.makeText(this, "Password changed."  , Toast.LENGTH_LONG).show();
+				passw_string = resultData.getString(Consts.NEW_PASSWORD);
+			}else{
+				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+			}
+			break;
+
+			case(Consts.REQUESTTYPE_UNREG_SERVICE):
+				int service_id = resultData.getInt(Consts.SERVICE_ID);
+			for (int i=0; i<wservice.length;i++){
+				if (wservice[i].getId() == service_id){
+					wservice[i].setRegistered(false);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
+					mDrawerList_left.setAdapter(adapter);
+					break;
+				}
+			}
+			StopProgressDialog();
+			Toast.makeText(this, "Service unsubscribed."  , Toast.LENGTH_LONG).show();
+			break;
+
+			case(Consts.REQUESTTYPE_SET_FOLLOWED):
+				//nel caso sia stato scelto di non seguirlo più allora ve chiesto se si vuole anche nascondere
+				//dalla lista dei suggeriti
+				loadFriends(); //valore settato, ricarica il drawer destro
 			break;
 
 			case(Consts.REQUESTTYPE_AUTHORIZE):
@@ -551,7 +715,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			for (int i=0; i<wservice.length;i++){
 				if (wservice[i].getId() == service_id1){
 					wservice[i].setRegistered(true);
-					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser);
+					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
 					mDrawerList_left.setAdapter(adapter);
 					break;
 				}
@@ -572,7 +736,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		{
 			Toast.makeText(this, "Error setting user's status", Toast.LENGTH_SHORT).show();
 			FragmentManager fragmentManager = getSupportFragmentManager();
-			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(HomeActivity.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 			fragment.changeCheckBoxState();
 		}
 		break;
@@ -580,7 +744,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		{ 
 			Toast.makeText(this, "Error setting user's status. Connection Timeout.", Toast.LENGTH_SHORT).show();
 			FragmentManager fragmentManager = getSupportFragmentManager();
-			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(HomeActivity.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 			fragment.changeCheckBoxState();
 		}
 		break;
@@ -592,7 +756,28 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			Toast.makeText(this, "Error retrieving users list. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
 			break;
-
+		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS:
+			Toast.makeText(this, "Error retrieving Hide Settings. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving Hide Settings. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.POST_ERROR:
+			Toast.makeText(this, "Error sending message. ", Toast.LENGTH_SHORT).show();
+			//exitToLogin();
+			break;
+		case Error_consts.POST_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error sending message. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			//exitToLogin();
+			break;
+		case Error_consts.RECORD_ERROR:
+			Toast.makeText(this, "Error recording the service. ", Toast.LENGTH_SHORT).show();
+			//exitToLogin();
+			break;
+		case Error_consts.RECORD_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error recording the service. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			//	exitToLogin();
+			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES:
 			Toast.makeText(this, "Error retrieving services.  Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
@@ -614,6 +799,12 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
 			break;
+		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS:
+			Toast.makeText(this, "Error updating Hide Settings. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error updating Hide Settings. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			break;
 		case Error_consts.ERROR_USERNAME_AVAILABLE:
 			Toast.makeText(this, "Error retrieving username availability. ", Toast.LENGTH_SHORT).show();
 			break;
@@ -625,6 +816,12 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			break;
 		case Error_consts.ERROR_GET_OAUTHDATA * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error retrieving OAuth Data. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_AVATARS:
+			Toast.makeText(this, "Error retrieving Available Avatars. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_AVATARS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving Available Avatars. Connection Timeout. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.AUTHORIZE_ERROR:
 			Toast.makeText(this, "Error in Authorize operation. ", Toast.LENGTH_SHORT).show();
@@ -644,6 +841,12 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		case Error_consts.SET_FEATURES_ERROR * Error_consts.TIMEOUT_FACTOR:
 			Toast.makeText(this, "Error updating features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
 			break;
+		case Error_consts.SET_AVATAR_ERROR:
+			Toast.makeText(this, "Error setting new Avatar. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.SET_AVATAR_ERROR * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error setting new Avatar. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			break;
 		case Error_consts.UNREG_SERVICE_ERROR:
 			Toast.makeText(this, "Error unsubscribing service. ", Toast.LENGTH_SHORT).show();
 			break;
@@ -655,9 +858,10 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 
 	public void exitToLogin(){
 		StopProgressDialog();
-		//se ci sono fragment eliminali.. TODO
+		//se ci sono fragment eliminali.. 
 		if (mRequestManager.isRequestInProgress(r)) mRequestManager.removeRequestListener(this, r);
 		if (mRequestManager.isRequestInProgress(r2)) mRequestManager.removeRequestListener(this, r2);
+		ConfiguratedImageLoader.destroyIfImageLoader();
 		Preferences.setFalseAutolog(this);
 		Intent i = new Intent(HomeActivity.this, LoginActivity.class);
 		startActivity(i);
@@ -681,7 +885,11 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 	@Override
 	protected void onPause() {
 		super.onPause();
+		if (!mRequestManager.isRequestInProgress(r)) r = null;
+		if (!mRequestManager.isRequestInProgress(r2)) r2 = null;
 		mRequestManager.removeRequestListener(this);
+
+
 	}
 
 
@@ -727,17 +935,11 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 	}
 
 	@Override
-	public void onProfileFragmentCheckBoxChanged(Boolean followChecked,
-			WUser wuser_profile) {
+	public void onProfileFragmentCheckBoxChanged(Boolean followChecked,	WUser wuser_profile) {
 		setFollow( followChecked,  wuser_profile);
 
 	}
 
-	@Override
-	public void onHomeTimeLineFragmentEvent() {
-		// TODO Auto-generated method stub
-
-	}
 
 
 	@Override
@@ -760,7 +962,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 				String token = data.getStringExtra(Consts.ACCESS_TOKEN); 
 				String secret = data.getStringExtra(Consts.ACCESS_SECRET);
 				String pin = data.getStringExtra(Consts.VERIFIER_PIN);
-				int oaut_version = data.getIntExtra(Consts.OAUTH_VERSION, -1);
+				//	int oaut_version = data.getIntExtra(Consts.OAUTH_VERSION, -1);
 				Authorize(service_id, token, pin, secret);
 
 			}
@@ -809,7 +1011,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		}
 	}
 
-	
+
 	public void saveFeaturesStatus(int service_id, String active_features) {
 		if (isOnline()){
 			r = SocialCDERequestFactory.setActiveFeatures();
@@ -826,7 +1028,7 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 		}
 	}
 
-	
+
 	public void unregisterService(int service_id){
 		if (isOnline()){
 			r = SocialCDERequestFactory.unregisterService();
@@ -841,5 +1043,137 @@ OnGenericTimeLineFragmentInteractionListener, RequestListener, OnFeaturesDialogI
 			new NoNetworkDialog().show(getFragmentManager(), "alert");
 		}
 	}
-	
+
+
+
+
+	@Override
+	public void recordService(String service_id, String username,
+			String password, String domain) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.recordService();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.SERVICE_ID, service_id);
+			r.put(Consts.TFSUSERNAME, username);
+			r.put(Consts.TFSPASSWORD, password);
+			r.put(Consts.TFSDOMAIN, domain);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
+	public void sendTFSPost(String postTFS){
+		if (isOnline()){
+			r = SocialCDERequestFactory.sendTFSpost();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.POST_TFS, postTFS);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
+
+
+	@Override
+	public void change_password(String new_password) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.changePass();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.NEW_PASSWORD, new_password);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+
+	}
+
+
+
+
+	@Override
+	public void loadUserHideSettings(int userId) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.getHideSettings();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.USERID, userId);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
+
+
+	@Override
+	public void setHideSettings(WHidden whidden, int userId) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.setHideSettings();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.USERID, userId);
+			r.put(Consts.WHIDDEN, whidden);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+	public void loadAvailableAvatars(){
+		if (isOnline()){
+			r = SocialCDERequestFactory.getAvailableAvatars();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
+
+
+	@Override
+	public void setAvatar(String uri) {
+		if (isOnline()){
+			r = SocialCDERequestFactory.setAvatar();
+			r.put(Preferences.PROXYSERVER, this.proxy_string);
+			r.put(Preferences.USERNAME, this.userName_string);
+			r.put(Preferences.PASSWORD, this.passw_string);
+			r.put(Consts.URI, uri);
+			r.setMemoryCacheEnabled(true);
+			StartProgressDialog();
+			mRequestManager.execute(r, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+
 } 

@@ -1,9 +1,8 @@
 package it.uniba.socialcde4android.fragments;
 
-import com.squareup.picasso.Picasso;
 
 import it.uniba.socialcde4android.R;
-import it.uniba.socialcde4android.preferences.Preferences;
+
 import it.uniba.socialcde4android.shared.library.WUser;
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,24 +26,29 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	private TextView followersText;
 	private TextView followingText;
 	private CheckBox followCheckBox;
+	private Button hideButton;
 	private OnProfileFragmentInteractionListener mListenerWUser;
+	private static final String ARG_PASSWORD = "password";
+
 
 	@Override
 	public int getFragmentViewId() {
 		return R.layout.fragment_wusercolleague_profile;
 	}
 
-	public static WUserColleagueProfile_Fragment newInstance(WUser wuser) {
+	public static WUserColleagueProfile_Fragment newInstance(WUser wuser, String passw_string) {
 		WUserColleagueProfile_Fragment fragment = new WUserColleagueProfile_Fragment();
 		Bundle args = new Bundle();
 		args.putParcelable(ARG_WUSER, wuser);
+		args.putString(ARG_PASSWORD, passw_string);
+
 		//	args.putString(ARG_PARAM2, param2);
 		fragment.setArguments(args);
 		return fragment;
 	}
 
 	public WUserColleagueProfile_Fragment() {
-		//super();
+		super();
 		// Required empty public constructor
 	}
 
@@ -53,6 +58,8 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		super.onCreate(savedInstanceState);
 		if (getArguments() != null) {
 			wuser = getArguments().getParcelable(ARG_WUSER);
+			password = getArguments().getString(ARG_PASSWORD);
+
 		}
 	}
 
@@ -69,11 +76,22 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		followersText = (TextView) view.findViewById(R.id.textViewFollowersFragment);
 		followingText = (TextView) view.findViewById(R.id.textViewFollowingFragment);
 		followCheckBox = (CheckBox) view.findViewById(R.id.checkBoxFollowFragment);
+		hideButton = (Button) view.findViewById(R.id.buttonHideUnide);
 
 
 		String avatar_address = wuser.getAvatar();
+		
+		hideButton.setOnClickListener(new View.OnClickListener() {
+		    @Override
+		    public void onClick(View v) {
+		    	mListenerWUser.loadUserHideSettings(wuser.getId());
+		    }
+		});
+		
+		
 		if (avatar_address != null){
-			Picasso.with(this.getActivity()).load(avatar_address).into(userImage);
+			imageloader.displayImage(avatar_address, userImage);
+
 		}
 		userNameText.setText(wuser.getUsername());
 		postsText.setText("Posts: "+wuser.getStatuses());
@@ -87,7 +105,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 				onFollowCheckBoxClicked(followCheckBox.isChecked());
 			}
 		});
-
+		
 		return view;
 	}
 
@@ -104,8 +122,15 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	public interface OnProfileFragmentInteractionListener {
 		// TODO: Update argument type and name
 		public void onProfileFragmentCheckBoxChanged(Boolean followChecked, WUser wuser_profile);
+		
+		public void loadUserHideSettings(int userId);
 	}
 
+//	public void loadDialogHideUnhide(WHidden widden){
+//		//richiamare la dialog impostando i checkbox con i valori di hidden
+//		HideUnhideDialog hideUnhide_dialog = HideUnhideDialog.newInstance(widden);
+//		hideUnhide_dialog.show(getFragmentManager(), "Change Hide Settings");
+//	}
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -139,8 +164,6 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 
 	@Override
 	public String getRequest(int datatype) {
-		String username = preferences.get(Preferences.USERNAME);
-		String password = preferences.get(Preferences.PASSWORD);
 		long since = 0;
 		long to = 0 ;
 		if (datatype == super.GET_MOREDATA_TYPE)

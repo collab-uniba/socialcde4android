@@ -5,9 +5,6 @@
         android:orderInCategory="100"
         android:showAsAction="always"
          android:icon="@drawable/ic_action_group"/>
-     <item
-        android:id="@+id/drawer"
-        android:title="">
-    </item>
+     
 
 </menu>

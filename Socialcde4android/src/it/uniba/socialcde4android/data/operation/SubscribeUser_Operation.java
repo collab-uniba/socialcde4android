@@ -11,6 +11,7 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import it.uniba.socialcde4android.config.Config;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.costants.Error_consts;
@@ -32,7 +33,7 @@ public class SubscribeUser_Operation implements Operation {
 		String mail = request.getString(Consts.MAIL);
 
 		String userName = request.getString(Preferences.USERNAME);
-		String password = request.getString(Preferences.PASSWORD);
+		String password = request.getString(Consts.INVIT_CODE);
 		String host = request.getString(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
 		int status = 0;
 		int response = -1;
@@ -54,11 +55,13 @@ public class SubscribeUser_Operation implements Operation {
 			Writer writer = new OutputStreamWriter(out, "UTF-8");
 			writer.write("{ \"email\":\"" + mail + "\" ,\"username\":\""
 					+ userName + "\", \"password\":\"" + password + "\"}");
+			Log.i("stauscode registration " , "{ \"email\":\"" + mail + "\" ,\"username\":\""
+					+ userName + "\", \"password\":\"" + password + "\"}");
 
 			writer.close();
 			out.close();
 			status = conn.getResponseCode();
-
+Log.i("stauscode registration " , String.valueOf(status));
 			if (status >= 200 && status <= 299) {
 				InputStreamReader in = new InputStreamReader(
 						conn.getInputStream());
@@ -85,8 +88,6 @@ public class SubscribeUser_Operation implements Operation {
 		Bundle bundle = new Bundle();
 		bundle.putInt(Consts.SUBSCRIPTION_RESPONSE, response);
 		bundle.putInt(Consts.REQUEST_TYPE, Consts.REQUESTTYPE_SUBSCRIBEUSER);
-
-		
 		return bundle;
 
 	}

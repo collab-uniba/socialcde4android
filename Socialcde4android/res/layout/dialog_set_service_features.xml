@@ -9,7 +9,8 @@
     <LinearLayout
         android:id="@+id/LinearLayout_title_features"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp" >
 
         <ImageView
             android:id="@+id/imageView1_logoFEATURE"
@@ -38,8 +39,9 @@
         android:id="@+id/linearLayout1_buttons_features"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/listViewCheckBoxFEATURES2"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
         android:gravity="bottom|center|center_horizontal|center_vertical" >
 
         <Button
@@ -62,10 +64,9 @@
     </LinearLayout>
 
     <ListView
-        android:id="@+id/listViewCheckBoxFEATURES"
+        android:id="@+id/listViewCheckBoxFEATURES2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/linearLayout1_buttons_features"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/LinearLayout_title_features" >
 

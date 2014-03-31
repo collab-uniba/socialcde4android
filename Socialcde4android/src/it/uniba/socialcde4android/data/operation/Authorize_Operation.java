@@ -15,7 +15,6 @@ import java.net.URL;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.CustomRequestException;
@@ -56,7 +55,6 @@ public class Authorize_Operation implements Operation {
 					+ "\", \"verifier\":\"" + verifier
 					+ "\", \"accessToken\": \"" + accessToken
 					+ "\", \"accessSecret\":\"" + accessSecret + "\"}");
-
 			writer.close();
 			out.close();
 			int status = conn.getResponseCode();

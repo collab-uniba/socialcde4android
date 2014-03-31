@@ -3,7 +3,7 @@ package it.uniba.socialcde4android.adapters;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import com.squareup.picasso.Picasso;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.shared.library.WPost;
@@ -31,16 +31,24 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 	private Boolean noMoreItems = false;	
 	private Boolean clickable;
 	private OnTimeLineAdapterListener frgmentListener;
+	private ImageLoader imageloader;
 
 
 
 	public TimeLineAdapter(Context context, int resource, ArrayList<WPost> mListWpostItems, Boolean noMoreItems, Boolean clickable, Fragment fragment) {
 		super(context, resource, mListWpostItems);
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		num_post = mListWpostItems.size();
+		if (mListWpostItems == null) num_post=0;
+			else num_post = mListWpostItems.size();
+//		if (context == null){
+//			Log.i("inside adapter", "context null");
+//		}
 		frgmentListener = (OnTimeLineAdapterListener) fragment;
 		this.noMoreItems = noMoreItems;
 		this.clickable = clickable;
+		imageloader = ConfiguratedImageLoader.getImageLoader(context);
+
+
 	}
 
 	public interface OnTimeLineAdapterListener {
@@ -101,7 +109,7 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 					@Override
 					public void onClick(View v) {
 						frgmentListener.openUserProfileFromActivity(wpost.getUser());
-						}
+					}
 				});  
 			}
 			view.textViewAbout.setText(getTimeElpased(wpost.getCreateAt(), wpost.getService().getName()));
@@ -117,7 +125,8 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 				});  
 			}
 			if (userImage_adress != null){
-				Picasso.with(this.getContext()).load(userImage_adress).into(view.imageviewUser);
+				imageloader.displayImage(userImage_adress, view.imageviewUser);
+
 			}
 
 			break;

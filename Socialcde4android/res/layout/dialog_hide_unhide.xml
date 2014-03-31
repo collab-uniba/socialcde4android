@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayoutHideUnide"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:id="@+id/FrameLayoutBase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp" >
+
+        <TextView
+            android:id="@+id/textView1_title_HIDE_FROM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="25dp"
+            android:text="@string/title_hide_from"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1_buttons_HIDEUNHIDE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearlayout_checkBox_HIDEHUNIDE"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:gravity="bottom|center|center_horizontal|center_vertical" >
+
+        <Button
+            android:id="@+id/button1_dialog_CANCELHIDEUNIDE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:background="@drawable/rounded_little_button"
+            android:text="@string/buttoncancel" />
+
+        <Button
+            android:id="@+id/button2_dialog_OKHIDEUNHIDE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:background="@drawable/rounded_little_button"
+            android:text="@string/buttonOK" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearlayout_checkBox_HIDEHUNIDE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/FrameLayoutBase"
+        android:layout_marginLeft="25dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
+
+        <CheckBox
+            android:id="@+id/checkBox1SUGGESTIONS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/suggestion"
+            android:textSize="20sp" />
+
+        <CheckBox
+            android:id="@+id/checkBox3ITERATION"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:text="@string/iterationtimeline"
+            android:textSize="20sp" />
+
+        <CheckBox
+            android:id="@+id/checkBox2INTERACTIVE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/interactivetimeline"
+            android:textSize="20sp" />
+       
+    </LinearLayout>
+
+</RelativeLayout>

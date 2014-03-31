@@ -90,7 +90,9 @@ public class RetrieveServices_Operation implements Operation {
 		}
 
 		Bundle bundle = new Bundle();
-		
+		for (int i=0; i < wservice.length; i++){
+			Log.i("wservice", wservice[i].toString());
+		}
 
 		if (wservice != null && wservice.length>0){
 			bundle.putParcelableArray(Consts.WSERVICES, wservice);
