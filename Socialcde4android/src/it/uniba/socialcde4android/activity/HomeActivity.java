@@ -123,7 +123,6 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
 			fragmentTransaction.commit();
 		}
-
 	}
 
 
@@ -151,6 +150,8 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			outState.putParcelable(PARCELABLE_REQUEST2, r2);
 		} else
 			outState.putBoolean(DIALOG_SHOWN, false);	
+		outState.putParcelable(PARCELABLE_REQUEST, null);
+		outState.putParcelable(PARCELABLE_REQUEST2, null);
 	}
 
 
@@ -215,10 +216,15 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		if (r != null && mRequestManager.isRequestInProgress(r)){
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r);
+		}else if (r != null) {
+			mRequestManager.callListenerWithCachedData(this, r);
 		}
 		if (r2 != null && mRequestManager.isRequestInProgress(r2)){
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r2);
+		}
+		else if (r2 != null) {
+			mRequestManager.callListenerWithCachedData(this, r2);
 		}
 	}
 
@@ -544,14 +550,14 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			case(Consts.REQUESTTYPE_GET_AVAILABLE_AVATARS):
 				StopProgressDialog();
 			if (resultData.getBoolean(Consts.FOUND_AVATAR_IMAGES)){
-				
+
 				String[] uri = null;
 				uri = resultData.getStringArray(Consts.URI);
-				
+
 				//apro la dialog 
 				ChooseAvatarDialog chooseAvatar_dialog = ChooseAvatarDialog.newInstance(uri, wuser.getAvatar());
 				chooseAvatar_dialog.show(getFragmentManager(), "choose avatar");
-				
+
 			}else{
 				Toast.makeText(this, "Avatars Not Available."  , Toast.LENGTH_LONG).show();
 			}
@@ -879,7 +885,11 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	@Override
 	protected void onPause() {
 		super.onPause();
+		if (!mRequestManager.isRequestInProgress(r)) r = null;
+		if (!mRequestManager.isRequestInProgress(r2)) r2 = null;
 		mRequestManager.removeRequestListener(this);
+
+
 	}
 
 

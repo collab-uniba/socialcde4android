@@ -50,9 +50,6 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 		TimeLine_Fragment fragment = new TimeLine_Fragment();
 		Bundle args = new Bundle();
 		args.putString(ARG_PASSWORD, passw_string);
-		//		args.putString(ARG_PARAM2, param2);
-		//		fragment.setArguments(args);
-		//fragment.setRetainInstance(true);
 		fragment.setArguments(args);
 		return fragment;
 	}

@@ -238,7 +238,6 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		TimeLine_AbstractFragment.this.loading = false;
 		mListener.setFragmentLoading(TimeLine_AbstractFragment.this.loading);
 		mListener.StopProgressDialog();
-		//pensare ad un modo per riavviare la richiesta REST
 	}
 
 
