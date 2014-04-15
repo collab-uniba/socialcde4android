@@ -283,9 +283,9 @@ public class LoginActivity extends Activity implements RequestListener {
 
 
 	public  void StopProgressDialog(){
-		if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r2 == null || !mRequestManager.isRequestInProgress(r2)))){
+		//if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r2 == null || !mRequestManager.isRequestInProgress(r2)))){
 			progressDialog.dismiss();
-		}
+		//}
 	}
 	
 	public void unlockScreenOrientation(){
@@ -372,18 +372,18 @@ public class LoginActivity extends Activity implements RequestListener {
 		
 		switch(statusCode){
 		case Error_consts.ERROR_GETTING_USER:
-			Toast.makeText(this, "Error retrieving user profile. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error occurred. Please check the Proxy Address. ", Toast.LENGTH_SHORT).show();
 			//verifyServer();
 			break;
 		case Error_consts.ERROR_GETTING_USER * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving user profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving user profile. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 		//	verifyServer();
 			break;
 		case Error_consts.ERROR_WEBSERVICE_RUNNING:
 			Toast.makeText(this, "Error retrieving webservice availability. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_WEBSERVICE_RUNNING * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving webservice availability.  Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving webservice availability. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}

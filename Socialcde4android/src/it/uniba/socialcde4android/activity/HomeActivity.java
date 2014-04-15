@@ -102,11 +102,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		mDrawerList_left = (ListView) findViewById(R.id.drawer_services_left);
 		mDrawerList_right = (ListView) findViewById(R.id.drawer_users_right);
 		mRequestManager = SocialCDERequestManager.from(this);
-
+		Log.i("homewuser", "prima");
 		if (getIntent().hasExtra("bundle") && savedInstanceState==null){
 			Bundle bundle = getIntent().getExtras().getBundle("bundle");
 			if (bundle != null){
 				wuser = (WUser)bundle.getParcelable(Consts.WUSER);
+				Log.i("homewuser", wuser.toString());
 				proxy_string = (String)getIntent().getExtras().getString(Preferences.PROXYSERVER);
 				userName_string = (String)getIntent().getExtras().getString(Preferences.USERNAME);
 				passw_string = (String)getIntent().getExtras().getString(Preferences.PASSWORD);
@@ -742,7 +743,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		break;
 		case Error_consts.SETFOLLOWED_ERROR * Error_consts.TIMEOUT_FACTOR:
 		{ 
-			Toast.makeText(this, "Error setting user's status. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error setting user's status. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(HomeActivity.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 			fragment.changeCheckBoxState();
@@ -753,21 +754,21 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			exitToLogin();
 			break;
 		case Error_consts.ERROR_GET_FRIENDS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving users list. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving users list. Try again in a few minutes. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS:
 			Toast.makeText(this, "Error retrieving Hide Settings. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving Hide Settings. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving Hide Settings. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.POST_ERROR:
 			Toast.makeText(this, "Error sending message. ", Toast.LENGTH_SHORT).show();
 			//exitToLogin();
 			break;
 		case Error_consts.POST_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error sending message. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error sending message. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			//exitToLogin();
 			break;
 		case Error_consts.RECORD_ERROR:
@@ -775,7 +776,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			//exitToLogin();
 			break;
 		case Error_consts.RECORD_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error recording the service. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error recording the service. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			//	exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES:
@@ -783,7 +784,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving services. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving services. Try again in a few minutes. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE:
@@ -791,67 +792,67 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 			break;
 		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving colleague profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving colleague profile. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_SETTINGPASSW:
 			Toast.makeText(this, "Error setting password. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error setting password. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS:
 			Toast.makeText(this, "Error updating Hide Settings. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error updating Hide Settings. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error updating Hide Settings. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_USERNAME_AVAILABLE:
 			Toast.makeText(this, "Error retrieving username availability. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_USERNAME_AVAILABLE * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving username availability. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving username availability. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_GET_OAUTHDATA:
 			Toast.makeText(this, "Error retrieving OAuth Data. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_GET_OAUTHDATA * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving OAuth Data. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving OAuth Data. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_AVATARS:
 			Toast.makeText(this, "Error retrieving Available Avatars. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_AVATARS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving Available Avatars. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving Available Avatars. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.AUTHORIZE_ERROR:
 			Toast.makeText(this, "Error in Authorize operation. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.AUTHORIZE_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error in Authorize operation. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error in Authorize operation. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_FEATURES:
 			Toast.makeText(this, "Error in retrieving features. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_FEATURES * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error in retrieving features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error in retrieving features. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_FEATURES_ERROR:
 			Toast.makeText(this, "Error updating features. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_FEATURES_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error updating features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error updating features. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_AVATAR_ERROR:
 			Toast.makeText(this, "Error setting new Avatar. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_AVATAR_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error setting new Avatar. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error setting new Avatar. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.UNREG_SERVICE_ERROR:
 			Toast.makeText(this, "Error unsubscribing service. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.UNREG_SERVICE_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error unsubscribing service. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error unsubscribing service. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
@@ -888,6 +889,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		if (!mRequestManager.isRequestInProgress(r)) r = null;
 		if (!mRequestManager.isRequestInProgress(r2)) r2 = null;
 		mRequestManager.removeRequestListener(this);
+		unlockScreenOrientation();
 
 
 	}
@@ -1142,7 +1144,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		}
 	}
 
-	public void loadAvailableAvatars(){
+	private void loadAvailableAvatars(){
 		if (isOnline()){
 			r = SocialCDERequestFactory.getAvailableAvatars();
 			r.put(Preferences.PROXYSERVER, this.proxy_string);

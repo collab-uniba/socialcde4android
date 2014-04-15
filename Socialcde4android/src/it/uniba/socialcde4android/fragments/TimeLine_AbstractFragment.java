@@ -54,7 +54,7 @@ import android.widget.Toast;
  * factory method to create an instance of this fragment.
  * 
  */
-public abstract class TimeLine_AbstractFragment extends Fragment implements  OnRefreshListener<ListView>, OnTimeLineAdapterListener {
+public abstract class TimeLine_AbstractFragment extends Fragment implements  OnRefreshListener<ListView> , OnTimeLineAdapterListener{
 
 
 	private static final String TAG = TimeLine_AbstractFragment.class.getSimpleName();
@@ -63,7 +63,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected static final int GET_DATA_TYPE  = 0;
 	protected static final int GET_MOREDATA_TYPE  = 1;
 	protected PullToRefreshListView pullListView;
-	ListView listView;
+	protected ListView listView;
 	protected TimeLineAdapter mAdapter;
 	protected Boolean loading = false;
 	protected Boolean loading_more = false;
@@ -292,7 +292,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 
 		public void sendTFSPost(String post);
 		
-		public String getPassword();
+		//public String getPassword();
 
 
 	//	public void loadUserHideSettings(int id);
