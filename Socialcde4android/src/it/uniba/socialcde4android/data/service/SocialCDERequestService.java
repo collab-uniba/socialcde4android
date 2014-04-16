@@ -72,6 +72,8 @@ public final class SocialCDERequestService extends RequestService {
 			return new GetAvailableAvatars_Operation();
 		case SocialCDERequestFactory.SET_AVATAR:
 			return new SetAvatar_Operation();
+		case SocialCDERequestFactory.GET_WPOSTS:
+			return new GetWposts_Operation();
 		}
 		
 		

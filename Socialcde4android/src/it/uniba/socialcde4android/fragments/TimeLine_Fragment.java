@@ -1,5 +1,7 @@
 package it.uniba.socialcde4android.fragments;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import it.uniba.socialcde4android.R;
 
+import it.uniba.socialcde4android.shared.library.WPost;
 import it.uniba.socialcde4android.shared.library.WUser;
 
 
@@ -22,6 +25,9 @@ import it.uniba.socialcde4android.shared.library.WUser;
  * 
  */
 public class TimeLine_Fragment extends TimeLine_AbstractFragment {
+	
+	private static final String TAG = TimeLine_AbstractFragment.class.getSimpleName();
+
 
 	private static final String EDIT_SHOWING = "edit_showing";
 
@@ -32,6 +38,7 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	private LinearLayout editTextLayout;
 	private Boolean isEditShowing = false;
 	private static final String ARG_PASSWORD = "password";
+
 
 
 	/**
@@ -47,18 +54,26 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	 */
 	// TODO: Rename and change types and number of parameters
 	public static TimeLine_Fragment newInstance(String passw_string) {
+		
 		TimeLine_Fragment fragment = new TimeLine_Fragment();
 		Bundle args = new Bundle();
 		args.putString(ARG_PASSWORD, passw_string);
 		fragment.setArguments(args);
 		return fragment;
+		
 	}
 
 	public TimeLine_Fragment() {
-		super();
+	//	super();
 		// Required empty public constructor
 	}
 
+	
+	@Override
+	public String getTAG(){
+		return TAG;
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,6 +92,8 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View view = super.onCreateView( inflater,  container, savedInstanceState);
+		pullListView.setOnRefreshListener(TimeLine_Fragment.this);
+
 		buttonWriteMessage = (ImageButton)view.findViewById(R.id.buttonEditTextHOMETIMELINE);
 		buttonCancelEditText = (ImageButton)view.findViewById(R.id.imageButtonCancelEditTextTIMELINE);
 		sendTFSPost = (ImageButton) view.findViewById(R.id.imageButton2);
@@ -145,28 +162,6 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	}
 
 
-	//	public interface OnTimeLineFragmentInteractionListener extends OnGenericTimeLineFragmentInteractionListener{
-	//
-	//		public void onHomeTimeLineFragmentEvent();
-	//
-	//	}
-
-	//	@Override
-	//	public void onCreate(Bundle savedInstanceState) {
-	//		super.onCreate(savedInstanceState);
-	//		if (getArguments() != null) {
-	//			mParam1 = getArguments().getString(ARG_PARAM1);
-	//			mParam2 = getArguments().getString(ARG_PARAM2);
-	//		}
-	//	}
-	//
-	//	@Override
-	//	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	//			Bundle savedInstanceState) {
-	//		TextView textView = new TextView(getActivity());
-	//		textView.setText(R.string.hello_blank_fragment);
-	//		return textView;
-	//	}
 
 	@Override
 	public String getRequestType() {
@@ -202,5 +197,12 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	public Fragment getFragment() {
 		return this;
 	}
+
+	@Override
+	ArrayList<WPost> getWPosts() {
+		// TODO Auto-generated method stub
+		return mListWpostItems;
+	}
+
 
 }
