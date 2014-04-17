@@ -167,6 +167,30 @@ public class Consts {
 
 	public static final int REQUESTTYPE_SET_AVATAR = 24;
 
+	public static final String WPOSTS = "WPOSTS";
+
+	public static final String DATA_ERROR = "data error";
+
+	public static final String NO_MORE_MESSAGES = "no more messages";
+
+	public static final String REQUEST = "request";
+
+	public static final String REQUEST_TYPE_STRING = "request type string";
+
+	public static final String FOUND_WPOSTS = "found wposts";
+
+	public static final int REQUESTTYPE_GET_WPOSTS = 25;
+
+	public static final String TYPE_REQUEST = "type request";
+
+	public static final String FRAGMENT_TAG = "fragment tag";
+
+	public static final String BUNDLE = "bundle";
+
+	public static final String ADAPTER = "adapter";
+
+	public static final String LOADING = "loading";
+
 	
 
 	

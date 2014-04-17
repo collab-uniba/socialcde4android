@@ -34,6 +34,7 @@
 
         <activity
             android:name="it.uniba.socialcde4android.activity.HomeActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_home" >
         </activity>
         <activity

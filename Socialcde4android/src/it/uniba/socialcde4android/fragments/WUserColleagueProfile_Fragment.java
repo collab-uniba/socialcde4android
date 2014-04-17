@@ -1,8 +1,11 @@
 package it.uniba.socialcde4android.fragments;
 
 
+import java.util.ArrayList;
+
 import it.uniba.socialcde4android.R;
 
+import it.uniba.socialcde4android.shared.library.WPost;
 import it.uniba.socialcde4android.shared.library.WUser;
 import android.app.Activity;
 import android.os.Bundle;
@@ -17,6 +20,8 @@ import android.widget.TextView;
 
 
 public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
+	
+
 
 	private static final String ARG_WUSER = "wuser";
 	private WUser wuser;
@@ -31,6 +36,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	private static final String ARG_PASSWORD = "password";
 
 
+
 	@Override
 	public int getFragmentViewId() {
 		return R.layout.fragment_wusercolleague_profile;
@@ -41,16 +47,16 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		Bundle args = new Bundle();
 		args.putParcelable(ARG_WUSER, wuser);
 		args.putString(ARG_PASSWORD, passw_string);
-
-		//	args.putString(ARG_PARAM2, param2);
 		fragment.setArguments(args);
 		return fragment;
 	}
 
 	public WUserColleagueProfile_Fragment() {
-		super();
+	//	super();
 		// Required empty public constructor
 	}
+	
+	
 
 
 	@Override
@@ -69,6 +75,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 			Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		View view = super.onCreateView(inflater, container, savedInstanceState);
+		pullListView.setOnRefreshListener(WUserColleagueProfile_Fragment.this);
 
 		userImage = (ImageView) view.findViewById(R.id.imageViewFrament);
 		userNameText = (TextView) view.findViewById(R.id.textViewUsernameFragment);
@@ -153,7 +160,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	@Override
 	public void onPause() {
 		super.onPause();
-		if (getDataTask != null ) 	getDataTask.cancel(true);
+		//if (getDataTask != null ) 	getDataTask.cancel(true);
 		//if (getMoreDataTask != null )getMoreDataTask.cancel(true);
 	}
 
@@ -167,7 +174,7 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 		long since = 0;
 		long to = 0 ;
 		if (datatype == super.GET_MOREDATA_TYPE)
-			to = (mListWpostItems.get(mListWpostItems.size()-1)).getId();
+			to = (mListWpostItems[mListWpostItems.length -1]).getId();
 		return "{ \"username\":\"" + username + "\", \"password\":\""
 		+ password + "\" , \"ownerName\":\"" + wuser.getUsername()
 		+ "\" , \"since\":\"" + since + "\" , \"to\":\"" + to
@@ -189,6 +196,8 @@ public class WUserColleagueProfile_Fragment extends TimeLine_AbstractFragment{
 	public Fragment getFragment() {
 		return this;
 	}
+
+
 
 
 

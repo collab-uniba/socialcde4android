@@ -35,11 +35,11 @@ public class TimeLineAdapter extends ArrayAdapter<WPost> {
 
 
 
-	public TimeLineAdapter(Context context, int resource, ArrayList<WPost> mListWpostItems, Boolean noMoreItems, Boolean clickable, Fragment fragment) {
+	public TimeLineAdapter(Context context, int resource, WPost[] mListWpostItems, Boolean noMoreItems, Boolean clickable, Fragment fragment) {
 		super(context, resource, mListWpostItems);
 		infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (mListWpostItems == null) num_post=0;
-			else num_post = mListWpostItems.size();
+			else num_post = mListWpostItems.length;
 //		if (context == null){
 //			Log.i("inside adapter", "context null");
 //		}

@@ -31,6 +31,7 @@ import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WHidden;
 import it.uniba.socialcde4android.shared.library.WOAuthData;
+import it.uniba.socialcde4android.shared.library.WPost;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 import it.uniba.socialcde4android.utility.ScreenUtility;
@@ -84,13 +85,17 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	private static final String DIALOG_SHOWN = "DIALOG_SHOWN";
 	private static final String PARCELABLE_REQUEST = "PARCELABLE_REQUEST";
 	private static final String PARCELABLE_REQUEST2 = "PARCELABLE_REQUEST2";
+	private static final String PARCELABLE_REQUEST3 = "PARCELABLE_REQUEST3";
 	private static final String FRAGMENT_WUSERCOLLEAGUE_PROFILE = "fragment colleague";
 	private static final String FRAGMENT_WUSER_PROFILE = "fragment wuser";
+	private static final String FRAGMENT_TIMELINE = "fragment timeline";
 	private static ProgressDialog progressDialog; 
 	private RequestManager mRequestManager;
 	private Request r;
 	private Request r2;
-	private Boolean isFragmentLoading;
+	private Request r3;
+
+	//private Boolean isFragmentLoading;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -102,11 +107,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		mDrawerList_left = (ListView) findViewById(R.id.drawer_services_left);
 		mDrawerList_right = (ListView) findViewById(R.id.drawer_users_right);
 		mRequestManager = SocialCDERequestManager.from(this);
-
-		if (getIntent().hasExtra("bundle") && savedInstanceState==null){
+		Log.i("ACTIVITY", "onCreate");
+		if (getIntent().hasExtra("bundle") && savedInstanceState == null){
 			Bundle bundle = getIntent().getExtras().getBundle("bundle");
 			if (bundle != null){
 				wuser = (WUser)bundle.getParcelable(Consts.WUSER);
+				Log.i("homewuser", wuser.toString());
 				proxy_string = (String)getIntent().getExtras().getString(Preferences.PROXYSERVER);
 				userName_string = (String)getIntent().getExtras().getString(Preferences.USERNAME);
 				passw_string = (String)getIntent().getExtras().getString(Preferences.PASSWORD);
@@ -117,23 +123,29 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		}
 
 		if (savedInstanceState==null) {
-			Fragment fragment = TimeLine_Fragment.newInstance(this.passw_string);
 			FragmentManager fragmentManager = getSupportFragmentManager();
+			TimeLine_Fragment fragment = (TimeLine_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_TIMELINE);
+			if (fragment == null){
+				fragment = TimeLine_Fragment.newInstance(this.passw_string);
+			}
+			
 			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-			fragmentTransaction.replace(R.id.frag_ptr_list, fragment);
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_TIMELINE);
 			fragmentTransaction.commit();
 		}
+		Log.i("SSSSSSSSSSSSSSSSSS","oncreate");
+
 	}
 
 
-	public String getPassword(){
-		return this.passw_string;
-	}
 
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		Log.i("ACTIVITY", "onSaveInstanceState");
+
+
 		outState.putParcelableArray(Consts.WSERVICES, wservice);
 		outState.putParcelableArrayList(Consts.WUSERS, this.wuser_all);
 		outState.putIntArray(Consts.WUSERS_NUMBERS, wUsersNumType_SuggFingFersHidd);
@@ -141,6 +153,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		outState.putString(Preferences.PROXYSERVER, this.proxy_string);
 		outState.putString(Preferences.USERNAME, this.userName_string);
 		outState.putString(Preferences.PASSWORD, this.passw_string);
+		//salvo il tag dell'ultimo fragment voglio solo sapere se è timeline o no 
 		if (progressDialog != null && progressDialog.isShowing()) {
 			// Dismiss the dialog, in order to avoid a memory leak
 			StopProgressDialog();
@@ -148,30 +161,35 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			outState.putBoolean(DIALOG_SHOWN, true);
 			outState.putParcelable(PARCELABLE_REQUEST, r);
 			outState.putParcelable(PARCELABLE_REQUEST2, r2);
-		} else
+			outState.putParcelable(PARCELABLE_REQUEST3, r3);
+		} else{
 			outState.putBoolean(DIALOG_SHOWN, false);	
-		outState.putParcelable(PARCELABLE_REQUEST, null);
-		outState.putParcelable(PARCELABLE_REQUEST2, null);
+			outState.putParcelable(PARCELABLE_REQUEST, null);
+			outState.putParcelable(PARCELABLE_REQUEST2, null);
+			outState.putParcelable(PARCELABLE_REQUEST3, null);
+		}
 	}
 
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-
+		Log.i("ACTIVITY", "onRestoreInstanceState");
 
 		if (savedInstanceState != null) {
 			r = savedInstanceState.getParcelable(PARCELABLE_REQUEST);
 			r2 = savedInstanceState.getParcelable(PARCELABLE_REQUEST2);
+			r3 = savedInstanceState.getParcelable(PARCELABLE_REQUEST3);
+
 
 			// Show the dialog, if there has to be one
-			if (savedInstanceState.getBoolean(DIALOG_SHOWN) && (mRequestManager.isRequestInProgress(r)||mRequestManager.isRequestInProgress(r2)))
+			if (savedInstanceState.getBoolean(DIALOG_SHOWN) && (mRequestManager.isRequestInProgress(r)||mRequestManager.isRequestInProgress(r2)
+					|| mRequestManager.isRequestInProgress(r3)))
 				StartProgressDialog();
 
-			Parcelable[] parcelableArray =	savedInstanceState.getParcelableArray(Consts.WSERVICES);
+			Parcelable[] parcelableArray = savedInstanceState.getParcelableArray(Consts.WSERVICES);
 			if (parcelableArray != null) {
 				wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
-
 				wuser_all = savedInstanceState.getParcelableArrayList(Consts.WUSERS);
 				wUsersNumType_SuggFingFersHidd = savedInstanceState.getIntArray(Consts.WUSERS_NUMBERS);
 				wuser = savedInstanceState.getParcelable(Consts.WUSER);
@@ -193,9 +211,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	}
 
 	public  void StopProgressDialog(){
-		if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r2 == null || !mRequestManager.isRequestInProgress(r2))) && !isFragmentLoading){
+		if (((r == null || !mRequestManager.isRequestInProgress(r)) && (r3 == null || !mRequestManager.isRequestInProgress(r3))
+				&& (r2 == null || !mRequestManager.isRequestInProgress(r2))) ){
+			if (progressDialog != null){
+				progressDialog.dismiss();
+			}
 			unlockScreenOrientation();
-			progressDialog.dismiss();
 		}
 	}
 
@@ -213,6 +234,8 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.i("ACTIVITY", "onResume");
+
 		if (r != null && mRequestManager.isRequestInProgress(r)){
 			StartProgressDialog();
 			mRequestManager.addRequestListener(this, r);
@@ -225,6 +248,13 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		}
 		else if (r2 != null) {
 			mRequestManager.callListenerWithCachedData(this, r2);
+		}
+		if (r3 != null && mRequestManager.isRequestInProgress(r3)){
+			StartProgressDialog();
+			mRequestManager.addRequestListener(this, r3);
+		}
+		else if (r3 != null) {
+			mRequestManager.callListenerWithCachedData(this, r3);
 		}
 	}
 
@@ -349,6 +379,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 					if (mDrawerList_right.getAdapter().getItemViewType(i) == ((UsersAdapter) mDrawerList_right.getAdapter()).getUserTypeID())
 						array_position++;
 				}
+
 				loadColleagueProfile(wuser_all.get(array_position).getId());
 			}
 			mDrawerLayout.closeDrawer(mDrawerList_right);
@@ -406,26 +437,25 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 	private void openUserProfile(WUser wuserToOpen){
 		// create a new fragment and specify the planet to show based on position
-		Fragment fragment = null;
+		WUserProfile_Fragment fragmentwuser = null;
+		WUserColleagueProfile_Fragment fragmentwusercolleague = null;
 		if (wuserToOpen.getId() == wuser.getId())	{
-			fragment = WUserProfile_Fragment.newInstance(wuser, this.passw_string);
+			fragmentwuser = WUserProfile_Fragment.newInstance(wuser, this.passw_string);
 		}
 		else	{
-			fragment = WUserColleagueProfile_Fragment.newInstance(wuserToOpen, this.passw_string);
+			fragmentwusercolleague = WUserColleagueProfile_Fragment.newInstance(wuserToOpen, this.passw_string);
 		}
 		// Insert the fragment by replacing any existing fragment
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		if (wuserToOpen.getId() == wuser.getId()){
-			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSER_PROFILE);
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragmentwuser, FRAGMENT_WUSER_PROFILE);
 		}else{
-			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragmentwusercolleague, FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 		}
 		fragmentManager.popBackStack();
 		fragmentTransaction.addToBackStack(null);
 		fragmentTransaction.commit();
-		// Highlight the selected item, update the title, and close the drawer
-		//getActionBar().setTitle("User Profile");
 		mDrawerLayout.closeDrawer(mDrawerList_right);
 	}
 
@@ -433,6 +463,10 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 	private void loadColleagueProfile(int wuserID){
 		if (isOnline()){
+			if (mRequestManager.isRequestInProgress(r3)) {
+				mRequestManager.removeRequestListener(this, r3);
+				r3=null;
+			}
 			r = SocialCDERequestFactory.getColleagueProfileRequest();
 			r.put(Preferences.PROXYSERVER, this.proxy_string);
 			r.put(Preferences.USERNAME, this.userName_string);
@@ -504,7 +538,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			switch(resultData.getInt(Consts.REQUEST_TYPE)){
 
 
-			case(Consts.REQUESTTYPE_RETRIEVESERVICES):
+			case(Consts.REQUESTTYPE_RETRIEVESERVICES):{
 				if (resultData.getBoolean(Consts.FOUND_WSERVICES)){
 					Parcelable[] parcelableArray =	resultData.getParcelableArray(Consts.WSERVICES);
 					if (parcelableArray != null) 
@@ -512,12 +546,41 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 				}else{
 					Toast.makeText(this, "No services found."  , Toast.LENGTH_LONG).show();
 				}
-			populateDrawerLeft(); //posso popolare il drawer sinistro
-			StopProgressDialog();
-			break;
+				populateDrawerLeft(); //posso popolare il drawer sinistro
+				StopProgressDialog();
+				break;
+			}
+			case(Consts.REQUESTTYPE_GET_WPOSTS):
+			{
+				//StopProgressDialog();
+				//passo il resultData direttamente al fragment..
+				FragmentManager fragmentManager = getSupportFragmentManager();
+				TimeLine_Fragment fragment_timeline = (TimeLine_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_TIMELINE);
+				if (fragment_timeline != null && fragment_timeline.isVisible()) {
+				     //DO STUFF
+					Log.i("homefragment","timeline");
+					fragment_timeline.onPostExecute(resultData);
+				}else {
+					WUserColleagueProfile_Fragment fragment_wuser_colleague = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+					if(fragment_wuser_colleague != null && fragment_wuser_colleague.isVisible()){
+						Log.i("homefragment","colleageprofiletimeline");
 
+						fragment_wuser_colleague.onPostExecute(resultData);
 
+					}else{
+						WUserProfile_Fragment fragment_wuser = (WUserProfile_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_WUSER_PROFILE);
+						if(fragment_wuser != null && fragment_wuser.isVisible()){
+							fragment_wuser.onPostExecute(resultData);
+
+							
+						}
+						
+					}
+				}
+				break;
+			}
 			case(Consts.REQUESTTYPE_RETRIEVEHIDESETTINGS):
+			{
 				if (resultData.getBoolean(Consts.FOUND_HIDDEN_SETTINGS)){
 					WHidden whidden = (WHidden) resultData.getParcelable(Consts.WHIDDEN);
 					int user_id = resultData.getInt(Consts.USERID);
@@ -530,10 +593,11 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 					Toast.makeText(this, "Error retrieving settings. Try again."  , Toast.LENGTH_LONG).show();
 				}
 
-			break;
-
+				break;
+			}
 
 			case(Consts.REQUESTTYPE_SENDTFSPOST):
+			{
 				if (resultData.getBoolean(Consts.SENT)){
 					//va fatto il refresh della view..
 					//Toast.makeText(this, "Updating Timeline", Toast.LENGTH_SHORT).show();
@@ -544,67 +608,71 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 				}else{
 					Toast.makeText(this, "An error occured."  , Toast.LENGTH_LONG).show();
 				}
-			StopProgressDialog();
-			break;
-
-			case(Consts.REQUESTTYPE_GET_AVAILABLE_AVATARS):
 				StopProgressDialog();
-			if (resultData.getBoolean(Consts.FOUND_AVATAR_IMAGES)){
-
-				String[] uri = null;
-				uri = resultData.getStringArray(Consts.URI);
-
-				//apro la dialog 
-				ChooseAvatarDialog chooseAvatar_dialog = ChooseAvatarDialog.newInstance(uri, wuser.getAvatar());
-				chooseAvatar_dialog.show(getFragmentManager(), "choose avatar");
-
-			}else{
-				Toast.makeText(this, "Avatars Not Available."  , Toast.LENGTH_LONG).show();
+				break;
 			}
-			break;
+			case(Consts.REQUESTTYPE_GET_AVAILABLE_AVATARS):
+			{
+				StopProgressDialog();
+				if (resultData.getBoolean(Consts.FOUND_AVATAR_IMAGES)){
 
+					String[] uri = null;
+					uri = resultData.getStringArray(Consts.URI);
+
+					//apro la dialog 
+					ChooseAvatarDialog chooseAvatar_dialog = ChooseAvatarDialog.newInstance(uri, wuser.getAvatar());
+					chooseAvatar_dialog.show(getFragmentManager(), "choose avatar");
+
+				}else{
+					Toast.makeText(this, "Avatars Not Available."  , Toast.LENGTH_LONG).show();
+				}
+				break;
+			}
 
 
 			case(Consts.REQUESTTYPE_RETRIEVEFEATURES):
+			{
 				StopProgressDialog();
-			if (resultData.getBoolean(Consts.FOUND_WFEATURES)){
-				WFeature[] wfeature = null;
-				int service_id = resultData.getInt(Consts.SERVICE_ID);
-				Parcelable[] parcelableArray =	resultData.getParcelableArray(Consts.WFEATURES);
-				if (parcelableArray != null) 
-					wfeature = Arrays.copyOf(parcelableArray, parcelableArray.length, WFeature[].class);
-				for (int i=0; i<wfeature.length; i++){
-					Log.i("wfeature",wfeature[i].toString());
-				}
-				//qui carico un pannello per visualizzare le feature
-				for (int i=0; i<wservice.length;i++){
-					if (wservice[i].getId() == service_id){
-						SetServiceFeaturesDialog features_dialog = SetServiceFeaturesDialog.newInstance(wfeature, wservice[i]);
-						//		features_dialog.setCancelable(false);
-						features_dialog.show(getFragmentManager(), "set features");
-						break;
+				if (resultData.getBoolean(Consts.FOUND_WFEATURES)){
+					WFeature[] wfeature = null;
+					int service_id = resultData.getInt(Consts.SERVICE_ID);
+					Parcelable[] parcelableArray =	resultData.getParcelableArray(Consts.WFEATURES);
+					if (parcelableArray != null) 
+						wfeature = Arrays.copyOf(parcelableArray, parcelableArray.length, WFeature[].class);
+//					for (int i=0; i<wfeature.length; i++){
+//						Log.i("wfeature",wfeature[i].toString());
+//					}
+					//qui carico un pannello per visualizzare le feature
+					for (int i=0; i<wservice.length;i++){
+						if (wservice[i].getId() == service_id){
+							SetServiceFeaturesDialog features_dialog = SetServiceFeaturesDialog.newInstance(wfeature, wservice[i]);
+							//		features_dialog.setCancelable(false);
+							features_dialog.show(getFragmentManager(), "set features");
+							break;
+						}
 					}
+				}else{
+					Toast.makeText(this, "No features found."  , Toast.LENGTH_LONG).show();
 				}
-			}else{
-				Toast.makeText(this, "No features found."  , Toast.LENGTH_LONG).show();
+				break;
 			}
-			break;
-
 
 			case(Consts.REQUESTTYPE_GETOAUTDATA):
+			{
 				WOAuthData woauthdata =	resultData.getParcelable(Consts.OAUTH_DATA);
-			final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
+				final Intent intent = new Intent(HomeActivity.this, WebViewActivity.class);
 
-			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-			intent.putExtra(Consts.OAUTH_DATA, woauthdata);
-			intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
-			intent.putExtra(Consts.OAUTH_VERSION, resultData.getInt(Consts.OAUTH_VERSION) );
-			StopProgressDialog();
-			startActivityForResult(intent, Consts.WEBVIEW_REQUEST);				
+				intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+				intent.putExtra(Consts.OAUTH_DATA, woauthdata);
+				intent.putExtra(Consts.SERVICE_ID,resultData.getString(Consts.SERVICE_ID) );
+				intent.putExtra(Consts.OAUTH_VERSION, resultData.getInt(Consts.OAUTH_VERSION) );
+				StopProgressDialog();
+				startActivityForResult(intent, Consts.WEBVIEW_REQUEST);				
 
-			break;
-
+				break;
+			}
 			case(Consts.REQUESTTYPE_ALL_USERS):
+			{
 				if (resultData.getBoolean(Consts.FOUND_WUSERS)){
 					wuser_all = resultData.getParcelableArrayList(Consts.WUSERS);
 					wUsersNumType_SuggFingFersHidd = resultData.getIntArray(Consts.WUSERS_NUMBERS);
@@ -612,64 +680,71 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 				else{
 					wUsersNumType_SuggFingFersHidd = new int[0];
 				}
-			populateDrawerRight();
-			StopProgressDialog();
-			break;
-
+				populateDrawerRight();
+				StopProgressDialog();
+				break;
+			}
 
 			case(Consts.REQUESTTYPE_GET_COLLEAGUE_PROFILE):
+			{
 				if (resultData.getBoolean(Consts.FOUND_WUSER)){
 					WUser wuser_colleague = resultData.getParcelable(Consts.WUSER);
-					openUserProfile(wuser_colleague);
+					openUserProfile(wuser_colleague);  //non deve essere richiamato al resume 
 				}else{
 					Toast.makeText(this, "Error retrieving colleague profile."  , Toast.LENGTH_LONG).show();
 					StopProgressDialog();
 				}
-			break;
-
+				break;
+			}
 
 			case(Consts.REQUESTTYPE_RECORD):
+			{
 				StopProgressDialog();
-			if (resultData.getBoolean(Consts.RECORDED)){
-				Toast.makeText(this, "Service recorded."  , Toast.LENGTH_LONG).show();
-			}else{
-				Toast.makeText(this, "Error recording service. Check the inserted values and try again."  , Toast.LENGTH_LONG).show();
-			}
-			int service_id_rec = resultData.getInt(Consts.SERVICE_ID);
-			for (int i=0; i<wservice.length;i++){
-				if (wservice[i].getId() == service_id_rec){
-					wservice[i].setRegistered(true);
-					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
-					mDrawerList_left.setAdapter(adapter);
-					break;
+				if (resultData.getBoolean(Consts.RECORDED)){
+					Toast.makeText(this, "Service recorded."  , Toast.LENGTH_LONG).show();
+				}else{
+					Toast.makeText(this, "Error recording service. Check the inserted values and try again."  , Toast.LENGTH_LONG).show();
 				}
+				int service_id_rec = resultData.getInt(Consts.SERVICE_ID);
+				for (int i=0; i<wservice.length;i++){
+					if (wservice[i].getId() == service_id_rec){
+						wservice[i].setRegistered(true);
+						ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
+						mDrawerList_left.setAdapter(adapter);
+						break;
+					}
+				}
+				getFeatures(service_id_rec);
+				break;
 			}
-			getFeatures(service_id_rec);
-			break;
 
 			case(Consts.REQUESTTYPE_SET_FEATURES):
+			{
 				StopProgressDialog();
-			if (resultData.getBoolean(Consts.SETTED_FEATURES)){
-				Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
-			}else{
-				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				if (resultData.getBoolean(Consts.SETTED_FEATURES)){
+					Toast.makeText(this, "Features updated."  , Toast.LENGTH_LONG).show();
+				}else{
+					Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				}
+				break;
 			}
-			break;
-
 			case(Consts.REQUESTTYPE_SET_AVATAR):
+			{
 				StopProgressDialog();
-			if (resultData.getBoolean(Consts.SETTED_AVATAR)){
-				Toast.makeText(this, "Avatar updated."  , Toast.LENGTH_LONG).show();
-				//è necessario aggiornare wuser e ricaricare il drawerleft
-				wuser.setAvatar(resultData.getString(Consts.URI));
-				populateDrawerLeft();
-				//TODO da controllare che funzioni anche con la cache dell'imageloader attiva
-			}else{
-				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				if (resultData.getBoolean(Consts.SETTED_AVATAR)){
+					Toast.makeText(this, "Avatar updated."  , Toast.LENGTH_LONG).show();
+					//è necessario aggiornare wuser e ricaricare il drawerleft
+					wuser.setAvatar(resultData.getString(Consts.URI));
+					populateDrawerLeft();
+					//TODO da controllare che funzioni anche con la cache dell'imageloader attiva
+				}else{
+					Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				}
+				break;
 			}
-			break;
 
 			case(Consts.REQUESTTYPE_UPDATE_HIDDEN_SETTINGS):
+			{
 				if (resultData.getBoolean(Consts.HIDDEN_SETTINGS_UPDATED)){
 					Toast.makeText(this, "Hide settings updated."  , Toast.LENGTH_LONG).show();
 					//ricarica il drawer degli utenti
@@ -678,51 +753,60 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 					StopProgressDialog();
 					Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
 				}
-			break;
+				break;
+			}
 
 			case(Consts.REQUESTTYPE_CHANGE_PASSW):
+			{
 				StopProgressDialog();
-			if (resultData.getBoolean(Consts.PASSWORD_SETTED)){
-				Toast.makeText(this, "Password changed."  , Toast.LENGTH_LONG).show();
-				passw_string = resultData.getString(Consts.NEW_PASSWORD);
-			}else{
-				Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				if (resultData.getBoolean(Consts.PASSWORD_SETTED)){
+					Toast.makeText(this, "Password changed."  , Toast.LENGTH_LONG).show();
+					passw_string = resultData.getString(Consts.NEW_PASSWORD);
+				}else{
+					Toast.makeText(this, "Error occurred."  , Toast.LENGTH_LONG).show();
+				}
+				break;
 			}
-			break;
 
 			case(Consts.REQUESTTYPE_UNREG_SERVICE):
+			{
 				int service_id = resultData.getInt(Consts.SERVICE_ID);
-			for (int i=0; i<wservice.length;i++){
-				if (wservice[i].getId() == service_id){
-					wservice[i].setRegistered(false);
-					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
-					mDrawerList_left.setAdapter(adapter);
-					break;
+				for (int i=0; i<wservice.length;i++){
+					if (wservice[i].getId() == service_id){
+						wservice[i].setRegistered(false);
+						ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
+						mDrawerList_left.setAdapter(adapter);
+						break;
+					}
 				}
+				StopProgressDialog();
+				Toast.makeText(this, "Service unsubscribed."  , Toast.LENGTH_LONG).show();
+				break;
 			}
-			StopProgressDialog();
-			Toast.makeText(this, "Service unsubscribed."  , Toast.LENGTH_LONG).show();
-			break;
 
 			case(Consts.REQUESTTYPE_SET_FOLLOWED):
+			{
 				//nel caso sia stato scelto di non seguirlo più allora ve chiesto se si vuole anche nascondere
 				//dalla lista dei suggeriti
 				loadFriends(); //valore settato, ricarica il drawer destro
-			break;
+				break;
+			}
 
 			case(Consts.REQUESTTYPE_AUTHORIZE):
+			{
 				int service_id1 = resultData.getInt(Consts.SERVICE_ID);
-			for (int i=0; i<wservice.length;i++){
-				if (wservice[i].getId() == service_id1){
-					wservice[i].setRegistered(true);
-					ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
-					mDrawerList_left.setAdapter(adapter);
-					break;
+				for (int i=0; i<wservice.length;i++){
+					if (wservice[i].getId() == service_id1){
+						wservice[i].setRegistered(true);
+						ServicesAdapter adapter = new ServicesAdapter(getBaseContext(), 0, wservice, wuser, this.proxy_string);
+						mDrawerList_left.setAdapter(adapter);
+						break;
+					}
 				}
+				getFeatures(service_id1);
+				//StopProgressDialog();
+				break;
 			}
-			getFeatures(service_id1);
-			//StopProgressDialog();
-			break;
 			}
 		}
 	}
@@ -742,7 +826,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		break;
 		case Error_consts.SETFOLLOWED_ERROR * Error_consts.TIMEOUT_FACTOR:
 		{ 
-			Toast.makeText(this, "Error setting user's status. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error setting user's status. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			FragmentManager fragmentManager = getSupportFragmentManager();
 			WUserColleagueProfile_Fragment fragment = (WUserColleagueProfile_Fragment) fragmentManager.findFragmentByTag(HomeActivity.FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 			fragment.changeCheckBoxState();
@@ -753,21 +837,27 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			exitToLogin();
 			break;
 		case Error_consts.ERROR_GET_FRIENDS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving users list. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving users list. Try again in a few minutes. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
+			break;
+		case Error_consts.ERROR_RETRIEVING_WPOSTS:
+			Toast.makeText(this, "Error retrieving posts. ", Toast.LENGTH_SHORT).show();
+			break;
+		case Error_consts.ERROR_RETRIEVING_WPOSTS * Error_consts.TIMEOUT_FACTOR:
+			Toast.makeText(this, "Error retrieving posts. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS:
 			Toast.makeText(this, "Error retrieving Hide Settings. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving Hide Settings. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving Hide Settings. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.POST_ERROR:
 			Toast.makeText(this, "Error sending message. ", Toast.LENGTH_SHORT).show();
 			//exitToLogin();
 			break;
 		case Error_consts.POST_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error sending message. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error sending message. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			//exitToLogin();
 			break;
 		case Error_consts.RECORD_ERROR:
@@ -775,7 +865,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			//exitToLogin();
 			break;
 		case Error_consts.RECORD_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error recording the service. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error recording the service. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			//	exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES:
@@ -783,7 +873,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIEVING_SERVICES * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving services. Connection Timeout. Exiting to login.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving services. Try again in a few minutes. Exiting to login.", Toast.LENGTH_SHORT).show();
 			exitToLogin();
 			break;
 		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE:
@@ -791,67 +881,67 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 			break;
 		case Error_consts.ERROR_RETRIVENG_GOLLEAGUE * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving colleague profile. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving colleague profile. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_SETTINGPASSW:
 			Toast.makeText(this, "Error setting password. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error setting password. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS:
 			Toast.makeText(this, "Error updating Hide Settings. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_UPDATING_HIDDEN_SETTINGS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error updating Hide Settings. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error updating Hide Settings. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_USERNAME_AVAILABLE:
 			Toast.makeText(this, "Error retrieving username availability. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_USERNAME_AVAILABLE * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving username availability. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving username availability. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_GET_OAUTHDATA:
 			Toast.makeText(this, "Error retrieving OAuth Data. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_GET_OAUTHDATA * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving OAuth Data. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving OAuth Data. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_AVATARS:
 			Toast.makeText(this, "Error retrieving Available Avatars. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_AVATARS * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error retrieving Available Avatars. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error retrieving Available Avatars. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.AUTHORIZE_ERROR:
 			Toast.makeText(this, "Error in Authorize operation. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.AUTHORIZE_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error in Authorize operation. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error in Authorize operation. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_FEATURES:
 			Toast.makeText(this, "Error in retrieving features. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_RETRIEVING_FEATURES * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error in retrieving features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error in retrieving features. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_FEATURES_ERROR:
 			Toast.makeText(this, "Error updating features. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_FEATURES_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error updating features. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error updating features. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_AVATAR_ERROR:
 			Toast.makeText(this, "Error setting new Avatar. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.SET_AVATAR_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error setting new Avatar. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error setting new Avatar. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.UNREG_SERVICE_ERROR:
 			Toast.makeText(this, "Error unsubscribing service. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.UNREG_SERVICE_ERROR * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error unsubscribing service. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error unsubscribing service. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
@@ -861,6 +951,8 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		//se ci sono fragment eliminali.. 
 		if (mRequestManager.isRequestInProgress(r)) mRequestManager.removeRequestListener(this, r);
 		if (mRequestManager.isRequestInProgress(r2)) mRequestManager.removeRequestListener(this, r2);
+		if (mRequestManager.isRequestInProgress(r3)) mRequestManager.removeRequestListener(this, r3);
+
 		ConfiguratedImageLoader.destroyIfImageLoader();
 		Preferences.setFalseAutolog(this);
 		Intent i = new Intent(HomeActivity.this, LoginActivity.class);
@@ -887,7 +979,10 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		super.onPause();
 		if (!mRequestManager.isRequestInProgress(r)) r = null;
 		if (!mRequestManager.isRequestInProgress(r2)) r2 = null;
+		if (!mRequestManager.isRequestInProgress(r3)) r3 = null;
+
 		mRequestManager.removeRequestListener(this);
+		unlockScreenOrientation();
 
 
 	}
@@ -895,9 +990,15 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 	@Override
 	public void onBackPressed() {
+		//annullare r3
+		if (mRequestManager.isRequestInProgress(r3)) {
+			mRequestManager.removeRequestListener(this, r3);
+			r3=null;
+		}
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		if (fragmentManager.getBackStackEntryCount()>0){
-			super.onBackPressed();
+			fragmentManager.popBackStackImmediate();
+
 			return;
 		}else{
 			if (doubleBackToExitPressedOnce) {
@@ -928,11 +1029,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	}
 
 
-	@Override
-	public void setFragmentLoading(Boolean isFragmentLoading) {
-		this.isFragmentLoading = isFragmentLoading;  
 
-	}
 
 	@Override
 	public void onProfileFragmentCheckBoxChanged(Boolean followChecked,	WUser wuser_profile) {
@@ -949,7 +1046,6 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		}else{
 			loadColleagueProfile(wuserToOpen.getId());
 		}
-
 	}
 
 
@@ -1142,7 +1238,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		}
 	}
 
-	public void loadAvailableAvatars(){
+	private void loadAvailableAvatars(){
 		if (isOnline()){
 			r = SocialCDERequestFactory.getAvailableAvatars();
 			r.put(Preferences.PROXYSERVER, this.proxy_string);
@@ -1174,6 +1270,32 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			new NoNetworkDialog().show(getFragmentManager(), "alert");
 		}
 	}
+
+
+	@Override
+	public void loadData(Integer type_request, String request, String requestType) {
+		// TODO Auto-generated method stub
+		if (isOnline()){
+			//blocca lo schermo
+			lockScreenOrientation();
+			r3 = SocialCDERequestFactory.getWPosts();
+			r3.put(Consts.REQUEST_TYPE, type_request);
+			r3.put(Consts.REQUEST, request);
+			r3.put(Consts.REQUEST_TYPE_STRING, requestType);
+			r3.put(Preferences.PROXYSERVER, this.proxy_string);
+			r3.setMemoryCacheEnabled(true);
+			//StartProgressDialog();
+			mRequestManager.execute(r3, this);
+		}else{
+			new NoNetworkDialog().show(getFragmentManager(), "alert");
+		}
+	}
+
+	
+
+
+
+	
 
 
 } 

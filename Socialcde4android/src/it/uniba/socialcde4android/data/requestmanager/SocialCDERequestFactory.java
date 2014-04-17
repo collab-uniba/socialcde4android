@@ -40,7 +40,7 @@ public final class SocialCDERequestFactory {
 	public static final int SET_HIDE_SETTINGS = 17;
 	public static final int GET_AVAILABLE_AVATARS = 18;
 	public static final int SET_AVATAR = 19;
-
+	public static final int GET_WPOSTS = 20;
 
 
     // Response data
@@ -160,6 +160,11 @@ public final class SocialCDERequestFactory {
 
 	public static Request setAvatar() {
 		Request request = new Request(SET_AVATAR);		
+		return request;
+	}
+
+	public static Request getWPosts() {
+		Request request = new Request(GET_WPOSTS);		
 		return request;
 	}
 

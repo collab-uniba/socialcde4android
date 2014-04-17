@@ -80,6 +80,15 @@
             android:layout_above="@+id/layout_edittext_TIMELINE"
             android:layout_alignParentLeft="true"
             android:background="@color/Gainsboro" />
+
+        <ProgressBar
+            android:id="@+id/progressBar3"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+
     </RelativeLayout>
 
 </RelativeLayout>

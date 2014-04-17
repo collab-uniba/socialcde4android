@@ -1,38 +1,25 @@
 package it.uniba.socialcde4android.fragments;
 
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Map;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.nostra13.universalimageloader.core.ImageLoader;
-
 import it.uniba.socialcde4android.R;
 import it.uniba.socialcde4android.adapters.ConfiguratedImageLoader;
 import it.uniba.socialcde4android.adapters.TimeLineAdapter;
 import it.uniba.socialcde4android.adapters.TimeLineAdapter.OnTimeLineAdapterListener;
-import it.uniba.socialcde4android.config.Config;
+import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.preferences.Preferences;
-import it.uniba.socialcde4android.shared.library.JsonDateDeserializer;
+import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WPost;
 import it.uniba.socialcde4android.shared.library.WUser;
-
 import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -43,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
@@ -54,65 +42,59 @@ import android.widget.Toast;
  * factory method to create an instance of this fragment.
  * 
  */
-public abstract class TimeLine_AbstractFragment extends Fragment implements  OnRefreshListener<ListView>, OnTimeLineAdapterListener {
+public abstract class TimeLine_AbstractFragment extends Fragment implements  OnRefreshListener<ListView> , OnTimeLineAdapterListener{
 
 
-	private static final String TAG = TimeLine_AbstractFragment.class.getSimpleName();
 
 	private static final String WPOST_ARRAY = "wpost array";
 	protected static final int GET_DATA_TYPE  = 0;
 	protected static final int GET_MOREDATA_TYPE  = 1;
 	protected PullToRefreshListView pullListView;
-	ListView listView;
+	protected ListView listView;
 	protected TimeLineAdapter mAdapter;
-	protected Boolean loading = false;
-	protected Boolean loading_more = false;
-	protected ArrayList<WPost> mListWpostItems = null;
+	protected WPost[] mListWpostItems = null;
 	protected OnGenericTimeLineFragmentInteractionListener mListener;
-	public volatile boolean noMoreMessages = false;
-	private static final String NO_MORE_MESSAGES = "no more messages";
-	private static final String LOADING_MORE = "loading more";
-	protected GetDataTask getDataTask ;
+	public  boolean noMoreMessages = false;
+	private final static String NO_MORE_MESSAGES = "no more messages";
 	protected String username = "";
 	protected String password = "";
 	protected String host = "";
-	//protected boolean loadAgainRequestedInASecond = false;
-	private volatile boolean data_error = false;
+	private  boolean data_error = false;
 	protected ImageLoader imageloader;
+	protected ProgressBar progress;
+	//private boolean loading = false;
 
 
-	public String getTAG(){
-		return TAG;
-	}
+	public abstract int getFragmentViewId();
 
-	public TimeLine_AbstractFragment() {
-		// Required empty public constructor
-	}
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i("onCreate","onCreate");
-
 	}
+
+
+
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		// Inflate the layout for this fragment
 		imageloader = ConfiguratedImageLoader.getImageLoader((Activity)mListener);
-
 		Log.i("onCreateView","onCreateView");
-
+		//se come background metto un loading.. e poi lo rendo invisibile una volta caircato
 		View view = inflater.inflate(getFragmentViewId(), container,	false);
-
+		progress = (ProgressBar)view.findViewById(R.id.progressBar3);
+		progress.setVisibility(View.VISIBLE);
 		pullListView = (PullToRefreshListView) view.findViewById(R.id.listViewCheckBoxFEATURES);
 		listView = pullListView.getRefreshableView();
-		pullListView.setOnRefreshListener(TimeLine_AbstractFragment.this);
 		return view;
 	}
 
-	public abstract int getFragmentViewId();
 
 	private void setListViewListener(){
 		listView.setOnScrollListener(new OnScrollListener(){
@@ -137,19 +119,14 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		});
 	}
 
+
 	private void checkLastItemInView(AbsListView   view){
 		int count = view.getCount(); // visible views count
 		int lastVisibleItemPosition = view.getLastVisiblePosition();
-		//Log.i("inside listview listener","lastitem: "+lastVisibleItemPosition+ "count: "+String.valueOf(count));
 
 		if (lastVisibleItemPosition >= count-2){
-			if(!TimeLine_AbstractFragment.this.loading && !noMoreMessages){
-				Log.i("inside listview before getdata listener","lastitem: "+lastVisibleItemPosition+ "count-1: "+String.valueOf(count-1));
-
-				TimeLine_AbstractFragment.this.loading = true;
-				TimeLine_AbstractFragment.this.loading_more = true;
-				getDataTask =	new GetDataTask();
-				getDataTask.execute(GET_MOREDATA_TYPE) ;
+			if( !noMoreMessages){
+				getDataTask(GET_MOREDATA_TYPE) ;
 			}	
 		}
 	}
@@ -157,88 +134,49 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.i("onresume","onresume");
-		if (loading_more){
-			TimeLine_AbstractFragment.this.loading = true;
-			TimeLine_AbstractFragment.this.loading_more = true;
-			getDataTask =	new GetDataTask();
-			getDataTask.execute(GET_MOREDATA_TYPE) ;
-		}
+		Log.i("onResume",getTag());
+
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState){
 		super.onActivityCreated(savedInstanceState);
-		Log.i("onActivityCreated","onActivityCreated");
-
+		Log.i("onActivityCreated",getTag());
 		if (username.equals("")){
 			Map<String,String> preferences = Preferences.loadPreferences((Activity)mListener);
 			username = preferences.get(Preferences.USERNAME);
-//			password = mListener.getPassword();
 			host = preferences.get(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
 		}
-		if (mListWpostItems!=null ){
+		if (mListWpostItems!= null && mListWpostItems.length>0){
 			Context context = (Activity)mListener;
 			mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
 			listView.setAdapter(mAdapter);
 			setListViewListener();
 			pullListView.onRefreshComplete();
-			Log.i("loadingmore",String.valueOf(loading_more));
+			progress.setVisibility(View.GONE);	
 		}else{
-			if (savedInstanceState == null){
-				TimeLine_AbstractFragment.this.loading = true;
-				mListener.setFragmentLoading(loading);
-				mListener.StartProgressDialog();
-				Log.i("astraaaaaaaaaaact","savedinstace == null");
-				getDataTask = new GetDataTask();
-				getDataTask.execute(GET_DATA_TYPE);
-			}
-			else {
-				noMoreMessages = savedInstanceState.getBoolean(NO_MORE_MESSAGES);
-				mListWpostItems = savedInstanceState.getParcelableArrayList(WPOST_ARRAY);
-				loading_more = savedInstanceState.getBoolean(LOADING_MORE);
-				password = savedInstanceState.getString(Preferences.PASSWORD);
-				if (mListWpostItems!=null ){
-					Context context = (Activity)mListener;
-					mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
-					listView.setAdapter(mAdapter);
-					setListViewListener();
-					pullListView.onRefreshComplete();
-				}else{
-					TimeLine_AbstractFragment.this.loading = true;
-					mListener.setFragmentLoading(loading);
-					mListener.StartProgressDialog();
-					//Log.i("astraaaaaaaaaaact","savedinstace not null ma list o activity null");
-
-					getDataTask = 	new GetDataTask();
-					getDataTask.execute(GET_DATA_TYPE);
-				}
-			}
+			getDataTask(GET_DATA_TYPE);
 		}
+
+
 	}
 
-	protected abstract Boolean getClickable();
+
+
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 		Log.i("onSaveInstanceState","onSaveInstanceState");
 
-		savedInstanceState.putParcelableArrayList(WPOST_ARRAY, mListWpostItems);
+		savedInstanceState.putParcelableArray(WPOST_ARRAY, mListWpostItems);
 		savedInstanceState.putBoolean(NO_MORE_MESSAGES, noMoreMessages);
-		savedInstanceState.putBoolean(LOADING_MORE, loading_more);
 		savedInstanceState.putString(Preferences.PASSWORD, password);
-		if (getDataTask != null ) {
-
-			getDataTask.cancel(true);
-			Log.i("datatask cancellato",String.valueOf(getDataTask.isCancelled()));
-
-			pullListView.onRefreshComplete();
-		}
-		TimeLine_AbstractFragment.this.loading = false;
-		mListener.setFragmentLoading(TimeLine_AbstractFragment.this.loading);
-		mListener.StopProgressDialog();
+		savedInstanceState.putString(Consts.TAG, getTag());
+		//savedInstanceState.putBoolean(Consts.LOADING, loading);
 	}
+
+
 
 
 	@Override
@@ -248,13 +186,14 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 
 		try {
 			mListener = (OnGenericTimeLineFragmentInteractionListener) activity;
-			mListener.setFragmentLoading(loading);
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString()
 					+ " must implement OnFragmentInteractionListener");
 		}
 	}
 
+
+	protected abstract Boolean getClickable();
 
 	@Override
 	public void onDetach() {
@@ -278,134 +217,54 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	 */
 	public interface OnGenericTimeLineFragmentInteractionListener {
 
-		//public void onHomeTimeLineFragmentEvent();
-
-		public  void StartProgressDialog();
-
-		public  void StopProgressDialog();
-
-		public void setFragmentLoading(Boolean isFragmentLoading);
 
 		public void exitToLogin();
 
 		public void openUserProfileFromFragment(WUser wuser);
 
 		public void sendTFSPost(String post);
-		
-		public String getPassword();
+
+		public void loadData(Integer type_request, String request, String requestType);
+
+		public void StopProgressDialog();
 
 
-	//	public void loadUserHideSettings(int id);
-
-		//public void removeThisFragment(Fragment fragment);
 	}
 
 
 	public void onRefresh(PullToRefreshBase<ListView> refreshView) {
-		TimeLine_AbstractFragment.this.loading = true;
-		getDataTask = new GetDataTask();
-		getDataTask.execute(GET_DATA_TYPE);
+		getDataTask(GET_DATA_TYPE);
 
 	}
 
 
 	public void refreshFragment(){
-		TimeLine_AbstractFragment.this.loading = true;
-		getDataTask = new GetDataTask();
-		getDataTask.execute(GET_DATA_TYPE);
+		getDataTask(GET_DATA_TYPE);
+	}
+
+
+	public void getDataTask(Integer type_request){
+		mListener.loadData(type_request , getRequest(type_request), getRequestType());
 	}
 
 
 
-	class GetDataTask extends AsyncTask<Integer, Void, WPost[]> {
+	//@Override
+	public void onPostExecute(Bundle result_data) {
+		Parcelable[] parcelableArray =	result_data.getParcelableArray(Consts.WPOSTS);
+		WPost[] wposts = null;
+		if (parcelableArray != null) 
+			wposts = Arrays.copyOf(parcelableArray, parcelableArray.length, WPost[].class);
+		//bisogna considerare se wpost == null
+		if (wposts != null){
 
-		private Integer type_request;
-
-		@Override
-		protected WPost[] doInBackground(Integer... params) {
-
-			type_request = params[0];
-			WPost[] wpost;
-			wpost = new WPost[2];
-
-			try {
-				URL url = new URL(host + getRequestType());
-
-				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-				conn.setConnectTimeout(Config.CONN_TIMEOUT_MS);
-				conn.setReadTimeout(Config.READ_TIMEOUT_MS);
-				conn.setRequestMethod("POST");
-				conn.setDoOutput(true);
-				conn.setDoInput(true);
-				conn.setUseCaches(false);
-				conn.setAllowUserInteraction(false);
-				conn.setRequestProperty("Content-Type", "application/json");
-
-				// Create the form content
-				OutputStream out = conn.getOutputStream();
-				Writer writer = new OutputStreamWriter(out, "UTF-8");
-				writer.write(getRequest(type_request));
-				writer.close();
-				out.close();
-				int status = conn.getResponseCode();
-
-				if (status >= 200 && status <= 299) {
-					InputStreamReader in = new InputStreamReader(
-							conn.getInputStream(), "UTF-8");
-					BufferedReader br = new BufferedReader(in);
-					String output;
-					String result = "";
-					while ((output = br.readLine()) != null) {
-						result += output;
-
-					}
-					br.close();
-					int count = 0;
-					if (result.equals("[]")) {
-						wpost = new WPost[0];
-						noMoreMessages=true;
-					} else {
-						String haystack = result;
-						char needle = '{';
-						for (int i = 0; i < haystack.length(); i++) {
-							if (haystack.charAt(i) == needle) 
-								count++;	}
-						if (count == 0) count += 1;
-
-						wpost = new WPost[count/3];
-						Gson gson = new GsonBuilder().registerTypeAdapter(
-								Calendar.class, new JsonDateDeserializer()).create();
-						wpost = gson.fromJson(result, WPost[].class);
-					}
-
-				} else if (status == 400){
-					wpost = new WPost[0];
-					noMoreMessages=true;
-				}else{
-					wpost = new WPost[0];
-				}
-
-				conn.disconnect();
-			} catch(java.net.SocketTimeoutException e) {
-				e.printStackTrace();
-				data_error=true;
-				wpost = new WPost[0];
-			} catch (Exception e) {
-				e.printStackTrace();
-				data_error =true;
-				wpost = new WPost[0];
-			}
-			return wpost;
-		}
-
-		@Override
-		protected void onPostExecute(WPost[] wposts) {
-			super.onPostExecute(wposts);
-
+			int type_request = result_data.getInt(Consts.TYPE_REQUEST);
+			data_error = result_data.getBoolean(Consts.DATA_ERROR);
+			noMoreMessages = result_data.getBoolean(Consts.NO_MORE_MESSAGES);
 			switch(type_request){
 			case GET_DATA_TYPE:
 				if (wposts.length>0){
-					mListWpostItems = new ArrayList<WPost>( Arrays.asList(wposts));
+					mListWpostItems = wposts;
 					if (wposts.length<15)
 						noMoreMessages = true;
 					else
@@ -426,22 +285,24 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 						mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
 						listView.setAdapter(mAdapter);
 						setListViewListener();
-						// Call onRefreshComplete when the list has been refreshed.
 						pullListView.onRefreshComplete();
-
 					}
-					//	pullListView.onRefreshComplete();
 				}
-				TimeLine_AbstractFragment.this.loading = false;
-				mListener.setFragmentLoading(TimeLine_AbstractFragment.this.loading);
-				mListener.StopProgressDialog();
 				break;
 
 			case GET_MOREDATA_TYPE:
-				Parcelable listViewState;
+				Parcelable listViewState = null;
 				if (wposts.length>0){
-					for (int j=0; j< wposts.length; j++)
-						mListWpostItems.add(wposts[j]);
+
+					int wlistlength = mListWpostItems.length;
+					WPost[] tempList =  new WPost[wlistlength + wposts.length];
+					for (int i = 0; i < wlistlength; i++){
+						tempList[i] = mListWpostItems[i];
+					}
+					for (int j=0; j<wposts.length; j++){
+						tempList[j+wlistlength]= wposts[j];
+					}
+					mListWpostItems = tempList;
 					listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
 
 					mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(),getFragment());
@@ -468,21 +329,23 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 					}
 
 				}
-				TimeLine_AbstractFragment.this.loading = false;
-				TimeLine_AbstractFragment.this.loading_more = false;
-				mListener.setFragmentLoading(loading);
 				break;
 			}
+			progress.setVisibility(View.GONE);
+		}else{
+			showErrorAndExit();
 		}
+		mListener.StopProgressDialog();
 	}
 
 
 
-	public void showErrorAndExit(){
 
+
+	public void showErrorAndExit(){
+		mListener.StopProgressDialog();
 		Toast.makeText((Activity)mListener, "Connection error.", Toast.LENGTH_SHORT).show();
 		mListener.exitToLogin();
-
 	}
 
 

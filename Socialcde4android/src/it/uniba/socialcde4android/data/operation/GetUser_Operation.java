@@ -77,14 +77,14 @@ public class GetUser_Operation implements Operation {
 				Gson gson = new Gson();
 				wuser = gson.fromJson(result, WUser.class);
 			}else{
-				throw new ConnectionException("Error setting new password",Error_consts.ERROR_GETTING_USER);
+				throw new ConnectionException("Error getting the user",Error_consts.ERROR_GETTING_USER);
 			}
 
 			conn.disconnect();
 		}catch(java.net.SocketTimeoutException e) {
-			throw new ConnectionException("Error setting new password",Error_consts.ERROR_GETTING_USER * Error_consts.TIMEOUT_FACTOR);
+			throw new ConnectionException("Error getting the user",Error_consts.ERROR_GETTING_USER * Error_consts.TIMEOUT_FACTOR);
 		}  catch (Exception e) {
-			throw new ConnectionException("Error setting new password",Error_consts.ERROR_GETTING_USER);
+			throw new ConnectionException("Error getting the user",Error_consts.ERROR_GETTING_USER);
 		}
 		
 		Bundle bundle = new Bundle();

@@ -331,14 +331,14 @@ public class RegistrationActivity extends Activity implements RequestListener {
 			Toast.makeText(this, "Error subscribing user. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_SUBSCRIBE_USER * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error subscribing user. Connection Timeout. ", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error subscribing user. Try again in a few minutes. ", Toast.LENGTH_SHORT).show();
 			break;
 		case Error_consts.ERROR_SETTINGPASSW:
 			Toast.makeText(this, "Error setting password. ", Toast.LENGTH_SHORT).show();
 
 			break;
 		case Error_consts.ERROR_SETTINGPASSW * Error_consts.TIMEOUT_FACTOR:
-			Toast.makeText(this, "Error setting password. Connection Timeout.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error setting password. Try again in a few minutes.", Toast.LENGTH_SHORT).show();
 			break;
 		}
 	}
