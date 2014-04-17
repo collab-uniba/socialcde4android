@@ -15,6 +15,7 @@ import it.uniba.socialcde4android.adapters.TimeLineAdapter;
 import it.uniba.socialcde4android.adapters.TimeLineAdapter.OnTimeLineAdapterListener;
 import it.uniba.socialcde4android.costants.Consts;
 import it.uniba.socialcde4android.preferences.Preferences;
+import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WPost;
 import it.uniba.socialcde4android.shared.library.WUser;
 import android.app.Activity;
@@ -51,7 +52,7 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	protected PullToRefreshListView pullListView;
 	protected ListView listView;
 	protected TimeLineAdapter mAdapter;
-	protected ArrayList<WPost> mListWpostItems = null;
+	protected WPost[] mListWpostItems = null;
 	protected OnGenericTimeLineFragmentInteractionListener mListener;
 	public  boolean noMoreMessages = false;
 	private final static String NO_MORE_MESSAGES = "no more messages";
@@ -61,26 +62,27 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 	private  boolean data_error = false;
 	protected ImageLoader imageloader;
 	protected ProgressBar progress;
+	//private boolean loading = false;
 
 
-	abstract String getTAG();
-	
-	abstract ArrayList<WPost> getWPosts();
+	public abstract int getFragmentViewId();
 
-	public TimeLine_AbstractFragment() {
-		// Required empty public constructor
-	}
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i("onCreate","onCreate");
-
 	}
+
+
+
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		// Inflate the layout for this fragment
 		imageloader = ConfiguratedImageLoader.getImageLoader((Activity)mListener);
 		Log.i("onCreateView","onCreateView");
@@ -93,7 +95,6 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		return view;
 	}
 
-	public abstract int getFragmentViewId();
 
 	private void setListViewListener(){
 		listView.setOnScrollListener(new OnScrollListener(){
@@ -118,13 +119,13 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		});
 	}
 
+
 	private void checkLastItemInView(AbsListView   view){
 		int count = view.getCount(); // visible views count
 		int lastVisibleItemPosition = view.getLastVisiblePosition();
 
 		if (lastVisibleItemPosition >= count-2){
 			if( !noMoreMessages){
-				Log.i("inside listview before getdata listener","lastitem: "+lastVisibleItemPosition+ "count-1: "+String.valueOf(count-1));
 				getDataTask(GET_MOREDATA_TYPE) ;
 			}	
 		}
@@ -146,28 +147,18 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 			username = preferences.get(Preferences.USERNAME);
 			host = preferences.get(Preferences.PROXYSERVER) + "/SocialTFSProxy.svc";
 		}
-		if (savedInstanceState != null){
-			String tag = savedInstanceState.getString(Consts.TAG);
-			Log.i("onActivityCreated",tag);
-
-			mListWpostItems = savedInstanceState.getParcelableArrayList(WPOST_ARRAY);
-			if (mListWpostItems!=null){
-				
-				noMoreMessages = savedInstanceState.getBoolean(NO_MORE_MESSAGES);
-				password = savedInstanceState.getString(Preferences.PASSWORD);
-				Context context = (Activity)mListener;
-				mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
-				listView.setAdapter(mAdapter);
-				setListViewListener();
-				pullListView.onRefreshComplete();
-				progress.setVisibility(View.GONE);
-
-			}else{
-				getDataTask(GET_DATA_TYPE);
-			}
+		if (mListWpostItems!= null && mListWpostItems.length>0){
+			Context context = (Activity)mListener;
+			mAdapter = new TimeLineAdapter(context, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
+			listView.setAdapter(mAdapter);
+			setListViewListener();
+			pullListView.onRefreshComplete();
+			progress.setVisibility(View.GONE);	
 		}else{
 			getDataTask(GET_DATA_TYPE);
 		}
+
+
 	}
 
 
@@ -178,14 +169,15 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		super.onSaveInstanceState(savedInstanceState);
 		Log.i("onSaveInstanceState","onSaveInstanceState");
 
-		savedInstanceState.putParcelableArrayList(WPOST_ARRAY, getWPosts());
+		savedInstanceState.putParcelableArray(WPOST_ARRAY, mListWpostItems);
 		savedInstanceState.putBoolean(NO_MORE_MESSAGES, noMoreMessages);
 		savedInstanceState.putString(Preferences.PASSWORD, password);
 		savedInstanceState.putString(Consts.TAG, getTag());
+		//savedInstanceState.putBoolean(Consts.LOADING, loading);
 	}
 
 
-	
+
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -234,6 +226,9 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 
 		public void loadData(Integer type_request, String request, String requestType);
 
+		public void StopProgressDialog();
+
+
 	}
 
 
@@ -263,85 +258,94 @@ public abstract class TimeLine_AbstractFragment extends Fragment implements  OnR
 		//bisogna considerare se wpost == null
 		if (wposts != null){
 
-		int type_request = result_data.getInt(Consts.TYPE_REQUEST);
-		data_error = result_data.getBoolean(Consts.DATA_ERROR);
-		noMoreMessages = result_data.getBoolean(Consts.NO_MORE_MESSAGES);
-		switch(type_request){
-		case GET_DATA_TYPE:
-			if (wposts.length>0){
-				mListWpostItems = new ArrayList<WPost>( Arrays.asList(wposts));
-				if (wposts.length<15)
-					noMoreMessages = true;
-				else
-					noMoreMessages = false;
+			int type_request = result_data.getInt(Consts.TYPE_REQUEST);
+			data_error = result_data.getBoolean(Consts.DATA_ERROR);
+			noMoreMessages = result_data.getBoolean(Consts.NO_MORE_MESSAGES);
+			switch(type_request){
+			case GET_DATA_TYPE:
+				if (wposts.length>0){
+					mListWpostItems = wposts;
+					if (wposts.length<15)
+						noMoreMessages = true;
+					else
+						noMoreMessages = false;
 
-				mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
-				listView.setAdapter(mAdapter);
-				setListViewListener();
-				// Call onRefreshComplete when the list has been refreshed.
-				pullListView.onRefreshComplete();
-			}else{
-				if (data_error){
-					Log.i("abstractfragment","error in get data type");
-					showErrorAndExit();
-					data_error = false;
-				}else{
-					noMoreMessages=true;
 					mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
 					listView.setAdapter(mAdapter);
 					setListViewListener();
+					// Call onRefreshComplete when the list has been refreshed.
 					pullListView.onRefreshComplete();
-				}
-			}
-			break;
-
-		case GET_MOREDATA_TYPE:
-			Parcelable listViewState = null;
-			if (wposts.length>0){
-				for (int j=0; j< wposts.length; j++)
-					mListWpostItems.add(wposts[j]);
-				listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
-
-				mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(),getFragment());
-				listView.setAdapter(mAdapter);
-				//setListViewListener();
-				listView.onRestoreInstanceState(listViewState);
-				pullListView.onRefreshComplete();
-			}else{//wpost==0
-				if (noMoreMessages){
-					//è necessario cambiare l'ultimo elemento per comunicare l'assenza di altri post
-					listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
-					mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(),getFragment());
-					listView.setAdapter(mAdapter);
-					listView.onRestoreInstanceState(listViewState);
-					pullListView.onRefreshComplete();
-				}else {
+				}else{
 					if (data_error){
 						Log.i("abstractfragment","error in get data type");
 						showErrorAndExit();
 						data_error = false;
 					}else{
-
+						noMoreMessages=true;
+						mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(), getFragment());
+						listView.setAdapter(mAdapter);
+						setListViewListener();
+						pullListView.onRefreshComplete();
 					}
 				}
+				break;
 
+			case GET_MOREDATA_TYPE:
+				Parcelable listViewState = null;
+				if (wposts.length>0){
+
+					int wlistlength = mListWpostItems.length;
+					WPost[] tempList =  new WPost[wlistlength + wposts.length];
+					for (int i = 0; i < wlistlength; i++){
+						tempList[i] = mListWpostItems[i];
+					}
+					for (int j=0; j<wposts.length; j++){
+						tempList[j+wlistlength]= wposts[j];
+					}
+					mListWpostItems = tempList;
+					listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
+
+					mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(),getFragment());
+					listView.setAdapter(mAdapter);
+					//setListViewListener();
+					listView.onRestoreInstanceState(listViewState);
+					pullListView.onRefreshComplete();
+				}else{//wpost==0
+					if (noMoreMessages){
+						//è necessario cambiare l'ultimo elemento per comunicare l'assenza di altri post
+						listViewState = TimeLine_AbstractFragment.this.listView.onSaveInstanceState();
+						mAdapter = new TimeLineAdapter((Activity)mListener, android.R.layout.simple_list_item_1, mListWpostItems, noMoreMessages, getClickable(),getFragment());
+						listView.setAdapter(mAdapter);
+						listView.onRestoreInstanceState(listViewState);
+						pullListView.onRefreshComplete();
+					}else {
+						if (data_error){
+							Log.i("abstractfragment","error in get data type");
+							showErrorAndExit();
+							data_error = false;
+						}else{
+
+						}
+					}
+
+				}
+				break;
 			}
-			break;
-		}
-		progress.setVisibility(View.GONE);
+			progress.setVisibility(View.GONE);
 		}else{
 			showErrorAndExit();
 		}
+		mListener.StopProgressDialog();
 	}
 
 
 
 
-	public void showErrorAndExit(){
 
+	public void showErrorAndExit(){
+		mListener.StopProgressDialog();
 		Toast.makeText((Activity)mListener, "Connection error.", Toast.LENGTH_SHORT).show();
 		mListener.exitToLogin();
-
 	}
 
 

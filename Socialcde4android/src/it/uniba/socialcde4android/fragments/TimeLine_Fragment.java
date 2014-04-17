@@ -26,7 +26,6 @@ import it.uniba.socialcde4android.shared.library.WUser;
  */
 public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	
-	private static final String TAG = TimeLine_AbstractFragment.class.getSimpleName();
 
 
 	private static final String EDIT_SHOWING = "edit_showing";
@@ -69,10 +68,7 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 	}
 
 	
-	@Override
-	public String getTAG(){
-		return TAG;
-	}
+	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -174,7 +170,7 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 		long since = 0;
 		long to = 0 ;
 		if (datatype == super.GET_MOREDATA_TYPE){
-			to = (mListWpostItems.get(mListWpostItems.size()-1)).getId();
+			to = (mListWpostItems[mListWpostItems.length -1]).getId();
 		}
 
 		return "{ \"username\":\"" + username + "\", \"password\":\""
@@ -198,11 +194,7 @@ public class TimeLine_Fragment extends TimeLine_AbstractFragment {
 		return this;
 	}
 
-	@Override
-	ArrayList<WPost> getWPosts() {
-		// TODO Auto-generated method stub
-		return mListWpostItems;
-	}
+	
 
 
 }

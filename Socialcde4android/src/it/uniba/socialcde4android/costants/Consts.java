@@ -185,6 +185,12 @@ public class Consts {
 
 	public static final String FRAGMENT_TAG = "fragment tag";
 
+	public static final String BUNDLE = "bundle";
+
+	public static final String ADAPTER = "adapter";
+
+	public static final String LOADING = "loading";
+
 	
 
 	

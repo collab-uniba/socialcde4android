@@ -31,6 +31,7 @@ import it.uniba.socialcde4android.preferences.Preferences;
 import it.uniba.socialcde4android.shared.library.WFeature;
 import it.uniba.socialcde4android.shared.library.WHidden;
 import it.uniba.socialcde4android.shared.library.WOAuthData;
+import it.uniba.socialcde4android.shared.library.WPost;
 import it.uniba.socialcde4android.shared.library.WService;
 import it.uniba.socialcde4android.shared.library.WUser;
 import it.uniba.socialcde4android.utility.ScreenUtility;
@@ -106,7 +107,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 		mDrawerList_left = (ListView) findViewById(R.id.drawer_services_left);
 		mDrawerList_right = (ListView) findViewById(R.id.drawer_users_right);
 		mRequestManager = SocialCDERequestManager.from(this);
-		Log.i("homewuser", "prima");
+		Log.i("ACTIVITY", "onCreate");
 		if (getIntent().hasExtra("bundle") && savedInstanceState == null){
 			Bundle bundle = getIntent().getExtras().getBundle("bundle");
 			if (bundle != null){
@@ -131,30 +132,19 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_TIMELINE);
 			fragmentTransaction.commit();
-		}else{
-//			FragmentManager fragmentManager = getSupportFragmentManager();
-//			TimeLine_Fragment fragment = (TimeLine_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_TIMELINE);
-//			if (fragment != null){
-//				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//				fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_TIMELINE);
-//				fragmentTransaction.commit();
-//			}
-//			
 		}
 		Log.i("SSSSSSSSSSSSSSSSSS","oncreate");
 
 	}
 
 
-	public String getPassword(){
-		return this.passw_string;
-	}
 
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		Log.i("SSSSSSSSSSSSSSSSSS","onsaveinstancestate");
+		Log.i("ACTIVITY", "onSaveInstanceState");
+
 
 		outState.putParcelableArray(Consts.WSERVICES, wservice);
 		outState.putParcelableArrayList(Consts.WUSERS, this.wuser_all);
@@ -184,7 +174,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		Log.i("SSSSSSSSSSSSSSSSSS","onrestoreinstancestate");
+		Log.i("ACTIVITY", "onRestoreInstanceState");
 
 		if (savedInstanceState != null) {
 			r = savedInstanceState.getParcelable(PARCELABLE_REQUEST);
@@ -200,7 +190,6 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			Parcelable[] parcelableArray = savedInstanceState.getParcelableArray(Consts.WSERVICES);
 			if (parcelableArray != null) {
 				wservice = Arrays.copyOf(parcelableArray, parcelableArray.length, WService[].class);
-
 				wuser_all = savedInstanceState.getParcelableArrayList(Consts.WUSERS);
 				wUsersNumType_SuggFingFersHidd = savedInstanceState.getIntArray(Consts.WUSERS_NUMBERS);
 				wuser = savedInstanceState.getParcelable(Consts.WUSER);
@@ -222,10 +211,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	}
 
 	public  void StopProgressDialog(){
-		if (progressDialog != null && ((r == null || !mRequestManager.isRequestInProgress(r)) && (r3 == null || !mRequestManager.isRequestInProgress(r3))
+		if (((r == null || !mRequestManager.isRequestInProgress(r)) && (r3 == null || !mRequestManager.isRequestInProgress(r3))
 				&& (r2 == null || !mRequestManager.isRequestInProgress(r2))) ){
+			if (progressDialog != null){
+				progressDialog.dismiss();
+			}
 			unlockScreenOrientation();
-			progressDialog.dismiss();
 		}
 	}
 
@@ -243,7 +234,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.i("SSSSSSSSSSSSSSSSSS","onresume" + String.valueOf(getFragmentManager().getBackStackEntryCount()));
+		Log.i("ACTIVITY", "onResume");
 
 		if (r != null && mRequestManager.isRequestInProgress(r)){
 			StartProgressDialog();
@@ -446,20 +437,21 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 	private void openUserProfile(WUser wuserToOpen){
 		// create a new fragment and specify the planet to show based on position
-		Fragment fragment = null;
+		WUserProfile_Fragment fragmentwuser = null;
+		WUserColleagueProfile_Fragment fragmentwusercolleague = null;
 		if (wuserToOpen.getId() == wuser.getId())	{
-			fragment = WUserProfile_Fragment.newInstance(wuser, this.passw_string);
+			fragmentwuser = WUserProfile_Fragment.newInstance(wuser, this.passw_string);
 		}
 		else	{
-			fragment = WUserColleagueProfile_Fragment.newInstance(wuserToOpen, this.passw_string);
+			fragmentwusercolleague = WUserColleagueProfile_Fragment.newInstance(wuserToOpen, this.passw_string);
 		}
 		// Insert the fragment by replacing any existing fragment
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		if (wuserToOpen.getId() == wuser.getId()){
-			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSER_PROFILE);
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragmentwuser, FRAGMENT_WUSER_PROFILE);
 		}else{
-			fragmentTransaction.replace(R.id.frag_ptr_list, fragment, FRAGMENT_WUSERCOLLEAGUE_PROFILE);
+			fragmentTransaction.replace(R.id.frag_ptr_list, fragmentwusercolleague, FRAGMENT_WUSERCOLLEAGUE_PROFILE);
 		}
 		fragmentManager.popBackStack();
 		fragmentTransaction.addToBackStack(null);
@@ -471,6 +463,10 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 
 	private void loadColleagueProfile(int wuserID){
 		if (isOnline()){
+			if (mRequestManager.isRequestInProgress(r3)) {
+				mRequestManager.removeRequestListener(this, r3);
+				r3=null;
+			}
 			r = SocialCDERequestFactory.getColleagueProfileRequest();
 			r.put(Preferences.PROXYSERVER, this.proxy_string);
 			r.put(Preferences.USERNAME, this.userName_string);
@@ -556,7 +552,7 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			}
 			case(Consts.REQUESTTYPE_GET_WPOSTS):
 			{
-				StopProgressDialog();
+				//StopProgressDialog();
 				//passo il resultData direttamente al fragment..
 				FragmentManager fragmentManager = getSupportFragmentManager();
 				TimeLine_Fragment fragment_timeline = (TimeLine_Fragment) fragmentManager.findFragmentByTag(this.FRAGMENT_TIMELINE);
@@ -581,8 +577,6 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 						
 					}
 				}
-				
-				fragment_timeline.onPostExecute(resultData);
 				break;
 			}
 			case(Consts.REQUESTTYPE_RETRIEVEHIDESETTINGS):
@@ -645,9 +639,9 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 					Parcelable[] parcelableArray =	resultData.getParcelableArray(Consts.WFEATURES);
 					if (parcelableArray != null) 
 						wfeature = Arrays.copyOf(parcelableArray, parcelableArray.length, WFeature[].class);
-					for (int i=0; i<wfeature.length; i++){
-						Log.i("wfeature",wfeature[i].toString());
-					}
+//					for (int i=0; i<wfeature.length; i++){
+//						Log.i("wfeature",wfeature[i].toString());
+//					}
 					//qui carico un pannello per visualizzare le feature
 					for (int i=0; i<wservice.length;i++){
 						if (wservice[i].getId() == service_id){
@@ -997,7 +991,10 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	@Override
 	public void onBackPressed() {
 		//annullare r3
-		if (mRequestManager.isRequestInProgress(r3)) mRequestManager.removeRequestListener(this, r3);
+		if (mRequestManager.isRequestInProgress(r3)) {
+			mRequestManager.removeRequestListener(this, r3);
+			r3=null;
+		}
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		if (fragmentManager.getBackStackEntryCount()>0){
 			fragmentManager.popBackStackImmediate();
@@ -1279,6 +1276,8 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 	public void loadData(Integer type_request, String request, String requestType) {
 		// TODO Auto-generated method stub
 		if (isOnline()){
+			//blocca lo schermo
+			lockScreenOrientation();
 			r3 = SocialCDERequestFactory.getWPosts();
 			r3.put(Consts.REQUEST_TYPE, type_request);
 			r3.put(Consts.REQUEST, request);
@@ -1291,6 +1290,12 @@ OnTFSAuthInteractionListener, OnChangePasswordListener, OnHideHunideListener, On
 			new NoNetworkDialog().show(getFragmentManager(), "alert");
 		}
 	}
+
+	
+
+
+
+	
 
 
 } 

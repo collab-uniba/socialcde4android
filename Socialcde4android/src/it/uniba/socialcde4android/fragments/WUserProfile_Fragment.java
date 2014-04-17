@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 public class WUserProfile_Fragment extends TimeLine_AbstractFragment{
 	
-	private static final String TAG = TimeLine_AbstractFragment.class.getSimpleName();
 
 
 	private static final String ARG_WUSER = "wuser";
@@ -37,10 +36,7 @@ public class WUserProfile_Fragment extends TimeLine_AbstractFragment{
 		return R.layout.fragment_wuser_profile;
 	}
 
-	@Override
-	public String getTAG(){
-		return TAG;
-	}
+	
 	
 	public static WUserProfile_Fragment newInstance(WUser wuser, String passw_string) {
 
@@ -117,7 +113,7 @@ public class WUserProfile_Fragment extends TimeLine_AbstractFragment{
 		long since = 0;
 		long to = 0 ;
 		if (datatype == super.GET_MOREDATA_TYPE)
-			to = (mListWpostItems.get(mListWpostItems.size()-1)).getId();
+			to = (mListWpostItems[mListWpostItems.length-1]).getId();
 		return "{ \"username\":\"" + username + "\", \"password\":\""
 		+ password + "\" , \"ownerName\":\"" + wuser.getUsername()
 		+ "\" , \"since\":\"" + since + "\" , \"to\":\"" + to
@@ -140,11 +136,5 @@ public class WUserProfile_Fragment extends TimeLine_AbstractFragment{
 		return this;
 	}
 
-
-	@Override
-	ArrayList<WPost> getWPosts() {
-		// TODO Auto-generated method stub
-		return mListWpostItems;
-	}
 
 }
